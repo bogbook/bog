@@ -48,7 +48,7 @@ When you post a new message, bogbook will
 
 + iterate up the message sequence number
 + hash the contents of the previous message using sha512
-+ sign the contents of the current message with your ed22519 private key
++ sign the contents of the current message with your ed25519 private key
 + hash the new message (including the signature) using sha512
 
 before appending the feed to the log stored in your browser.

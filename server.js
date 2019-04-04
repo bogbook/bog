@@ -36,24 +36,24 @@ wss.on('connection', function (ws) {
             log: serverLog
           }
           ws.send(JSON.stringify(sendingLog))
-          console.log('SENT LOG TO CLIENT')
+          console.log('SENT ' + publicKey + ' TO CLIENT')
         }
         // if server log has less entries than the log sent by the client, write it to the server
         if (serverLog.length < clientLog.length) {
           fs.writeFile(__dirname + '/bogs/' + publicKey, JSON.stringify(clientLog), function (err) {
             if (err) throw err
-            console.log('SAVED LOG TO SERVER')
+            console.log('SAVED ' + publicKey + ' TO SERVER')
           })
         }
         // if logs are identical, do nothing
         if (serverLog.length == clientLog.length) {
-          console.log('LOGS ARE THE SAME')
+          console.log(publicKey + ': LOGS ARE THE SAME')
         }
       // if log doesn't already exist, write it
       } else {
         fs.writeFile(__dirname + '/bogs/' + publicKey, JSON.stringify(clientLog), function (err) {
           if (err) throw err
-          console.log('SAVED LOG TO SERVER')
+          console.log('SAVED ' + publicKey + ' TO SERVER')
         })
       }
     }

@@ -1,0 +1,110 @@
+body {
+  font-family: 'Source Sans Pro';
+  background: #222;
+  color: #f5f5f5;
+  max-width: 780px;
+  margin-right: auto;
+  margin-left: auto;
+}
+
+p {
+  margin-top: 5px;
+  margin-bottom: 5px;
+  font-size: 1em;
+}
+
+#screen {
+  top: 0; right: 0; left: 0; bottom: 0;
+}
+
+.right { float: right;}
+
+.message {
+  background: #333;
+  margin-top: .5em;
+  padding: .5em;
+  border-radius: 5px;
+}
+
+img {
+  max-width: 100%;
+}
+
+img.small {
+  vertical-align: top;  
+  width: 25px;
+  height: 25px;
+  margin-right: .2em;
+  border-radius: 3px;
+}
+
+a {
+  color: cyan;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+pre {
+  color: violet;
+  width: 100%;
+  display: block;
+}
+
+code {
+  display: inline-block;
+  vertical-align: bottom;
+}
+
+code, pre {
+  overflow: auto;
+  word-break: break-all;
+  word-wrap: break-word;
+  white-space: pre;
+  white-space: -moz-pre-wrap;
+  white-space: pre-wrap;
+  white-space: pre\9;
+}
+
+textarea, input {
+  background: #222;
+  padding: .5em;
+  color: #f5f5f5;
+  border: none;
+  border-radius: 5px;
+}
+
+textarea {
+  width: 100%;
+}
+
+
+button {
+  display: inline-block;
+  padding: 2px 6px;
+  margin: .2em .2em .2em 0em;
+  font-size: 14px;
+  line-height: 20px;
+  color: #d5d5d5;
+  text-align: center;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.75);
+  vertical-align: middle;
+  cursor: pointer;
+  background-color: #222;
+  border: 1px solid #222;
+  border-radius: 4px;
+}
+
+button:hover,
+button:focus,
+button:active {
+  color: white;
+  background-color: black;
+}
+
+button.active {
+  background-color: #111;
+}
+

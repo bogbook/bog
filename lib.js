@@ -131,12 +131,25 @@ function renderMessage (post) {
 
   if (post.content.type == 'post') {
 
+    var renderer = new marked.Renderer();
+    renderer.link = function(href, title, text) {
+        if (href[0] == '@') {
+          href = '#' + href
+        }
+        var link = marked.Renderer.prototype.link.call(this, href, title, text);
+        return link
+    }
+    
+    marked.setOptions({
+        renderer: renderer
+    });
 
     message.appendChild(getHeader(post))
-    message.appendChild(h('div', [post.content.text]))
+    message.appendChild(h('div', {innerHTML: marked(post.content.text)}))
     message.appendChild(h('pre', [JSON.stringify(post)]))
+    var gotName = getName(post.content.author)
 
-    var textarea = h('textarea', {placeholder: 'Reply to this bog post'})
+    var textarea = h('textarea', {placeholder: 'Reply to this bog post'}, ['['+ gotName.textContent + '](' + post.content.author + ')'])
 
     message.appendChild(h('button', {
       onclick: function () {

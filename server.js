@@ -2,10 +2,14 @@
 
 var http = require('http')
 var serve = require('ecstatic')
+var opn = require('opn')
 
 http.createServer(
   serve({ root: __dirname})
 ).listen(8089)
+
+
+opn('http://localhost:8089')
 
 // websocket server (8080)
 

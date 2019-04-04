@@ -6,7 +6,9 @@ To avoid confusion we're dropping the 'l' and calling them 'bogs'.
 
 **WARNING** This is very new and experimental software, **not intended for use in production**. Pull-requests are welcome, and if you find anything wrong feel free to report it in public.    
 
-Try it online at http://bogbook.com/ !
+Try it online at http://bogbook.com/ ! 
+
+but nothing will load into the browser unless you request a public key,  so try mine: http://bogbook.com/#@218Fd2bCrmXe4gwnMg5Gcb9qVZrjXquym2AlelbkBro=
 
 ### What?
 

@@ -143,7 +143,13 @@ function route () {
         // contact new items from the log onto the client's log of everything
         var num = serverData.log.length - clientLog.log.length
         var diff = serverData.log.slice(0, num)
-        var oldLog = JSON.parse(localStorage['log'])
+
+        if (localStorage['log']) {
+          var oldLog = JSON.parse(localStorage['log'])
+        } else {
+          var oldLog = []
+        }
+
         var newLog = diff.concat(oldLog)
         localStorage['log'] = JSON.stringify(newLog)
 

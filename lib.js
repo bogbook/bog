@@ -131,6 +131,22 @@ function renderMessage (post) {
 
   if (post.content.type == 'post') {
 
+    var log = JSON.parse(localStorage['log'])
+    for (var i = log.length - 1; i >= 0; --i) {
+      //console.log(i)
+      if (log[i].content.reply == post.key) {
+        var nextPost = log[i]
+        console.log(nextPost)
+        setTimeout(function () {
+
+          scroller.appendChild(h('div', {classList: 'submessage'}, [
+            renderMessage(nextPost)
+          ]))
+
+        }, 100)
+      }
+    }
+
     var renderer = new marked.Renderer();
     renderer.link = function(href, title, text) {
         if (href[0] == '@') {
@@ -145,35 +161,50 @@ function renderMessage (post) {
     });
 
     message.appendChild(getHeader(post))
+    
+    if (post.content.reply) {
+      message.appendChild(h('span', [
+        're: ',
+        h('a', {href: '#' + post.content.reply}, [post.content.reply])
+      ]))
+    }
+
     message.appendChild(h('div', {innerHTML: marked(post.content.text)}))
     message.appendChild(h('pre', [JSON.stringify(post)]))
+
     var gotName = getName(post.content.author)
+
+    var publishButton = h('button', {
+      onclick: function () {
+        if (textarea.value) {
+          var content = {
+            author: keys.publicKey,
+            type: 'post',
+            text: textarea.value,
+            reply: post.key,
+            timestamp: Date.now()
+          }
+          console.log(content)
+          publish(content, keys)
+          message.removeChild(textarea)
+          message.removeChild(publishButton)
+        }
+      }
+    }, ['Publish'])
 
     var textarea = h('textarea', {placeholder: 'Reply to this bog post'}, ['['+ gotName.textContent + '](' + post.content.author + ')'])
 
-    message.appendChild(h('button', {
+    var replyButton = h('button', {
+      classList: 'replyButton:' + post.key,
       onclick: function () {
+        message.removeChild(replyButton)
         message.appendChild(textarea)
-        message.appendChild(h('button', {
-          onclick: function () {
-            if (textarea.value) {
-              var content = {
-                author: keys.publicKey,
-                type: 'post',
-                text: textarea.value,
-                reply: post.key,
-                timestamp: Date.now()
-              }
-              console.log(content)
-              publish(content, keys)
-            }
-          }
-        }, ['Publish']))
+        message.appendChild(publishButton)
         
       }
-    }, ['Reply']))
+    }, ['Reply'])
 
-
+    message.appendChild(replyButton)
   }
 
   return message

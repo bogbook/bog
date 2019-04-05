@@ -32,7 +32,7 @@ bogbook servers
 
 ```
 git clone git@github.com/bogbook/bogbook.git
-cd bogbook
+cd bog
 npm install
 npm start
 ```

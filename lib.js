@@ -132,20 +132,20 @@ function renderMessage (post) {
   if (post.content.type == 'post') {
 
     var log = JSON.parse(localStorage['log'])
+    setTimeout(function () {
     for (var i = log.length - 1; i >= 0; --i) {
       //console.log(i)
       if (log[i].content.reply == post.key) {
-        var nextPost = log[i]
-        console.log(nextPost)
-        setTimeout(function () {
+          var nextPost = log[i]
+          console.log(nextPost)
 
           scroller.appendChild(h('div', {classList: 'submessage'}, [
             renderMessage(nextPost)
           ]))
 
-        }, 100)
+        }
       }
-    }
+    }, 10)
 
     var renderer = new marked.Renderer();
     renderer.link = function(href, title, text) {

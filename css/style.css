@@ -2,9 +2,6 @@ body {
   font-family: 'Source Sans Pro';
   background: #222;
   color: #f5f5f5;
-  max-width: 780px;
-  margin-right: auto;
-  margin-left: auto;
 }
 
 p {
@@ -14,7 +11,17 @@ p {
 }
 
 #screen {
-  top: 0; right: 0; left: 0; bottom: 0;
+  position: absolute;
+  top: 35px; 
+  right: 0; 
+  left: 0; 
+  bottom: 0;
+}
+
+#scroller {
+  max-width: 780px;
+  margin-right: auto;
+  margin-left: auto;
 }
 
 .right { float: right;}
@@ -25,6 +32,11 @@ p {
   padding: .5em;
   border-radius: 5px;
 }
+
+.submessage {
+  margin-left: 2em;
+}
+
 
 img {
   max-width: 100%;
@@ -80,6 +92,57 @@ textarea {
   width: 100%;
 }
 
+.navbar {
+  background: #333;
+  border-bottom: 1px solid #222;
+}
+
+.navbar {
+  width: 100%;
+  position: fixed;
+  z-index: 1000;
+  margin: 0;
+  padding-top: .3em;
+  padding-bottom: .3em;
+  left: 0; right: 0;
+  top: 0;
+}
+
+.navbar .internal {
+  max-width: 97%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.navbar li {
+  margin-top: .15em;
+  float: left;
+  margin-right: .6em;
+  margin-left: .3em;
+  list-style-type: none;
+}
+
+.navbar li.right {
+  padding-left: .4em;
+  padding-right: .4em;
+  margin-top: .3em;
+  margin-right: 1.7em;
+  float: right;
+  list-style-type: none;
+  background: #333;
+  border-radius: 100%;
+}
+
+.navbar a {
+  color: #999;
+  text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.25);
+  text-decoration: none;
+}
+
+.navbar a:hover, .navbar a:focus {
+  color: #fff;
+  text-decoration: none;
+}
 
 button {
   display: inline-block;

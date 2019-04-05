@@ -1,10 +1,19 @@
 var screen = h('div', {id: 'screen'})
-
 document.body.appendChild(screen)
 
 //var header = h('div', {classList: 'message'})
 
 var keys = getKeys()
+
+var navbar = h('div', {classList: 'navbar'}, [
+  h('div', {classList: 'internal'}, [
+    h('li', [h('a', {href: '/'}, ['Home'])]),
+    h('li', [h('a', {href: '#' + keys.publicKey}, [getName(keys.publicKey)])]),
+    h('li', [h('a', {href: '/#key'}, ['Key'])])
+  ])
+])
+
+document.body.appendChild(navbar)
 
 function compose (keys, opts) {
   var header = h('div', {classList: 'message'})
@@ -62,62 +71,63 @@ function route () {
   }
 
   else if (src[0] === '@') {
-    var profile = h('div', {classList: 'message'})
-    scroller.appendChild(profile)
 
-    var nameInput = h('input', {placeholder: 'Publish a new name'})
+    if (src == keys.publicKey) {
+      var profile = h('div', {classList: 'message'})
+      scroller.appendChild(profile)
+      var nameInput = h('input', {placeholder: 'Publish a new name'})
 
-    var namePublisher = h('div',[
-      nameInput,
-      h('button', {
-        onclick: function () {
-          if (nameInput.value) {
+      var namePublisher = h('div',[
+        nameInput,
+        h('button', {
+          onclick: function () {
+            if (nameInput.value) {
 
+              var content = {
+                author: keys.publicKey,
+                type: 'name',
+                text: nameInput.value,
+                timestamp: Date.now()
+              }
+
+              publish(content, keys)
+            }
+          }
+        }, ['Publish'])
+      ])
+
+      profile.appendChild(namePublisher)
+
+      readFile()
+
+      var imageInput = h('span', [
+        h('input', {id: 'inp', type:'file'}),
+        h('span', {id: 'b64'}),
+        h('img', {id: 'img'})
+      ])
+
+      var imagePublisher = h('div', [
+        imageInput,
+        h('button', {
+          onclick: function () {
             var content = {
               author: keys.publicKey,
-              type: 'name',
-              text: nameInput.value,
+              type: 'image',
+              image: document.getElementById("img").src,
               timestamp: Date.now()
             }
 
             publish(content, keys)
           }
-        }
-      }, ['Publish'])
-    ])
+        }, ['Publish'])
+      ])
 
-    profile.appendChild(namePublisher)
+      profile.appendChild(imagePublisher)
 
-    readFile()
+      document.getElementById("inp").addEventListener("change", readFile);
+    }
 
-    var imageInput = h('span', [
-      h('input', {id: 'inp', type:'file'}),
-      h('span', {id: 'b64'}),
-      h('img', {id: 'img'})
-    ])
-
-    var imagePublisher = h('div', [
-      imageInput,
-      h('button', {
-        onclick: function () {
-          var content = {
-            author: keys.publicKey,
-            type: 'image',
-            image: document.getElementById("img").src,
-            timestamp: Date.now()
-          }
-
-          publish(content, keys)
-        }
-      }, ['Publish'])
-    ])
-
-    profile.appendChild(imagePublisher)
-
-    document.getElementById("inp").addEventListener("change", readFile);
-
-
-    var ws = new WebSocket('ws://localhost:8080/' + src)
+    var ws = new WebSocket('ws://bogbook.com/' + src)
 
     var clientLog = {
       publicKey: src
@@ -168,8 +178,9 @@ function route () {
 
   else if (src[0] === '%') {
     if (localStorage['log']) {
-      var log = JSON.parse(localStorage['log']) 
-      for (var i=0; i < log.length; i++) {
+      var log = JSON.parse(localStorage['log'])
+      console.log(log.length) 
+      for (var i = log.length - 1; i >= 0; --i) {
         if (log[i].key === src) {
           var post = log[i]
           scroller.appendChild(renderMessage(post))

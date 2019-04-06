@@ -56,16 +56,29 @@ function route () {
   if (src === 'key') {
     var keyMessage = h('div', {classList: 'message'})    
 
+    keyMessage.appendChild(h('p', {innerHTML: marked('This is your ed25519 public/private keypair. It was generated using [Tweetnacl.js](https://tweetnacl.js.org/#/). Your public key is your identiy when using [Bogbook](http://bogbook.com/), save your key in a safe place so that you can continue to use the same identity.')}))
+
+    // print stringified keypair
+    keyMessage.appendChild(h('pre', {style: 'width: 80%'}, [h('code', [JSON.stringify(keys)])]))
+
     // delete key button
-    keyMessage.appendChild(h('button', {classList: 'right', 
+    keyMessage.appendChild(h('button', { 
       onclick: function () {
        localStorage['id'] = ''
        location.reload() 
       }
     }, ['Delete Key'])) 
-    
-    // print stringified keypair
-    keyMessage.appendChild(h('pre', {style: 'width: 80%'}, [h('code', [JSON.stringify(keys)])]))
+
+    var textarea = h('textarea', {placeholder: 'Import your existing ed25519 keypair'})
+    keyMessage.appendChild(textarea)
+    keyMessage.appendChild(h('button', {
+      onclick: function () {
+        if (textarea.value) {
+          localStorage['id'] = textarea.value
+          location.reload()
+        }
+      }
+    }, ['Import Key']))
 
     scroller.appendChild(keyMessage)
   }

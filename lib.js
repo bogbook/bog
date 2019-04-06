@@ -14,11 +14,13 @@ function getKeys () {
       }
 
       console.log(genkey)
-      if ((keys.publicKey.includes('+')) || (keys.publicKey.includes('/'))) {
+
+      // for some reason keys with /'s in them mess up node, so we'll try generating keys again if they contain slashes
+      if (keys.publicKey.includes('/')) {
         console.log('TRYING AGAIN')
         setTimeout(function () {
           window.location.reload()
-        }, 100)
+        }, 10)
       } else {
         localStorage['id'] = JSON.stringify(keys)
         return keys

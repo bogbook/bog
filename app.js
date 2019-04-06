@@ -140,7 +140,7 @@ function route () {
       document.getElementById("inp").addEventListener("change", readFile);
     }
 
-    var ws = new WebSocket('ws://bogbook.com/' + src)
+    var ws = new WebSocket('ws://localhost:8080/' + src)
 
     var clientLog = {
       publicKey: src

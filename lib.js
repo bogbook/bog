@@ -108,7 +108,7 @@ function readFile () {
 // render messages
 
 function renderMessage (post) {
-  var messageDiv = h('messageDiv')
+  var messageDiv = h('messageDiv', {id: post.key})
   var message = h('div', {classList: 'message'})
 
   if  (post.content.type == 'name') {
@@ -141,11 +141,12 @@ function renderMessage (post) {
       if (log[i].content.reply == post.key) {
           var nextPost = log[i]
           console.log(nextPost)
-
-          messageDiv.appendChild(h('div', {classList: 'submessage'}, [
-            renderMessage(nextPost)
-          ]))
-
+          var messageExists = (document.getElementById(nextPost.key) !== null);
+          if (!messageExists) {
+            messageDiv.appendChild(h('div', {classList: 'submessage'}, [
+              renderMessage(nextPost)
+            ]))
+          }
         }
       }
     }, 10)

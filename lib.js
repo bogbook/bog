@@ -108,6 +108,7 @@ function readFile () {
 // render messages
 
 function renderMessage (post) {
+  var messageDiv = h('messageDiv')
   var message = h('div', {classList: 'message'})
 
   if  (post.content.type == 'name') {
@@ -141,7 +142,7 @@ function renderMessage (post) {
           var nextPost = log[i]
           console.log(nextPost)
 
-          scroller.appendChild(h('div', {classList: 'submessage'}, [
+          messageDiv.appendChild(h('div', {classList: 'submessage'}, [
             renderMessage(nextPost)
           ]))
 
@@ -207,9 +208,10 @@ function renderMessage (post) {
     }, ['Reply'])
 
     message.appendChild(replyButton)
+    messageDiv.appendChild(message)
   }
 
-  return message
+  return messageDiv
 }
 
 

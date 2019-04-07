@@ -169,7 +169,7 @@ function renderMessage (post) {
     if (post.content.reply) {
       message.appendChild(h('span', [
         're: ',
-        h('a', {href: '#' + post.content.reply}, [post.content.reply])
+        h('a', {href: '#' + post.content.reply}, [post.content.reply.substring(0, 10) + '...'])
       ]))
     }
 
@@ -234,7 +234,7 @@ function getImage (id) {
 }
 
 function getName (id) {
-  var name = h('span', [id])
+  var name = h('span', [id.substring(0, 10) + '...'])
   if (localStorage[id]) {
     var log = JSON.parse(localStorage[id])
     for (var i=0; i < log.length; i++) {

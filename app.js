@@ -1,8 +1,6 @@
 var screen = h('div', {id: 'screen'})
 document.body.appendChild(screen)
 
-//var header = h('div', {classList: 'message'})
-
 var keys = getKeys()
 
 var navbar = h('div', {classList: 'navbar'}, [
@@ -140,7 +138,7 @@ function route () {
       document.getElementById("inp").addEventListener("change", readFile);
     }
 
-    var ws = new WebSocket('ws://localhost:8080/' + src)
+    var ws = new WebSocket('ws://bogbook.com/' + src)
 
     var clientLog = {
       publicKey: src

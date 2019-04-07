@@ -174,7 +174,17 @@ function renderMessage (post) {
     }
 
     message.appendChild(h('div', {innerHTML: marked(post.content.text)}))
-    message.appendChild(h('pre', [JSON.stringify(post)]))
+
+    
+    message.appendChild(h('span', {id: post.key + 'src', classList: 'right'}, [
+      h('a', {
+        onclick: function () {
+          message.appendChild(h('pre', [JSON.stringify(post)]))
+          var span = document.getElementById(post.key + 'src') 
+          span.parentNode.removeChild(span)
+        }
+      }, ['[src]'])
+    ]))
 
     var gotName = getName(post.content.author)
 

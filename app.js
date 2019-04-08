@@ -238,7 +238,13 @@ function route () {
       for (var i=0; i < log.length; i++) {
         var post = log[i]
         scroller.appendChild(renderMessage(post))
-
+      }
+      // sort log by timestamp and save over -- I don't know how expensive this is, we probably don't want to do this every single time we load the log?
+      var newLog = log.sort(function (a, b) {
+        return b.content.timestamp - a.content.timestamp
+      })
+      if (newLog) {
+        localStorage['log'] = JSON.stringify(newLog)
       }
     }
   }

@@ -11,6 +11,12 @@ var navbar = h('div', {classList: 'navbar'}, [
   ])
 ])
 
+if (!localStorage['subscribees']) {
+  var subscribees = ['@218Fd2bCrmXe4gwnMg5Gcb9qVZrjXquym2AlelbkBro=']
+  localStorage['subscribees'] = JSON.stringify(subscribees)
+}
+
+
 document.body.appendChild(navbar)
 
 function compose (keys, opts) {
@@ -82,10 +88,10 @@ function route () {
   }
 
   else if (src[0] === '@') {
+    var profile = h('div', {classList: 'message'})
+    scroller.appendChild(profile)
 
     if (src == keys.publicKey) {
-      var profile = h('div', {classList: 'message'})
-      scroller.appendChild(profile)
       var nameInput = h('input', {placeholder: 'Publish a new name'})
 
       var namePublisher = h('div',[
@@ -136,6 +142,31 @@ function route () {
       profile.appendChild(imagePublisher)
 
       document.getElementById("inp").addEventListener("change", readFile);
+
+    } else {
+      var subscribees = JSON.parse(localStorage['subscribees'])
+      if (subscribees.includes(src)) {
+        profile.appendChild(h('button', {
+          onclick: function () {
+            for (var i = subscribees.length; i--;) {
+              if (subscribees[i] === src) {
+                subscribees.splice(i, 1);
+                localStorage['subscribees'] = JSON.stringify(subscribees)
+                window.location.reload()
+              }
+            }
+          }
+          // remove subscribee
+        }, ['UNSUBSCRIBE']))
+      } else { 
+        profile.appendChild(h('button', {
+          onclick: function () {
+            subscribees.push(src)
+            localStorage['subscribees'] = JSON.stringify(subscribees)
+            window.location.reload()
+          }
+        }, ['SUBSCRIBE']))
+      }
     }
 
     var ws = new WebSocket('ws://bogbook.com/' + src)

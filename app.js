@@ -19,6 +19,11 @@ if (!localStorage['subscribees']) {
   localStorage['subscribees'] = JSON.stringify(subscribees)
 }
 
+if (!localStorage['pubs']) {
+  var pubs = ['ws://bogbook.com/', 'ws://localhost:8080/']
+  localStorage['pubs'] = JSON.stringify(pubs)
+}
+
 document.body.appendChild(navbar)
 
 function compose (keys, opts) {
@@ -87,7 +92,55 @@ function route () {
     }, ['Import Key']))
 
     scroller.appendChild(keyMessage)
+
+    var pubMessage = h('div', {classList: 'message'})
+
+    var newPub = h('input', {placeholder: 'Add a new pub. Ex: ws://bogbook.com/'})
+
+    var pubs = JSON.parse(localStorage['pubs'])
+
+    pubMessage.appendChild(h('div', [
+      h('p', {innerHTML: marked('These are your bogbook pubs. These servers will sync data when you publish a new post, when you subscribe to new feeds, and when you click on feed ids.')}),
+      newPub,
+      h('button', {
+        onclick: function () {
+          if (newPub.value) {
+            pubs.push(newPub.value)
+            localStorage['pubs'] = JSON.stringify(pubs)  
+            location.reload() 
+          }
+        }
+      }, ['Add Pub'])
+    ]))
+    
+    function removeButton (pubName) {
+      var button = h('button', {
+        onclick: function () {
+          console.log('removing' + pubName)
+          for (var i = pubs.length; i--;) {
+            if (pubs[i] === pubName) {
+              pubs.splice(i, 1);
+              localStorage['pubs'] = JSON.stringify(pubs)
+              window.location.reload()
+            }
+          }
+        }
+      }, ['Remove Pub'])
+      return button 
+    }
+
+    for (i = 0; i < pubs.length; i++) {
+      var pubName = pubs[i]
+      pubMessage.appendChild(h('p', [
+        pubName,
+        removeButton(pubName)
+      ]))
+    }    
+
+    scroller.appendChild(pubMessage)
   }
+
+
 
   else if (src[0] === '@') {
     var profile = h('div', {classList: 'message'})
@@ -171,7 +224,11 @@ function route () {
       }
     }
 
-    requestFeed(src, 'ws://bogbook.com/')    
+    var pubs = JSON.parse(localStorage['pubs'])
+
+    for (i = 0; i < pubs.length; i++) {
+      requestFeed(src, pubs[i]) 
+    }   
     
     if (localStorage[src]) {
       var log = JSON.parse(localStorage[src])
@@ -202,7 +259,10 @@ function route () {
 
     console.log(subscribees)
     for (i = 0; i < subscribees.length; i++) {
-      requestFeed(subscribees[i], 'ws://bogbook.com/')
+      var pubs = JSON.parse(localStorage['pubs'])
+      for (n = 0; n < pubs.length; n++) {
+        requestFeed(subscribees[i], pubs[n])
+      }
     }
 
     if (localStorage['log']) {

@@ -65,7 +65,6 @@ function requestFeed (src, server) {
 
       var newLog = diff.concat(oldLog)
       localStorage['log'] = JSON.stringify(newLog)
-
       location.reload()
     }
   }
@@ -96,7 +95,12 @@ function publish (content, keys) {
 
   // update the log
   updateLog(keys.publicKey, post)
-  requestFeed(keys.publicKey, 'ws://bogbook.com/')
+
+  var pubs = JSON.parse(localStorage['pubs'])
+
+  for (i = 0; i < pubs.length; i++) {
+    requestFeed(keys.publicKey, pubs[i])
+  }
 
   var scroller = document.getElementById('scroller')
   if (scroller.firstChild) {

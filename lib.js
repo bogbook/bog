@@ -196,7 +196,7 @@ function renderMessage (post) {
 
     var renderer = new marked.Renderer();
     renderer.link = function(href, title, text) {
-        if (href[0] == '@') {
+        if ((href[0] == '@') || (href[0] == '%')) {
           href = '#' + href
         }
         var link = marked.Renderer.prototype.link.call(this, href, title, text);

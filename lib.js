@@ -96,6 +96,7 @@ function publish (content, keys) {
 
   // update the log
   updateLog(keys.publicKey, post)
+  requestFeed(keys.publicKey, 'ws://bogbook.com/')
 
   var scroller = document.getElementById('scroller')
   if (scroller.firstChild) {

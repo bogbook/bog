@@ -1,3 +1,6 @@
+
+
+
 var screen = h('div', {id: 'screen'})
 document.body.appendChild(screen)
 
@@ -15,7 +18,6 @@ if (!localStorage['subscribees']) {
   var subscribees = ['@218Fd2bCrmXe4gwnMg5Gcb9qVZrjXquym2AlelbkBro=']
   localStorage['subscribees'] = JSON.stringify(subscribees)
 }
-
 
 document.body.appendChild(navbar)
 
@@ -169,46 +171,8 @@ function route () {
       }
     }
 
-    var ws = new WebSocket('ws://bogbook.com/' + src)
-
-    var clientLog = {
-      publicKey: src
-    }
-
-    if (localStorage[src]) {
-      clientLog.log = JSON.parse(localStorage[src])
-    } else {
-      clientLog.log = []
-    }
-
-    ws.onopen = function () {
-      ws.send(JSON.stringify(clientLog))
-    }
-
-    ws.onmessage = function (ev) {
-      var serverData = JSON.parse(ev.data)
-      if (serverData.log.length > clientLog.log.length) {
-
-        // update the log of the id
-        localStorage[src] = JSON.stringify(serverData.log)
-
-        // contact new items from the log onto the client's log of everything
-        var num = serverData.log.length - clientLog.log.length
-        var diff = serverData.log.slice(0, num)
-
-        if (localStorage['log']) {
-          var oldLog = JSON.parse(localStorage['log'])
-        } else {
-          var oldLog = []
-        }
-
-        var newLog = diff.concat(oldLog)
-        localStorage['log'] = JSON.stringify(newLog)
-
-        location.reload()
-      }
-    }
-
+    requestFeed(src, 'ws://bogbook.com/')    
+    
     if (localStorage[src]) {
       var log = JSON.parse(localStorage[src])
       for (var i=0; i < log.length; i++) {
@@ -233,6 +197,14 @@ function route () {
 
   else {
     compose(keys)
+
+    var subscribees = JSON.parse(localStorage['subscribees'])
+
+    console.log(subscribees)
+    for (i = 0; i < subscribees.length; i++) {
+      requestFeed(subscribees[i], 'ws://bogbook.com/')
+    }
+
     if (localStorage['log']) {
       var log = JSON.parse(localStorage['log'])
       for (var i=0; i < log.length; i++) {

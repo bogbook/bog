@@ -121,7 +121,7 @@ function route () {
 
         var oldKey = h('div', {classlist: 'message'})
 
-        oldKey.appendChild(h('You had a key in localStorage. Import it to the new database by pasting it into the box above.'))
+        oldKey.appendChild(h('p', ['You had a key in localStorage. Import it to the new database by pasting it into the box above.']))
         oldKey.appendChild(h('pre', {style: 'width: 80%'}, [h('code', [JSON.stringify(localStorage['id'])])]))
 
         scroller.appendChild(oldKey)

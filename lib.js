@@ -1,135 +1,193 @@
 // generate a public.private keypair with TweetNaCl.js
 
 function getKeys () {
-  if (localStorage['id']) {
-    var keys = JSON.parse(localStorage['id'])
-    return keys
-  } else {
-
-    var genkey = nacl.sign.keyPair()
-    if (genkey) {
-      var keys = {
-        publicKey: '@' + nacl.util.encodeBase64(genkey.publicKey),
-        privateKey: nacl.util.encodeBase64(genkey.secretKey),
-      }
-
-      console.log(genkey)
-
-      // for some reason keys with /'s in them mess up node, so we'll try generating keys again if they contain slashes
-      if (keys.publicKey.includes('/')) {
-        console.log('TRYING AGAIN')
-        setTimeout(function () {
-          window.location.reload()
-        }, 10)
-      } else {
-        localStorage['id'] = JSON.stringify(keys)
-        return keys
+  localforage.getItem('id', function(err, value) {
+    if (value) {
+      var keys = value
+      return keys
+    } else if (value == null) {
+      var genkey = nacl.sign.keyPair()
+      if (genkey) {
+        var keys = {
+          publicKey: '@' + nacl.util.encodeBase64(genkey.publicKey),
+          privateKey: nacl.util.encodeBase64(genkey.secretKey)
+        }
+        // when we get our next round of funding, let's figure out how to do this without a page reload
+        if (keys.publicKey.includes('/')) {
+          console.log('TRYING AGAIN')
+          setTimeout(function () {
+            window.location.reload()
+          }, 10)
+        } else {
+          localforage.setItem('id', keys)
+          return keys
+        }
       }
     }
-  }
+  })
+  return keys
 }
 
 function requestFeed (src, server) {
   var ws = new WebSocket(server + src)
 
-  var clientLog = {
-    publicKey: src
-  }
+  localforage.getItem(src, function (err, log) {
+    if (log) {
+      // update the log
 
-  if (localStorage[src]) {
-    clientLog.log = JSON.parse(localStorage[src])
-  } else {
-    clientLog.log = []
-  }
-
-  ws.onopen = function () {
-    ws.send(JSON.stringify(clientLog))
-  }
-
-  ws.onmessage = function (ev) {
-    var serverData = JSON.parse(ev.data)
-    if (serverData.log.length > clientLog.log.length) {
-
-      // update the log of the id
-      localStorage[src] = JSON.stringify(serverData.log)
-
-      // contact new items from the log onto the client's log of everything
-      var num = serverData.log.length - clientLog.log.length
-      var diff = serverData.log.slice(0, num)
-
-      if (localStorage['log']) {
-        var oldLog = JSON.parse(localStorage['log'])
-      } else {
-        var oldLog = []
+      console.log('LOG DOES EXIST, asking')
+      ws.onopen = function () {
+        // req feed
+        var clientLog = {
+          publicKey: src,
+          log: log
+        }
+        console.log(clientLog)
+        ws.send(JSON.stringify(clientLog))
       }
+      ws.onmessage = function (ev) {
+        console.log(ev.data)
+        var serverLog = JSON.parse(ev.data)
 
-      var newLog = diff.concat(oldLog)
-      localStorage['log'] = JSON.stringify(newLog)
-      location.reload()
+        if (serverLog.log.length > log.length) {
+          // update the log of the id
+          localforage.setItem(src, serverLog.log)
+
+          // concat new items from the log onto the client's public log
+          localforage.getItem('log', function (err, feed) {
+            if (feed) {
+              var num = serverLog.log.length - log.length
+              var diff = serverLog.log.slice(0, num) 
+              oldLog = feed
+              newLog = diff.concat(oldLog)
+              localforage.setItem('log', newLog) 
+            } 
+          })
+        }
+      }
+    } else {
+      ws.onopen = function () {
+        // req feed
+        var clientLog = {
+          publicKey: src,
+          log: []
+        }
+        ws.send(JSON.stringify(clientLog))
+      }
+      // request the log (because we don't have it)
+      console.log('LOG DOES NOT EXIST, asking')
+      ws.onmessage = function (ev) {
+        serverLog = JSON.parse(ev.data)
+        localforage.setItem(src, serverLog.log)
+
+        // concat new items from the log onto the client's public log
+        localforage.getItem('log', function (err, feed) {
+          if (feed) {
+            newLog = serverLog.log.concat(feed)
+            localforage.setItem('log', newLog)
+          } else {
+            localforage.setItem('log', serverLog.log)
+          }
+        })
+      } 
     }
-  }
+  })
 }
 
 // publish new messages to your log
 function publish (content, keys) {
 
-  if (localStorage[keys.publicKey]) {
-    var log = JSON.parse(localStorage[keys.publicKey])
-    var lastPost = log[0]
-    var seq = lastPost.content.sequence
-    content.sequence = ++seq
-    content.previous = nacl.util.encodeBase64(nacl.hash(nacl.util.decodeUTF8(JSON.stringify(log[0]))))
-    console.log(content.previous)
-  } else {
-    console.log('SEQUENCE 0')
-    content.sequence = 0
-  }
+  console.log(content) 
+  console.log(keys) 
+  localforage.getItem(keys.publicKey, function (err, log) {
+    if (log) {
+      var lastPost = log[0]
+      var seq = lastPost.content.sequence
+      content.sequence = ++seq
+      content.previous = nacl.util.encodeBase64(nacl.hash(nacl.util.decodeUTF8(JSON.stringify(log[0]))))
 
-  var post = {
-     content: content,
-     signature: nacl.util.encodeBase64(nacl.sign(nacl.util.decodeUTF8(JSON.stringify(content)), nacl.util.decodeBase64(keys.privateKey)))
-   }
+      var post = {
+         content: content,
+         signature: nacl.util.encodeBase64(nacl.sign(nacl.util.decodeUTF8(JSON.stringify(content)), nacl.util.decodeBase64(keys.privateKey)))
+       }
 
-  // add key (which is a hash of the stringified object post)
-  post.key = '%' + nacl.util.encodeBase64(nacl.hash(nacl.util.decodeUTF8(JSON.stringify(post))))
+      // add key (which is a hash of the stringified object post)
+      post.key = '%' + nacl.util.encodeBase64(nacl.hash(nacl.util.decodeUTF8(JSON.stringify(post))))
 
-  // update the log
-  updateLog(keys.publicKey, post)
+      // update the log
+      updateLog(keys.publicKey, post)
 
-  var pubs = JSON.parse(localStorage['pubs'])
+      var pubs = JSON.parse(localStorage['pubs'])
 
-  for (i = 0; i < pubs.length; i++) {
-    requestFeed(keys.publicKey, pubs[i])
-  }
+      for (i = 0; i < pubs.length; i++) {
+        requestFeed(keys.publicKey, pubs[i])
+      }
 
-  var scroller = document.getElementById('scroller')
-  if (scroller.firstChild) {
-    scroller.insertBefore(renderMessage(post), scroller.childNodes[1])
-  } else {
-    scroller.appendChild(renderMessage(post))
-  }
+      var scroller = document.getElementById('scroller')
+      if (scroller.firstChild) {
+        scroller.insertBefore(renderMessage(post), scroller.childNodes[1])
+      } else {
+        scroller.appendChild(renderMessage(post))
+      }
+
+    } else {
+      content.sequence = 0
+      var post = {
+         content: content,
+         signature: nacl.util.encodeBase64(nacl.sign(nacl.util.decodeUTF8(JSON.stringify(content)), nacl.util.decodeBase64(keys.privateKey)))
+       }
+
+      // add key (which is a hash of the stringified object post)
+      post.key = '%' + nacl.util.encodeBase64(nacl.hash(nacl.util.decodeUTF8(JSON.stringify(post))))
+
+      // update the log
+      updateLog(keys.publicKey, post)
+
+      var pubs = JSON.parse(localStorage['pubs'])
+
+      for (i = 0; i < pubs.length; i++) {
+        requestFeed(keys.publicKey, pubs[i])
+      }
+
+      var scroller = document.getElementById('scroller')
+      if (scroller.firstChild) {
+        scroller.insertBefore(renderMessage(post), scroller.childNodes[1])
+      } else {
+        scroller.appendChild(renderMessage(post))
+      }
+
+    }
+  })
 }
 
 // update your log in the browser
 
 function updateLog (feed, post) {
-  if (localStorage[feed]) {
-    var log = JSON.parse(localStorage[feed])
-    log.unshift(post)
-    localStorage[feed] = JSON.stringify(log)
-  } else {
-    var log = [post]
-    localStorage[feed] = JSON.stringify(log)
-  }
+  console.log('UPDATE LOG')
+  console.log(feed)
+  console.log(post)
+  localforage.getItem(feed, function (err, log) {
+    if (log) {
+      log.unshift(post)
+      localforage.setItem(feed, log)
+    } else {
+      log = []
+      log.unshift(post)
+      localforage.setItem(feed, log)
+    }
+  })
 
-  if (localStorage['log']) {
-    var log = JSON.parse(localStorage['log'])
-    log.unshift(post) 
-    localStorage['log'] = JSON.stringify(log)
-  } else {
-    var log = [post]
-    localStorage['log'] = JSON.stringify(log)
-  }
+  localforage.getItem('log', function (err, log) {
+    if (log) {
+      log.unshift(post)
+      localforage.setItem('log', log)
+    } else {
+      log = []
+      log.unshift(post)
+      localforage.setItem('log', log)
+    }
+
+  })
 }
 
 // file uploaders for user images
@@ -181,23 +239,22 @@ function renderMessage (post) {
 
   if (post.content.type == 'post') {
 
-    var log = JSON.parse(localStorage['log'])
-    setTimeout(function () {
-    for (var i = log.length - 1; i >= 0; --i) {
-      //console.log(i)
-      if (log[i].content.reply == post.key) {
-          var nextPost = log[i]
-          console.log(nextPost)
-          var messageExists = (document.getElementById(nextPost.key) !== null);
-          if (!messageExists) {
-            messageDiv.appendChild(h('div', {classList: 'submessage'}, [
-              renderMessage(nextPost)
-            ]))
+    localforage.getItem('log', function (err, log) {
+      if (log) {
+        for (var i = log.length - 1; i >= 0; --i) {
+          if (log[i].content.reply == post.key) {
+            var nextPost = log[i]
+            var messageExists = (document.getElementById(nextPost.key) !== null);
+            if (!messageExists) {
+              messageDiv.appendChild(h('div', {classList: 'submessage'}, [
+                renderMessage(nextPost)
+              ]))
+            }
           }
         }
       }
-    }, 10)
-
+    })
+  
     var renderer = new marked.Renderer();
     renderer.link = function(href, title, text) {
         if ((href[0] == '@') || (href[0] == '%')) {
@@ -222,7 +279,6 @@ function renderMessage (post) {
 
     message.appendChild(h('div', {innerHTML: marked(post.content.text)}))
 
-    
     message.appendChild(h('span', {id: post.key + 'src', classList: 'right'}, [
       h('a', {
         onclick: function () {
@@ -235,37 +291,41 @@ function renderMessage (post) {
 
     var gotName = getName(post.content.author)
 
-    var publishButton = h('button', {
-      onclick: function () {
-        if (textarea.value) {
-          var content = {
-            author: keys.publicKey,
-            type: 'post',
-            text: textarea.value,
-            reply: post.key,
-            timestamp: Date.now()
+    localforage.getItem('id', function (err, keys) {
+
+      var publishButton = h('button', {
+        onclick: function () {
+          if (textarea.value) {
+            var content = {
+              author: keys.publicKey,
+              type: 'post',
+              text: textarea.value,
+              reply: post.key,
+              timestamp: Date.now()
+            }
+            publish(content, keys)
+            message.removeChild(textarea)
+            message.removeChild(publishButton)
           }
-          console.log(content)
-          publish(content, keys)
-          message.removeChild(textarea)
-          message.removeChild(publishButton)
         }
-      }
-    }, ['Publish'])
+      }, ['Publish'])
 
-    var textarea = h('textarea', {placeholder: 'Reply to this bog post'}, ['['+ gotName.textContent + '](' + post.content.author + ')'])
 
-    var replyButton = h('button', {
-      classList: 'replyButton:' + post.key,
-      onclick: function () {
-        message.removeChild(replyButton)
-        message.appendChild(textarea)
-        message.appendChild(publishButton)
-        
-      }
-    }, ['Reply'])
+      var textarea = h('textarea', {placeholder: 'Reply to this bog post'}, ['['+ gotName.textContent + '](' + post.content.author + ')'])
 
-    message.appendChild(replyButton)
+      var replyButton = h('button', {
+        classList: 'replyButton:' + post.key,
+        onclick: function () {
+          message.removeChild(replyButton)
+          message.appendChild(textarea)
+          message.appendChild(publishButton)
+          
+        }
+      }, ['Reply'])
+
+      message.appendChild(replyButton)
+    })
+
     messageDiv.appendChild(message)
   }
 
@@ -274,34 +334,40 @@ function renderMessage (post) {
 
 
 function getImage (id) {
-  var image = h('img', {classList: 'small'})
+  var image = h('span')
 
-  if (localStorage[id]) {
-    var log = JSON.parse(localStorage[id])
-    for (var i=0; i < log.length; i++) {
-      var imagePost = log[i]
-      if (imagePost.content.type == 'image') {
-        image = h('img', {classList: 'small', src: imagePost.content.image})
-        return image
-      } 
+  //image.appendChild(h('img', {classList: 'small'}))
+
+  localforage.getItem(id, function (err, log) {
+    if (log) {
+      for (var i=0; i < log.length; i++) {
+        var imagePost = log[i]
+        if (imagePost.content.type == 'image') {
+          image.appendChild(h('img', {classList: 'small', src: imagePost.content.image}))
+          return
+        } 
+      }
     }
-  }
+  })
 
   return image
 }
 
 function getName (id) {
-  var name = h('span', [id.substring(0, 10) + '...'])
-  if (localStorage[id]) {
-    var log = JSON.parse(localStorage[id])
-    for (var i=0; i < log.length; i++) {
-      var namePost = log[i]
-      if (namePost.content.type == 'name') {
-        name = h('span', ['@' + namePost.content.text])
-        return name
+  var name = h('span')
+  name.textContent = id.substring(0, 10) + '...'
+
+  localforage.getItem(id, function (err, log) {
+    if (log) {
+      for (var i=0; i < log.length; i++) {
+        var namePost = log[i]
+        if (namePost.content.type == 'name') {
+          name.textContent = '@' + namePost.content.text
+          //return name
+        }
       }
     }
-  }
+  })
   return name
 }
 

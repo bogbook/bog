@@ -109,7 +109,7 @@ function route () {
       keyMessage.appendChild(h('button', {
         onclick: function () {
           if (textarea.value) {
-            localforage.setItem('id', textarea.value) 
+            localforage.setItem('id', JSON.parse(textarea.value)) 
             location.reload()
           }
         }

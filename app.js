@@ -117,6 +117,16 @@ function route () {
 
       scroller.appendChild(keyMessage)
 
+      if (localStorage['id']) {
+
+        var oldKey = h('div', {classlist: 'message'})
+
+        oldKey.appendChild(h('You had a key in localStorage. Import it to the new database by pasting it into the box above.'))
+        oldKey.appendChild(h('pre', {style: 'width: 80%'}, [h('code', [JSON.stringify(localStorage['id'])])]))
+
+        scroller.appendChild(oldKey)
+      }
+
       var pubMessage = h('div', {classList: 'message'})
 
       var newPub = h('input', {placeholder: 'Add a new pub. Ex: ws://bogbook.com/'})

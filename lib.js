@@ -1,5 +1,7 @@
 // generate a public.private keypair with TweetNaCl.js
 
+
+
 function requestFeed (src, server) {
   var ws = new WebSocket(server + src)
 
@@ -105,6 +107,37 @@ function publish (content, keys) {
     }
   })
 }
+
+function compose (keys) {
+  var message = h('div', {classList: 'message'})
+
+  var scroller = document.getElementById('scroller')
+
+  scroller.insertBefore(message, scroller.firstChild)
+
+  var textarea = h('textarea', {placeholder: 'Write a new bog post'})
+
+  message.appendChild(textarea)
+
+  var composer = h('div', [
+    h('button', {
+      onclick: function () {
+        if (textarea.value) {
+          var content = {
+            author: keys.publicKey,
+            type: 'post',
+            text: textarea.value,
+            timestamp: Date.now()
+          }
+          textarea.value = ''
+          publish(content, keys)
+        }
+      }
+    }, ['Publish'])
+  ])
+  message.appendChild(composer)
+}
+
 
 // update your log in the browser
 

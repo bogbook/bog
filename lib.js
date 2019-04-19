@@ -1,109 +1,120 @@
-// generate a public.private keypair with TweetNaCl.js
 
 
+function requestFeed (src, server, requester) {
 
-function requestFeed (src, server) {
+  console.log(src)
+  console.log(server)
+
   var ws = new WebSocket(server + src)
 
   localforage.getItem(src, function (err, log) {
     if (log) {
-      ws.onopen = function () {
-        var clientLog = { publicKey: src, log: log }
-        ws.send(JSON.stringify(clientLog))
-      }
-      ws.onmessage = function (ev) {
-        var serverLog = JSON.parse(ev.data)
+      console.log(log)
 
-        if (serverLog.log.length > log.length) {
-          localforage.setItem(src, serverLog.log)
-          localforage.getItem('log', function (err, publicLog) {
-            if (publicLog) {
-              var num = serverLog.log.length - publicLog.length
-              var diff = serverLog.log.slice(0, num) 
-              newLog = diff.concat(publicLog)
-              localforage.setItem('log', newLog)
-            } else {
-            localforage.setItem('log', serverLog.log)
-            }
-          })
-        } 
+      var post = log[0]
+
+      var pubkey = nacl.util.decodeBase64(src.substring(1))
+      var sig = nacl.util.decodeBase64(post.signature)
+      post.content = JSON.parse(nacl.util.encodeUTF8(nacl.sign.open(sig, pubkey)))
+
+      var seq = post.content.sequence
+
+      ws.onopen = function () {
+        var req = {
+          feed: src,
+          seq,
+          requester
+        }
+        
+        console.log(req)
+
+        ws.send(JSON.stringify(req))
+
+      }
+      ws.onmessage = function (message) {
+        var res = JSON.parse(message.data)
+        if (res.seq == null) {
+          console.log('SENDING ENTIRE LOG')
+          var send = {
+            feed: src,
+            log,
+            requester
+          }
+          ws.send(JSON.stringify(send))
+        }
+        if (seq > res.req) {
+          console.log('SENDING')
+          console.log(log)
+        }
       }
     } else {
       ws.onopen = function () {
-        var clientLog = {
-          publicKey: src,
-          log: []
-        }
-        ws.send(JSON.stringify(clientLog))
+        var seq = null
+
       }
-      ws.onmessage = function (ev) {
-        serverLog = JSON.parse(ev.data)
-        localforage.setItem(src, serverLog.log)
-        localforage.getItem('log', function (err, publicLog) {
-          if (publicLog) {
-            newLog = serverLog.log.concat(publicLog)
-            localforage.setItem('log', newLog)
-          } else {
-            localforage.setItem('log', serverLog.log)
-          }
-        })
+      ws.onmessage = function (message) {
+        console.log(message.data)
       } 
     }
   })
 }
 
 // publish new messages to your log
-function publish (content, keys) {
+function publish (toPublish, keys) {
 
-  console.log(content) 
-  console.log(keys) 
   localforage.getItem(keys.publicKey, function (err, log) {
     if (log) {
       var lastPost = log[0]
 
       var pubkey = nacl.util.decodeBase64(keys.publicKey.substring(1))
       var sig = nacl.util.decodeBase64(lastPost.signature) 
+
       var opened = JSON.parse(nacl.util.encodeUTF8(nacl.sign.open(sig, pubkey)))
 
-      console.log(opened)
-
       var seq = opened.sequence
-      content.sequence = ++seq
-      content.previous = nacl.util.encodeBase64(nacl.hash(nacl.util.decodeUTF8(JSON.stringify(log[0]))))
 
-      var post = {
-         author: keys.publicKey,
-         key: '%' + nacl.util.encodeBase64(nacl.hash(nacl.util.decodeUTF8(JSON.stringify(content)))),
-         signature: nacl.util.encodeBase64(nacl.sign(nacl.util.decodeUTF8(JSON.stringify(content)), nacl.util.decodeBase64(keys.privateKey)))
+      toPublish.sequence = ++seq
+      toPublish.previous = nacl.util.encodeBase64(nacl.hash(nacl.util.decodeUTF8(JSON.stringify(log[0]))))
+
+      var author = keys.publicKey
+      var key = '%' + nacl.util.encodeBase64(nacl.hash(nacl.util.decodeUTF8(JSON.stringify(toPublish))))
+      var signature = nacl.util.encodeBase64(nacl.sign(nacl.util.decodeUTF8(JSON.stringify(toPublish)), nacl.util.decodeBase64(keys.privateKey)))
+
+      var toPost = {
+         author,
+         key,
+         signature
       }
+
+      console.log(toPost)
 
       // update the log
-      updateLog(keys.publicKey, post)
+      updateLog(keys.publicKey, toPost)
 
-      var scroller = document.getElementById('scroller')
+      /*var scroller = document.getElementById('scroller')
       if (scroller.firstChild) {
-        scroller.insertBefore(renderMessage(post), scroller.childNodes[1])
+        scroller.insertBefore(renderMessage(toPost), scroller.childNodes[1])
       } else {
-        scroller.appendChild(renderMessage(post))
-      }
+        scroller.appendChild(renderMessage(toPost))
+      }*/
 
     } else {
-      content.sequence = 0
+      toPublish.sequence = 0
 
-      var post = {
+      var toPost = {
          author: keys.publicKey,
-         key: '%' + nacl.util.encodeBase64(nacl.hash(nacl.util.decodeUTF8(JSON.stringify(content)))),
-         signature: nacl.util.encodeBase64(nacl.sign(nacl.util.decodeUTF8(JSON.stringify(content)), nacl.util.decodeBase64(keys.privateKey)))
+         key: '%' + nacl.util.encodeBase64(nacl.hash(nacl.util.decodeUTF8(JSON.stringify(toPublish)))),
+         signature: nacl.util.encodeBase64(nacl.sign(nacl.util.decodeUTF8(JSON.stringify(toPublish)), nacl.util.decodeBase64(keys.privateKey)))
       }
 
-      updateLog(keys.publicKey, post)
+      updateLog(keys.publicKey, toPost)
 
-      var scroller = document.getElementById('scroller')
+      /*var scroller = document.getElementById('scroller')
       if (scroller.firstChild) {
-        scroller.insertBefore(renderMessage(post), scroller.childNodes[1])
+        scroller.insertBefore(renderMessage(toPost), scroller.childNodes[1])
       } else {
-        scroller.appendChild(renderMessage(post))
-      }
+        scroller.appendChild(renderMessage(toPost))
+      }*/
     }
   })
 }
@@ -123,14 +134,14 @@ function compose (keys) {
     h('button', {
       onclick: function () {
         if (textarea.value) {
-          var content = {
+          var toPublish = {
             author: keys.publicKey,
             type: 'post',
             text: textarea.value,
             timestamp: Date.now()
           }
           textarea.value = ''
-          publish(content, keys)
+          publish(toPublish, keys)
         }
       }
     }, ['Publish'])
@@ -142,30 +153,36 @@ function compose (keys) {
 // update your log in the browser
 
 function updateLog (feed, post) {
-  console.log('UPDATE LOG')
-  console.log(feed)
-  console.log(post)
   localforage.getItem(feed, function (err, log) {
     if (log) {
       log.unshift(post)
-      localforage.setItem(feed, log)
+      localforage.setItem(feed, log, function () {
+        console.log('FEED UPDATED')
+      })
     } else {
       log = []
       log.unshift(post)
-      localforage.setItem(feed, log)
+      localforage.setItem(feed, log, function () {
+        console.log('FEED UPDATED')
+      })
     }
   })
 
   localforage.getItem('log', function (err, log) {
     if (log) {
       log.unshift(post)
-      localforage.setItem('log', log)
+      localforage.setItem('log', log, function () {
+        console.log('LOG UPDATED')
+        location.reload()
+      })
     } else {
       log = []
       log.unshift(post)
-      localforage.setItem('log', log)
+      localforage.setItem('log', log, function () {
+        console.log('LOG UPDATED')
+        location.reload()
+      })
     }
-
   })
 }
 
@@ -184,7 +201,6 @@ function getName (id) {
 
         //if (post.content) {
           if (post.content.type == 'name') {
-            console.log(post.content.name)
             name.textContent = '@' + post.content.name
           }
         //}

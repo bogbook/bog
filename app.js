@@ -65,6 +65,8 @@ function profilePage (src, keys) {
 
   scroller.appendChild(message)
 
+  requestFeed(src, 'ws://localhost:8080/', keys.publicKey)
+
   localforage.getItem(src, function (err, log) {
     if (log) {
       for (var i=0; i < log.length; i++) {
@@ -189,7 +191,7 @@ localforage.getItem('id', function (err, keys) {
           identify, 
           h('button', {onclick: function () {
             if (identify.value) {
-              var content = {
+              var toPublish = {
                 author: keys.publicKey,
                 type: 'name',
                 naming: keys.publicKey,
@@ -198,7 +200,7 @@ localforage.getItem('id', function (err, keys) {
               }
 
               identify.value = ''
-              publish(content, keys)
+              publish(toPublish, keys)
               localforage.setItem('id', keys, function (err, published) {
                 if (published) {
                   location.reload()

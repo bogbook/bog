@@ -21,6 +21,8 @@ function renderMessage (post) {
 
   if (post.content.type == 'post') {
 
+    /*
+    NEED TO UNBOX THREADS
     localforage.getItem('log', function (err, log) {
       if (log) {
         for (var i = log.length - 1; i >= 0; --i) {
@@ -36,7 +38,7 @@ function renderMessage (post) {
           }
         }
       }
-    })
+    })*/
   
     var renderer = new marked.Renderer();
     renderer.link = function(href, title, text) {

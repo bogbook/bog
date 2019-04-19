@@ -14,8 +14,10 @@ function keyPage (keys) {
   // delete key button
   message.appendChild(h('button', {
     onclick: function () {
-     localStorage['id'] = ''
-     location.reload()
+     localforage.removeItem('id', function () {
+
+       location.reload()
+     })
     }
   }, ['Delete Key']))
 
@@ -134,7 +136,7 @@ localforage.getItem('id', function (err, keys) {
 
     var navbar = h('div', {classList: 'navbar'}, [
       h('div', {classList: 'internal'}, [
-        h('li', [h('a', {href: '/'}, ['Home'])]),
+        h('li', [h('a', {href: '/#'}, ['Home'])]),
         h('li', [h('a', {href: '#' + keys.publicKey}, [getName(keys.publicKey)])]),
         h('li', [h('a', {href: '/#key'}, ['Key'])])
       ])
@@ -157,7 +159,7 @@ localforage.getItem('id', function (err, keys) {
           location.reload()
         }, 10)
       } else {
-        welcomeScreen()
+        welcomeScreen(keys)
       }
     }
   }

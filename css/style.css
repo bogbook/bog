@@ -41,7 +41,7 @@ hr {
 }
 
 #scroller {
-  max-width: 780px;
+  max-width: 50em;
   margin-right: auto;
   margin-left: auto;
 }

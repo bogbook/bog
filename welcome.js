@@ -9,7 +9,7 @@ function welcomeScreen (keys) {
   scroller.appendChild(message)
 
   message.appendChild(h('h1', ['Welcome to Bogbook']))
-  message.appendChild(h('p', ['Bogbook is a distributed blogging network of signed append-only feeds. To avoid confusion, we call them "bogs".']))
+  message.appendChild(h('p', ['Bogbook is a distributed blogging network of signed append-only feeds. We call them "bogs".']))
   message.appendChild(h('p', ['Please note: Bogbook is experimental software, not for use in producton environments. Expect bugs and breaking changes. Pull-requests are needed.']))
   message.appendChild(h('p', {innerHTML: marked('View the code: [http://github.com/bogbook/bog](http://github.com/bogbook/bog). Questions? [ev@evbogue.com](mailto:ev@evbogue.com).')}))
   message.appendChild(h('hr'))
@@ -17,7 +17,7 @@ function welcomeScreen (keys) {
   message.appendChild(h('p', {innerHTML: marked('This is an ed25519 public/private signing keypair. It was generated using [TweetNaCl.js](https://tweetnacl.js.org/#/)')}))
   message.appendChild(h('pre', [JSON.stringify(keys)]))
   message.appendChild(h('p', ['Right now, this keypair exists only in memory. When you leave this page, the keypair will vanish forever. If you refresh this page you\'ll receive a new keypair.']))
-  message.appendChild(h('p', {innerHTML: marked('To save this keypair, identify with handle below. Once you identify, your public/private keypair will be stored in your browser using [localForage.js](https://localforage.github.io/localForage). Save your keypair somewhere safe to preserve your identity.')}))
+  message.appendChild(h('p', {innerHTML: marked('To save this keypair, identify with a handle below. Once you identify, your public/private keypair will be stored in your browser using [localForage.js](https://localforage.github.io/localForage). Save your keypair somewhere safe to preserve your identity.')}))
   message.appendChild(h('hr'))
   message.appendChild(h('h3', ['Identify']))
 

@@ -116,23 +116,3 @@ function renderMessage (post) {
   return messageDiv
 }
 
-function getHeader (post, mini) {
-  var inner 
-  if (mini) {
-    var inner = mini
-  }
-
-  var head = h('span', [
-    h('a', {href: '#' + post.key}, [
-      h('p', {classList: 'right'}, [human(new Date(post.content.timestamp))]),
-    ]),
-    h('p', [
-      h('a', {href: '#' + post.content.author}, [
-        getName(post.content.author)
-      ]),
-      inner
-    ])
-  ])
-  return head
-}
-

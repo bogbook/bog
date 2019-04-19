@@ -15,7 +15,7 @@ function keyPage (keys) {
   message.appendChild(h('button', {
     onclick: function () {
      localforage.removeItem('id', function () {
-
+       location.hash = ''
        location.reload()
      })
     }

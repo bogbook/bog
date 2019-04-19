@@ -12,7 +12,7 @@ but nothing will load into the browser unless you request a public key,  so try 
 
 ### What?
 
-bogbook is a distributed social networking application using [TweetNaCl.js](https://tweetnacl.js.org/#/) to publish signed append-only logs to your browser's localStorage. 
+bogbook is a distributed social networking application using [TweetNaCl.js](https://tweetnacl.js.org/#/) to publish signed append-only logs to your browser's IndexedDB using [localForage](https://localforage.github.io/localForage). 
 
 The bogs are then gossiped between your bog client and bog 'pub' servers using websockets. You're responsible for syncing your messages between different bog 'pub' servers. Bog 'pubs' themselves don't talk to each other, instead they only talk to clients. 
 
@@ -44,20 +44,31 @@ Bogbook should launch in your browser. If it doesn't, navigate to http://localho
 
 All of the bogbook cryptography is produced using [TweetNaCl.js](https://tweetnacl.js.org/#/) which is a port of [TweetNaCl](https://tweetnacl.cr.yp.to/), a cryptography library written in 100 Tweets. 
 
-bogbook generates an ed25519 public/private keypair on load using `nacl.sign.keyPair()`, which is then stored in localStorage at `localStorage['id']` as a JSON object with the public/private keypairs base64-encoded.
+bogbook generates an ed25519 public/private keypair on load using `nacl.sign.keyPair()`, which is then stored in localForage at `localStorage['id']` as a JSON object with the public/private keypairs base64-encoded.
 
 When you post a new message, bogbook will 
 
 + iterate up the message sequence number
 + hash the contents of the previous message using sha512
-+ sign the contents of the current message with your ed25519 private key
-+ hash the new message (including the signature) using sha512
++ generate a hash of the contents of the current message using sha512
++ generate a signature of the contents of the current message with your ed25519 private key
 
-before appending the feed to the log stored in your browser.
+Then you publish a message containing
+
+```
+{
+  "author": <your publickey>,
+  "key": <sha512 hash of content>,
+  "signature": <signature of content>
+}
+
+To view the message, you use `nacl.sign.open` passing Uint8Arrays of the signature and publickey as paramaters.
+
+---
 
 Please note: All logs are append-only, public, and plain text at the current time. While you _can_ moderate your local database and pub servers by deleting logs associated with public keys, it can be difficult to unsay something, so don't drink and bog, people.
 
-Some browsers clear localStorage upon exit, others will clear it if you wipe your browser cache. Remember to save your public/private keypair somewhere, because no one can regenerate it for you.   
+Some browsers clear stored data upon exit, others will clear it if you wipe your browser cache. Remember to save your public/private keypair somewhere, because no one can regenerate it for you.   
 
 ### contributing
 

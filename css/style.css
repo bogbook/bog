@@ -5,13 +5,32 @@ body {
   overflow-wrap: break-word;
   word-wrap: break-word;
   word-break: break-word;
+  line-height: 1.25em;
 }
 
 p {
-  margin-top: 5px;
-  margin-bottom: 5px;
+  margin-top: 1ex;
+  margin-bottom: 1ex;
   font-size: 1em;
 }
+
+h1, h2, h3, h4, h5, h6 { margin-top: 5px;}
+
+h1 { font-size: 1.4em; }
+h2 { font-size: 1.3em; }
+h3 { font-size: 1.25em; }
+h4 { font-size: 1.2em; }
+h5 { font-size: 1.15em; }
+h6 { font-size: 1.1em; }
+
+hr {
+  border: solid #222;
+  clear: both;
+  border-width: 1px 0 0;
+  height: 0;
+  margin-bottom: .9em;
+}
+
 
 #screen {
   position: absolute;
@@ -32,7 +51,7 @@ p {
 .message {
   background: #333;
   margin-top: .5em;
-  padding: .5em;
+  padding: .3em .5em;
   border-radius: 5px;
 }
 
@@ -84,6 +103,8 @@ code, pre {
 }
 
 textarea, input {
+  font-family: 'Source Sans Pro';
+  font-size: 1em;
   background: #222;
   padding: .5em;
   color: #f5f5f5;
@@ -149,10 +170,10 @@ textarea {
 
 button {
   display: inline-block;
-  padding: 2px 6px;
-  margin: .2em .2em .2em 0em;
-  font-size: 14px;
-  line-height: 20px;
+  padding: .25em .5em;
+  margin: .15em;
+  font-size: 1em;
+  line-height: 1.2em;
   color: #d5d5d5;
   text-align: center;
   text-shadow: 0 1px 1px rgba(0, 0, 0, 0.75);

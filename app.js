@@ -66,6 +66,35 @@ function keyPage (keys) {
 function profilePage (src, keys) {
   var scroller = document.getElementById('scroller')
 
+  var message = h('div', {classList: 'message'})
+
+  var identify = h('input', {placeholder: 'Identify ' + src.substring(0, 10) + '...'})
+
+  message.appendChild(h('div', [
+    identify,
+    h('button', {onclick: function () {
+      if (identify.value) {
+        var content = {
+          author: keys.publicKey,
+          type: 'name',
+          naming: src,
+          name: identify.value,
+          timestamp: Date.now()
+        }
+
+        identify.value = ''
+        publish(content, keys)
+        localforage.setItem('id', keys, function (err, published) {
+          if (published) {
+            location.reload()
+          }
+        })
+      }
+    }}, ['Identify'])
+  ]))
+
+  scroller.appendChild(message)
+
   localforage.getItem(src, function (err, log) {
     if (log) {
       for (var i=0; i < log.length; i++) {

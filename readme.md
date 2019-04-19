@@ -61,6 +61,7 @@ Then you publish a message containing
   "key": <sha512 hash of content>,
   "signature": <signature of content>
 }
+```
 
 To view the message, you use `nacl.sign.open` passing Uint8Arrays of the signature and publickey as paramaters.
 

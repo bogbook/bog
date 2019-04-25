@@ -17,8 +17,8 @@ function render (msg, keys) {
   var messageDiv = h('messageDiv', {id: msg.key})
   var message = h('div', {classList: 'message'})
 
-  bog().then(log => {
-    log.forEach(function (nextPost) {
+  bog().then(logger => {
+    logger.forEach(function (nextPost) {
       open(nextPost).then(nextMessage => {
         var messageExists = (document.getElementById(nextMessage.key) !== null);
         if (nextMessage.reply == msg.key) {

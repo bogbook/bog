@@ -56,14 +56,14 @@ hr {
   border-radius: 5px;
 }
 
-.message, .message > *, .navbar, .navbar > * {
+/*.message, .message > *, .navbar, .navbar > * {
   animation: fadein .5s;
 }
 
 @keyframes fadein {
     from { opacity: 0; }
     to   { opacity: 1; }
-}
+}*/
 
 
 .submessage {

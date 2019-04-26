@@ -25,7 +25,15 @@ async function keys (key) {
       publicKey: '@' + nacl.util.encodeBase64(genkey.publicKey),
       privateKey: nacl.util.encodeBase64(genkey.secretKey)
     }
-    localforage.setItem('id', keypair)
+    if (keypair.publicKey.includes('/')) {
+      console.log('TRYING AGAIN')
+      setTimeout(function () {
+        location.reload()
+      }, 10)
+    } else {
+      localforage.setItem('id', keypair)
+    }
+
     return keypair 
   }
 }
@@ -103,7 +111,7 @@ async function publish (post, keys) {
 
   } else {
 
-    post.seq = 0
+    post.seq = 1 
 
     message.key = '%' + nacl.util.encodeBase64(nacl.hash(nacl.util.decodeUTF8(JSON.stringify(post)))),
     message.signature = nacl.util.encodeBase64(nacl.sign(nacl.util.decodeUTF8(JSON.stringify(post)), nacl.util.decodeBase64(keys.privateKey)))

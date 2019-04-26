@@ -25,17 +25,11 @@ function composer (keys, reply) {
               textarea.value = ''
               if (reply) {
                 messageDiv.removeChild(messageDiv.firstChild)
-                if (messageDiv.firstChild) {
-                  messageDiv.insertBefore(h('div', {classList: 'submessage'}, [render(msg, keys)]), messageDiv.childNodes[1])
-                } else {
-                  messageDiv.appendChild(h('div', {classList: 'submessage'}, [render(msg, keys)]))
-                }
+              }
+              if (messageDiv.firstChild) {
+                messageDiv.insertBefore(render(msg, keys), messageDiv.childNodes[1])
               } else {
-                if (messageDiv.firstChild) {
-                  messageDiv.insertBefore(render(msg, keys), messageDiv.childNodes[1])
-                } else {
-                  messageDiv.appendChild(render(msg, keys))
-                }
+                messageDiv.appendChild(render(msg, keys))
               }
             })
           }) 

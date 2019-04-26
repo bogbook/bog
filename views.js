@@ -7,12 +7,18 @@ function threadPage (src, keys) {
 }
 
 function profilePage (src, keys) {
+  var server = 'ws://localhost:8080/'
+
+  sync(src, server, keys)
+
   bog(src).then(log => {
-    log.forEach(function (msg) {
-      open(msg).then(post => {
-        scroller.appendChild(render(post, keys))
+    if (log) {
+      log.forEach(function (msg) {
+        open(msg).then(post => {
+          scroller.appendChild(render(post, keys))
+        })
       })
-    })
+    }
   })
 }
 

@@ -14,9 +14,10 @@ function getHeader (post, mini) {
 }
 
 function render (msg, keys) {
-  var messageDiv = h('messageDiv', {id: msg.key})
+  var messageDiv = h('div', {id: msg.key})
   var message = h('div', {classList: 'message'})
 
+  /* TODO: this is really slow for some reason
   bog().then(logger => {
     logger.forEach(function (nextPost) {
       open(nextPost).then(nextMessage => {
@@ -28,7 +29,7 @@ function render (msg, keys) {
         }
       })
     })
-  }) 
+  })*/
 
   if (msg.type == 'post') {
     message.appendChild(getHeader(msg))
@@ -43,7 +44,12 @@ function render (msg, keys) {
     message.appendChild(h('div', [msg.text]))
     message.appendChild(h('button', {
       onclick: function () {
-        messageDiv.appendChild(composer(keys, msg)) 
+        if (messageDiv.firstChild) {
+          messageDiv.insertBefore(h('div', {classList: 'submessage'}, [composer(keys, msg)]), messageDiv.childNodes[1])
+        } else {
+          messageDiv.appendChild(h('div', {classList: 'submessage'}, [composer(keys, msg)])) 
+        }
+
       }
     }, ['Reply']))
   } 

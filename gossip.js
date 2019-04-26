@@ -36,8 +36,25 @@ function sync (src, server, keys) {
             console.log(send)
             ws.send(JSON.stringify(send))
           } else {
-            console.log('RECEIVING')
-                
+            if (serverMsg.log) {
+              console.log('RECEIVING')
+              var newlog = serverMsg.log.concat(srclog)
+              console.log('NEWLOG')
+              localforage.getItem('log').then(log => {
+                if (log) {
+                   var newpubliclog = serverMsg.log.concat(log)
+
+                   localforage.setItem('log', newpubliclog)
+                }
+              })
+
+              localforage.setItem(src, newlog)
+              setTimeout(function () {
+                location.reload()
+              }, 1000)
+
+              console.log(newlog)
+            }         
           }
         }
       })

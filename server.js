@@ -39,6 +39,19 @@ wserver.on('connection', function (ws) {
               seq: opened.seq
             }
             ws.send(JSON.stringify(res))
+            if(res.seq > req.seq) {
+              console.log('SEND DIFF TO CLIENT')
+              var diff = res.seq - req.seq
+              console.log(diff)
+              var sendlog = log.slice(0, diff)
+              var send = {
+                src: req.src,
+                log: sendlog
+              }
+              console.log(send)
+              ws.send(JSON.stringify(send))
+            }
+
             // COMPARE SEQ
           }
         })
@@ -50,7 +63,7 @@ wserver.on('connection', function (ws) {
         console.log(res)
         ws.send(JSON.stringify(res))
       }
-    } else {
+    } else if (req.seq == null) {
       if (fs.existsSync(__dirname + '/bogs/' + req.src)) { 
         fs.readFile(__dirname + '/bogs/' + req.src, 'UTF-8', function (err, data) {
           var log = JSON.parse(data)

@@ -17,19 +17,17 @@ function render (msg, keys) {
   var messageDiv = h('div', {id: msg.key})
   var message = h('div', {classList: 'message'})
 
-  /* TODO: this is really slow for some reason
   bog().then(logger => {
     logger.forEach(function (nextPost) {
-      open(nextPost).then(nextMessage => {
-        var messageExists = (document.getElementById(nextMessage.key) !== null);
-        if (nextMessage.reply == msg.key) {
-          if (!messageExists) {
-            messageDiv.appendChild(h('div', {classList: 'submessage'}, [render(nextMessage, keys)]))
-          }
+      if (nextPost.reply == msg.key) {
+        var messageExists = (document.getElementById(nextPost.key) !== null);
+
+        if (!messageExists) {
+          messageDiv.appendChild(h('div', {classList: 'submessage'}, [render(nextPost, keys)]))
         }
-      })
+      }
     })
-  })*/
+  })
 
   if (msg.type == 'post') {
     message.appendChild(getHeader(msg))

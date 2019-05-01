@@ -86,6 +86,7 @@ async function publish (post, keys) {
   var message = { author: keys.publicKey }
 
   var feed = await localforage.getItem(keys.publicKey)
+
   if (feed) {
     var firstMsg = await open(feed[0])
 
@@ -94,12 +95,14 @@ async function publish (post, keys) {
     message.key = '%' + nacl.util.encodeBase64(nacl.hash(nacl.util.decodeUTF8(JSON.stringify(post)))),
     message.signature = nacl.util.encodeBase64(nacl.sign(nacl.util.decodeUTF8(JSON.stringify(post)), nacl.util.decodeBase64(keys.privateKey)))
 
+    var openedMsg = await open(message)
+
     localforage.getItem('log').then(log => {
       if (log) {
-        log.unshift(message)
+        log.unshift(openedMsg)
         localforage.setItem('log', log)
       } else {
-        var feed = [message]
+        var feed = [openedMessage]
         localforage.setItem('log', feed)
       }
     })
@@ -116,12 +119,14 @@ async function publish (post, keys) {
     message.key = '%' + nacl.util.encodeBase64(nacl.hash(nacl.util.decodeUTF8(JSON.stringify(post)))),
     message.signature = nacl.util.encodeBase64(nacl.sign(nacl.util.decodeUTF8(JSON.stringify(post)), nacl.util.decodeBase64(keys.privateKey)))
 
+    var openedMsg = await open(message)
+
     localforage.getItem('log').then(log => {
       if (log) {
-        log.unshift(message)
+        log.unshift(openedMessage)
         localforage.setItem('log', log)
       } else {
-        var feed = [message]
+        var feed = [openedMessage]
         localforage.setItem('log', feed)
       }
     })

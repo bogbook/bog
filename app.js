@@ -14,8 +14,7 @@ function composer (keys, reply) {
         if (textarea.value) {
           var content = {
             type: 'post',
-            text: textarea.value,
-            timestamp: Date.now()
+            text: textarea.value
           }
           if (reply) {
             content.reply = reply.key
@@ -67,7 +66,8 @@ keys().then(key => {
     h('div', {classList: 'internal'}, [
       h('li', [h('a', {href: '#'}, ['Home'])]),
       h('li', [h('a', {href: '#' + key.publicKey}, [getName(key.publicKey)])]),
-      h('li', [h('a', {href: '#key'}, ['Key'])])
+      h('li', [h('a', {href: '#key'}, ['Key'])]),
+      h('li', {classList: 'right'}, [h('a', {href: 'http://github.com/bogbook/bog/'}, ['Git Repo'])])
     ])
   ])
   document.body.appendChild(navbar)

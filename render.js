@@ -29,6 +29,20 @@ function render (msg, keys) {
     })
   })
 
+  var renderer = new marked.Renderer();
+  renderer.link = function(href, title, text) {
+      if ((href[0] == '@') || (href[0] == '%')) {
+        href = '#' + href
+      }
+      var link = marked.Renderer.prototype.link.call(this, href, title, text);
+      return link
+  }
+
+  marked.setOptions({
+      renderer: renderer
+  })
+
+
   if (msg.type == 'post') {
     message.appendChild(getHeader(msg))
 
@@ -39,7 +53,7 @@ function render (msg, keys) {
       ]))
     }
 
-    message.appendChild(h('div', [msg.text]))
+    message.appendChild(h('div', {innerHTML: marked(msg.text)}))
     message.appendChild(h('button', {
       onclick: function () {
         if (messageDiv.firstChild) {

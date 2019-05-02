@@ -40,18 +40,8 @@ function sync (src, server, keys) {
               console.log('RECEIVING')
               var newlog = serverMsg.log.concat(srclog)
               console.log('NEWLOG')
-              localforage.getItem('log').then(log => {
-                if (log) {
-                   var newpubliclog = serverMsg.log.concat(log)
 
-                   localforage.setItem('log', newpubliclog)
-                }
-              })
-
-              localforage.setItem(src, newlog)
-              setTimeout(function () {
-                location.reload()
-              }, 1000)
+              localforage.setItem(src, newlog).then(function () {regenerate()})
 
               console.log(newlog)
             }         
@@ -72,19 +62,15 @@ function sync (src, server, keys) {
       ws.onmessage = function (message) {
         var serverMsg = JSON.parse(message.data)
         console.log(serverMsg)
-        localforage.getItem('log').then(log => {
+        /*localforage.getItem('log').then(log => {
           if (log) {
             var newlog = serverMsg.log.concat(log)
 
             localforage.setItem('log', newlog)
           }
-        })
+        })*/
 
-        localforage.setItem(src, serverMsg.log)
-
-        setTimeout(function () {
-          location.reload()
-        }, 1000)
+        localforage.setItem(src, serverMsg.log).then(function () {regenerate()})
       }
     }
   })

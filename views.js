@@ -55,68 +55,9 @@ function profilePage (src, keys) {
 }
 
 function publicPage (keys) {
-  var newlog = []
-
   scroller.appendChild(h('button', {
     onclick: function () {
-      var openedlog = []
-      localforage.iterate(function(value, key, i) {
-        if (key[0] == '@') {
-          newlog = newlog.concat(value)
-        }
-        console.log(newlog)
-      }).then(function () {
-        newlog.forEach(function (msg) {
-          var pubkey = nacl.util.decodeBase64(msg.author.substring(1))
-          var sig = nacl.util.decodeBase64(msg.signature)
-          var opened = JSON.parse(nacl.util.encodeUTF8(nacl.sign.open(sig, pubkey)))
-          opened.key = msg.key
-          
-          openedlog.push(opened)
-        })
-        console.log(openedlog)
-        localforage.setItem('log', openedlog).then(function () {location.reload()}) 
-      })
-    }
-  }, ['Merge']))
-
-  scroller.appendChild(h('button', {
-    onclick: function () {
-      localforage.getItem('log').then(log => {
-        log.sort((a, b) => a.timestamp - b.timestamp)
-        console.log(log)
-        var reversed = log.reverse()
-        localforage.setItem('log', reversed).then(function () {location.reload()})
-      })
-    }
-  }, ['Sort']))
-
-  scroller.appendChild(h('button', {
-    onclick: function () {
-      var openedlog = []
-      localforage.iterate(function(value, key, i) {
-        if (key[0] == '@') {
-          newlog = newlog.concat(value)
-        }
-        console.log(newlog)
-      }).then(function () {
-        newlog.forEach(function (msg) {
-          var pubkey = nacl.util.decodeBase64(msg.author.substring(1))
-          var sig = nacl.util.decodeBase64(msg.signature)
-          var opened = JSON.parse(nacl.util.encodeUTF8(nacl.sign.open(sig, pubkey)))
-          opened.key = msg.key
-
-          openedlog.push(opened)
-        })
-        console.log(openedlog)
-
-        openedlog.sort((a, b) => a.timestamp - b.timestamp)
-
-        var reversed = openedlog.reverse()
-
-        localforage.setItem('log', reversed).then(function () {location.reload()})
-      })
-
+      regenerate()
     }
   }, ['Regenerate']))
 

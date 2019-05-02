@@ -70,6 +70,35 @@ function getName (id) {
   return name
 }
 
+// bog.regenerate -- regenerates main log by taking all of the feed logs, combinging them, and then sorting them
+
+function regenerate () {
+  var newlog = []
+  var openedlog = []
+  localforage.iterate(function(value, key, i) {
+    if (key[0] == '@') {
+      newlog = newlog.concat(value)
+    }
+    console.log(newlog)
+  }).then(function () {
+    newlog.forEach(function (msg) {
+      var pubkey = nacl.util.decodeBase64(msg.author.substring(1))
+      var sig = nacl.util.decodeBase64(msg.signature)
+      var opened = JSON.parse(nacl.util.encodeUTF8(nacl.sign.open(sig, pubkey)))
+      opened.key = msg.key
+
+      openedlog.push(opened)
+    })
+    console.log(openedlog)
+
+    openedlog.sort((a, b) => a.timestamp - b.timestamp)
+
+    var reversed = openedlog.reverse()
+    console.log('REGENERATE')
+    localforage.setItem('log', reversed).then(function () {location.reload()})
+  })
+}
+
 // bog.log (feed) -- returns a specific feed if a parameter is passed, if not returns the entire log
 // EX: bog().then(log => { console.log(log)})
 // EX: bog('@ExE3QXmBhYQlGVA3WM2BD851turNzwhruWbIpMd7rbQ=').then(log => { console.log(log)})

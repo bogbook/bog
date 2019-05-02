@@ -53,7 +53,7 @@ function render (msg, keys) {
   } else if (msg.type == 'name') {
     message.appendChild(getHeader(msg))
 
-    message.appendChild(h('span', ['identified ' + msg.named.substring(0, 10) + '... as ' + msg.name]))
+    message.appendChild(h('span', ['identified ', h('a', {href: '#' + msg.named }, [msg.named.substring(0, 10) + '...']), ' as ' + msg.name]))
   } 
 
   messageDiv.appendChild(message)

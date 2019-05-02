@@ -38,7 +38,7 @@ function profilePage (src, keys) {
 
   profile.appendChild(h('button', {
     onclick: function () {
-      localforage.removeItem(src).then(function () { location.reload() })
+      localforage.removeItem(src).then(function () { regenerate() })
     }
   }, ['Delete feed']))
   

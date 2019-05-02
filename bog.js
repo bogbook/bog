@@ -59,6 +59,14 @@ function getName (id) {
 
   name.textContent = id.substring(0, 10) + '...'
 
+  bog().then(log => {
+    log.forEach(function (msg) {
+      if (msg.named == id) {
+        return name.textContent = '@' + msg.name
+      } 
+    })
+  })
+
   return name
 }
 
@@ -83,8 +91,12 @@ async function bog (feed) {
 async function publish (post, keys) {
   post.author = keys.publicKey
 
-  var message = { author: keys.publicKey }
+  post.timestamp = Date.now() 
 
+  var message = { 
+    author: keys.publicKey 
+  }
+  
   var feed = await localforage.getItem(keys.publicKey)
 
   if (feed) {

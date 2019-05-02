@@ -61,15 +61,6 @@ function sync (src, server, keys) {
       }
       ws.onmessage = function (message) {
         var serverMsg = JSON.parse(message.data)
-        console.log(serverMsg)
-        /*localforage.getItem('log').then(log => {
-          if (log) {
-            var newlog = serverMsg.log.concat(log)
-
-            localforage.setItem('log', newlog)
-          }
-        })*/
-
         localforage.setItem(src, serverMsg.log).then(function () {regenerate()})
       }
     }

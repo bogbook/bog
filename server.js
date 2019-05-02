@@ -63,7 +63,7 @@ wserver.on('connection', function (ws) {
         console.log(res)
         ws.send(JSON.stringify(res))
       }
-    } else if (req.seq == null) {
+    } else if (req.seq === null) {
       if (fs.existsSync(__dirname + '/bogs/' + req.src)) { 
         fs.readFile(__dirname + '/bogs/' + req.src, 'UTF-8', function (err, data) {
           var log = JSON.parse(data)

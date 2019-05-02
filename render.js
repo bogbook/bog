@@ -50,6 +50,10 @@ function render (msg, keys) {
 
       }
     }, ['Reply']))
+  } else if (msg.type == 'name') {
+    message.appendChild(getHeader(msg))
+
+    message.appendChild(h('span', ['identified ' + msg.named.substring(0, 10) + '... as ' + msg.name]))
   } 
 
   messageDiv.appendChild(message)

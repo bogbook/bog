@@ -52,16 +52,15 @@ function render (msg, keys) {
         h('a', {href: '#' + msg.reply}, [msg.reply.substring(0, 10) + '...'])
       ]))
     }
-
+    var gotName = getName(msg.author)
     message.appendChild(h('div', {innerHTML: marked(msg.text)}))
     message.appendChild(h('button', {
       onclick: function () {
         if (messageDiv.firstChild) {
-          messageDiv.insertBefore(h('div', {classList: 'submessage'}, [composer(keys, msg)]), messageDiv.childNodes[1])
+          messageDiv.insertBefore(h('div', {classList: 'submessage'}, [composer(keys, msg, gotName)]), messageDiv.childNodes[1])
         } else {
-          messageDiv.appendChild(h('div', {classList: 'submessage'}, [composer(keys, msg)])) 
+          messageDiv.appendChild(h('div', {classList: 'submessage'}, [composer(keys, msg, gotName)])) 
         }
-
       }
     }, ['Reply']))
   } else if (msg.type == 'name') {

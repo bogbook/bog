@@ -1,11 +1,17 @@
 var screen = h('div', {id: 'screen'})
 document.body.appendChild(screen)
 
-function composer (keys, reply) {
+function composer (keys, reply, gotName) {
   var messageDiv = h('div')
   var message = h('div', {classList: 'message'})
 
-  var textarea = h('textarea', {placeholder: 'Write a new bog post...'})
+  if (gotName) {
+    console.log(gotName.textContent)
+    var textarea = h('textarea', ['[' + gotName.textContent + '](' + reply.author + ')'])
+  } else {
+
+    var textarea = h('textarea', {placeholder: 'Write a new bog post...'})
+  }
 
   var publisher = h('div', [
     textarea,

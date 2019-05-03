@@ -57,6 +57,12 @@ function profilePage (src, keys) {
 function publicPage (keys) {
   scroller.appendChild(h('button', {
     onclick: function () {
+      localforage.clear().then(function () {location.reload()})
+    }
+  }, ['Delete Everything']))
+
+  scroller.appendChild(h('button', {
+    onclick: function () {
       regenerate()
     }
   }, ['Regenerate']))

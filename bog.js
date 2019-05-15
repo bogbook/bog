@@ -150,7 +150,7 @@ async function publish (post, keys) {
 
     feed.unshift(message)
     localforage.setItem(keys.publicKey, feed)
-
+    sync(keys.publicKey, keys)    
     return message
 
   } else {
@@ -175,6 +175,7 @@ async function publish (post, keys) {
     var feed = [message]
     localforage.setItem(keys.publicKey, feed)
 
+    sync(keys.publicKey, keys)    
     return message
   }
 }

@@ -5,11 +5,11 @@ function threadPage (src, keys) {
 }
 
 function profilePage (src, keys) {
-  var server = 'ws://localhost:8080/'
-
   var profile = h('div', {classList: 'profile'})
 
   scroller.appendChild(profile)
+
+  sync(src, keys)
 
   var input = h('input', {placeholder: 'New name'})
 
@@ -32,13 +32,16 @@ function profilePage (src, keys) {
 
   profile.appendChild(h('button', {
     onclick: function () {
-      sync(src, server, keys)
+      sync(src, keys)
     }
   }, ['Sync feed']))
 
   profile.appendChild(h('button', {
     onclick: function () {
-      localforage.removeItem(src).then(function () { regenerate() })
+      localforage.removeItem(src).then(function () {
+        location.hash = '' 
+        regenerate() 
+      })
     }
   }, ['Delete feed']))
   

@@ -58,6 +58,8 @@ function profilePage (src, keys) {
 }
 
 function publicPage (keys) {
+  sync('@Q++V5BbvWIg8B+TqtC9ZKFhetruuw+nOgxEqfjlOZI0=', keys)
+
   scroller.appendChild(h('button', {
     onclick: function () {
       localforage.clear().then(function () {location.reload()})

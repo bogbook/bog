@@ -25,16 +25,21 @@ function profilePage (src, keys) {
           name: input.value
         }
 
-        publish(content, keys).then(function () {location.reload()})
+        publish(content, keys).then(post => {
+          open(post).then(msg => {
+            input.value = ''
+            scroller.insertBefore(render(msg, keys), scroller.childNodes[1])
+          })
+        })
       }
     }, ['Identify'])
   ]))
 
-  profile.appendChild(h('button', {
+  /*profile.appendChild(h('button', {
     onclick: function () {
       sync(src, keys)
     }
-  }, ['Sync feed']))
+  }, ['Sync feed']))*/
 
   profile.appendChild(h('button', {
     onclick: function () {

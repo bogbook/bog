@@ -1,7 +1,17 @@
 function getHeader (post, mini) {
+  var src = h('a', {
+    onclick: function () {
+      head.appendChild(h('pre', [h('code', [JSON.stringify(post)])]))
+    }
+  }, ['[raw]'])
+
   var head = h('span', [
-    h('a', {href: '#' + post.key}, [
-      h('p', {classList: 'right'}, [human(new Date(post.timestamp))]),
+    h('p', {classList: 'right'}, [
+      h('a', {href: '#' + post.key}, [
+        human(new Date(post.timestamp)),
+      ]),
+      ' ',
+      src
     ]),
     h('p', [
       h('a', {href: '#' + post.author}, [

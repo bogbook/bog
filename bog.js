@@ -60,11 +60,12 @@ function getName (id) {
   name.textContent = id.substring(0, 10) + '...'
 
   bog().then(log => {
-    log.forEach(function (msg) {
-      if (msg.named == id) {
-        return name.textContent = '@' + msg.name
-      } 
-    })
+    for (var i = 0; i < log.length; i++ ) {
+      if (log[i].named == id) {
+        console.log(log[i].name)
+        return name.textContent = '@' + log[i].name
+      }
+    }
   })
 
   return name

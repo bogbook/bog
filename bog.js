@@ -73,7 +73,7 @@ function getName (id) {
 
 // bog.regenerate -- regenerates main log by taking all of the feed logs, combinging them, and then sorting them
 
-function regenerate () {
+function regenerate (home) {
   var newlog = []
   var openedlog = []
   localforage.iterate(function(value, key, i) {
@@ -96,7 +96,12 @@ function regenerate () {
 
     var reversed = openedlog.reverse()
     console.log('REGENERATE')
-    localforage.setItem('log', reversed).then(function () {location.reload()})
+    localforage.setItem('log', reversed).then(function () {
+      if (home) {
+        location.hash = ''
+      }
+      location.reload()
+    })
   })
 }
 

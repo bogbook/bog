@@ -9,7 +9,9 @@ function profilePage (src, keys) {
 
   scroller.appendChild(profile)
 
-  sync(src, keys)
+  var subs = [src]
+
+  sync(subs, keys)
 
   var input = h('input', {placeholder: 'New name'})
 
@@ -35,6 +37,24 @@ function profilePage (src, keys) {
     }, ['Identify'])
   ]))
 
+  localforage.getItem('subscriptions').then(function (subs) {
+    if (subs.includes(src)) {
+      profile.appendChild(h('button', {
+        onclick: function () {
+          subs = subs.filter(a => a !== src)
+          localforage.setItem('subscriptions', subs).then(function () { location.reload() })
+        }
+      }, ['Unsubscribe']))
+    } else {
+      profile.appendChild(h('button', {
+        onclick: function () {
+          subs.push(src)
+          localforage.setItem('subscriptions', subs).then(function () { location.reload() })
+        }
+      }, ['Subscribe']))
+    }
+  })
+  
   /*profile.appendChild(h('button', {
     onclick: function () {
       sync(src, keys)
@@ -63,7 +83,16 @@ function profilePage (src, keys) {
 }
 
 function publicPage (keys) {
-  sync('@Q++V5BbvWIg8B+TqtC9ZKFhetruuw+nOgxEqfjlOZI0=', keys)
+
+  localforage.getItem('subscriptions').then(function (subs) {
+    if (subs) {
+      sync(subs, keys)
+    } else {
+      var subs = [keys.publicKey]
+      localforage.setItem('subscriptions', subs)
+      sync(subs, keys)
+    }
+  })
 
   scroller.appendChild(h('button', {
     onclick: function () {

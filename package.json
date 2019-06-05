@@ -10,7 +10,7 @@
   "author": "Ev Bogue <ev@evbogue.com>",
   "license": "MIT",
   "dependencies": {
-    "ecstatic": "^3.3.1",
+    "ecstatic": "^4.1.2",
     "open": "^6.2.0",
     "tweetnacl": "^1.0.1",
     "tweetnacl-util": "^0.15.0",

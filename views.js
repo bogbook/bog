@@ -135,11 +135,56 @@ function keyPage (keys) {
   message.appendChild(h('button', {
     onclick: function () {
       if (textarea.value) {
-        localforage.setItem('id', JSON.parse(textarea.value))
-        location.reload()
+        localforage.setItem('id', JSON.parse(textarea.value)).then(function () { location.reload() })
       }
     }
   }, ['Import Key']))
+
+  scroller.appendChild(message)
+}
+
+function pubs () {
+  var message = h('div', {classList: 'message'})
+ 
+  message.appendChild(h('p', {innerHTML: marked('These are the Bogbook pubs that your browser will connect to as it looks for new messages from your subscriptions, when you post new bog posts, and when you click on feeds.\n\nAdd or remove these pubs to control where your Bogbook gossips. Localhost is a default, but will only work if you install Bogbook on your local computer by [cloning down the repo](https://git.sr.ht/~ev/bogbook).')}))
+
+  var add = h('input', {placeholder: 'Add a pub'})
+
+  localforage.getItem('pubs').then(function (servers) {
+
+    message.appendChild(h('div', [
+      add,
+      h('button', {
+        onclick: function () {
+          if (add.value) {
+            servers.push(add.value)
+            localforage.setItem('pubs', servers).then(function () { location.reload() })
+          }
+        }
+      }, ['Add a pub'])
+    ]))
+
+    servers.forEach(function (pub) {
+      message.appendChild(h('p', [
+        pub,
+        h('button', {
+          onclick: function () {
+            var newServers = servers.filter(item => item !== pub)
+            localforage.setItem('pubs', newServers).then(function () { location.reload() })
+          }
+        }, ['Remove'])
+      ]))
+    })
+  })
+
+  message.appendChild(h('button', {
+    onclick: function () {
+      localforage.removeItem('pubs').then(function () {
+        location.hash = ''
+        location.reload()
+      })
+    }
+  }, ['Reset pubs']))
 
   scroller.appendChild(message)
 }

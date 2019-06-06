@@ -2,13 +2,13 @@ function sync (subs, keys) {
 
   var wsServers
 
-  localforage.getItem('servers').then(function (servers) {
+  localforage.getItem('pubs').then(function (servers) {
     if (servers) {
       console.log(servers)
       wsServers = servers
     } else {
       servers = ['ws://localhost:8080/', 'ws://evbogue.com/']
-      localforage.setItem('servers', servers)
+      localforage.setItem('pubs', servers)
       console.log(servers)
       wsServers = servers
     }

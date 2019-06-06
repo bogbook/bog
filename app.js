@@ -57,6 +57,8 @@ function route (keys) {
 
   if (src === 'key') {
     keyPage(keys)
+  } else if (src === 'pubs') {
+    pubs()
   } else if (src[0] === '@') {
     profilePage(src, keys)
   } else if (src[0] === '%') {
@@ -73,6 +75,7 @@ keys().then(key => {
       h('li', [h('a', {href: '#'}, ['Home'])]),
       h('li', [h('a', {href: '#' + key.publicKey}, [getName(key.publicKey)])]),
       h('li', [h('a', {href: '#key'}, ['Key'])]),
+      h('li', [h('a', {href: '#pubs'}, ['Pubs'])]),
       h('li', {classList: 'right'}, [h('a', {href: 'http://github.com/bogbook/bog/'}, ['Git Repo'])])
     ])
   ])

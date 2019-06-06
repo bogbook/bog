@@ -76,7 +76,7 @@ keys().then(key => {
       h('li', [h('a', {href: '#' + key.publicKey}, [getName(key.publicKey)])]),
       h('li', [h('a', {href: '#key'}, ['Key'])]),
       h('li', [h('a', {href: '#pubs'}, ['Pubs'])]),
-      h('li', {classList: 'right'}, [h('a', {href: 'http://github.com/bogbook/bog/'}, ['Git Repo'])])
+      h('li', {classList: 'right'}, [h('a', {href: 'http://github.com/bogbook/bog/'}, ['Git'])])
     ])
   ])
   document.body.appendChild(navbar)

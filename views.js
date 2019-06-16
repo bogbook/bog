@@ -108,9 +108,11 @@ function publicPage (keys) {
 
   scroller.appendChild(composer(keys))
   bog().then(log => {
-    log.forEach(function (msg) {
-      scroller.appendChild(render(msg, keys))
-    })
+    if (log) {
+      log.forEach(function (msg) {
+        scroller.appendChild(render(msg, keys))
+      })
+    }
   })
 }
 

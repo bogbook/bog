@@ -60,12 +60,14 @@ function getName (id) {
   name.textContent = id.substring(0, 10) + '...'
 
   bog().then(log => {
-    for (var i = 0; i < log.length; i++ ) {
-      if (log[i].named == id) {
-        console.log(log[i].name)
-        return name.textContent = '@' + log[i].name
+    if (log) {
+      for (var i = 0; i < log.length; i++ ) {
+        if (log[i].named == id) {
+          console.log(log[i].name)
+          return name.textContent = '@' + log[i].name
+        }
       }
-    }
+    } 
   })
 
   return name
@@ -149,14 +151,19 @@ async function publish (post, keys) {
         log.unshift(openedMsg)
         localforage.setItem('log', log)
       } else {
-        var feed = [openedMessage]
+        var feed = [openedMsg]
         localforage.setItem('log', feed)
       }
     })
 
+    console.log(keys.publicKey)
+
+    var subs = [keys.publicKey]
+
     feed.unshift(message)
-    localforage.setItem(keys.publicKey, feed)
-    sync(keys.publicKey, keys)    
+    localforage.setItem(keys.publicKey, feed).then(function () {
+      sync(subs, keys)    
+    })
     return message
 
   } else {
@@ -170,18 +177,22 @@ async function publish (post, keys) {
 
     localforage.getItem('log').then(log => {
       if (log) {
-        log.unshift(openedMessage)
+        log.unshift(openedMsg)
         localforage.setItem('log', log)
       } else {
-        var feed = [openedMessage]
+        var feed = [openedMsg]
         localforage.setItem('log', feed)
       }
     })
 
     var feed = [message]
-    localforage.setItem(keys.publicKey, feed)
 
-    sync(keys.publicKey, keys)    
+    var subs = [keys.publicKey]
+
+    localforage.setItem(keys.publicKey, feed).then(function () {
+      sync(subs, keys)    
+    })
+
     return message
   }
 }

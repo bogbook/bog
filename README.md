@@ -8,7 +8,7 @@ To avoid confusion we're dropping the 'l' and calling them 'bogs'.
 
 Try it online at http://bogbook.com/ ! 
 
-but nothing will load into the browser unless you request a public key,  so try mine: http://bogbook.com/#@218Fd2bCrmXe4gwnMg5Gcb9qVZrjXquym2AlelbkBro=
+but nothing will load into the browser unless you request a public key,  so try mine: http://bogbook.com/#@Q++V5BbvWIg8B+TqtC9ZKFhetruuw+nOgxEqfjlOZI0=
 
 ### What?
 

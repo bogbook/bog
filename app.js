@@ -13,6 +13,8 @@ function composer (keys, reply, gotName) {
     var textarea = h('textarea', {placeholder: 'Write a new bog post...'})
   }
 
+
+
   var publisher = h('div', [
     textarea,
     h('button', {
@@ -25,22 +27,45 @@ function composer (keys, reply, gotName) {
           if (reply) {
             content.reply = reply.key
           }
-          publish(content, keys).then(post => {
+
+          publish(content, keys, {preview: true}).then(post => {
             open(post).then(msg => {
-              textarea.value = ''
-              if (reply) {
-                messageDiv.removeChild(messageDiv.firstChild)
-              }
-              if (messageDiv.firstChild) {
-                messageDiv.insertBefore(render(msg, keys), messageDiv.childNodes[1])
-              } else {
-                messageDiv.appendChild(render(msg, keys))
-              }
+              var preview = render(msg, keys, {preview: true})
+              var cache = messageDiv.firstChild
+              messageDiv.appendChild(preview)
+              messageDiv.removeChild(messageDiv.firstChild)
+              preview.firstChild.appendChild(h('button', {
+                onclick: function () {
+                  messageDiv.removeChild(messageDiv.firstChild)
+                  messageDiv.appendChild(cache)
+                }
+              }, ['Cancel']))
+              preview.firstChild.appendChild(h('button', {
+                onclick: function () {
+                  publish(content, keys).then(post => {
+                    open(post).then(msg => {
+                      textarea.value = ''
+                      if (reply) {
+                        messageDiv.removeChild(messageDiv.firstChild)
+                      }
+                      if (messageDiv.firstChild) {
+                        messageDiv.removeChild(messageDiv.firstChild)
+                        messageDiv = h('div')
+                        messageDiv.appendChild(cache)
+                        scroller.insertBefore(messageDiv, scroller.childNodes[2])
+                        scroller.insertBefore(render(msg, keys), scroller.childNodes[3])
+                      } else {
+                        messageDiv.appendChild(render(msg, keys))
+                      }
+                    })
+                  }) 
+                }
+              }, ['Publish']))
             })
-          }) 
+          })
         }
       }
-    }, ['Publish'])
+    }, ['Preview'])
   ])
 
   message.appendChild(publisher)

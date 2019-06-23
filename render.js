@@ -23,7 +23,7 @@ function getHeader (post, mini) {
   return head
 }
 
-function render (msg, keys) {
+function render (msg, keys, preview) {
   var messageDiv = h('div', {id: msg.key})
   var message = h('div', {classList: 'message'})
 
@@ -64,15 +64,17 @@ function render (msg, keys) {
     }
     var gotName = getName(msg.author)
     message.appendChild(h('div', {innerHTML: marked(msg.text)}))
-    message.appendChild(h('button', {
-      onclick: function () {
-        if (messageDiv.firstChild) {
-          messageDiv.insertBefore(h('div', {classList: 'submessage'}, [composer(keys, msg, gotName)]), messageDiv.childNodes[1])
-        } else {
-          messageDiv.appendChild(h('div', {classList: 'submessage'}, [composer(keys, msg, gotName)])) 
+    if (!preview) {
+      message.appendChild(h('button', {
+        onclick: function () {
+          if (messageDiv.firstChild) {
+            messageDiv.insertBefore(h('div', {classList: 'submessage'}, [composer(keys, msg, gotName)]), messageDiv.childNodes[1])
+          } else {
+            messageDiv.appendChild(h('div', {classList: 'submessage'}, [composer(keys, msg, gotName)])) 
+          }
         }
-      }
-    }, ['Reply']))
+      }, ['Reply']))
+    }
   } else if (msg.type == 'name') {
     message.appendChild(getHeader(msg))
 

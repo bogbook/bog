@@ -1,9 +1,18 @@
 function getHeader (post, mini) {
-  var src = h('a', {
+
+  var getRaw = h('button', {
     onclick: function () {
-      head.appendChild(h('pre', [h('code', [JSON.stringify(post)])]))
+      var raw = h('pre', [h('code', [JSON.stringify(post)])])
+      var removeRaw = h('button', {
+        onclick: function () {
+          raw.parentNode.removeChild(raw)
+          removeRaw.parentNode.replaceChild(getRaw, removeRaw)
+        }   
+      }, ['hide'])
+      getRaw.parentNode.replaceChild(removeRaw, getRaw)      
+      head.appendChild(raw)
     }
-  }, ['[raw]'])
+  }, ['src'])
 
   var head = h('span', [
     h('p', {classList: 'right'}, [
@@ -11,7 +20,7 @@ function getHeader (post, mini) {
         human(new Date(post.timestamp)),
       ]),
       ' ',
-      src
+      getRaw
     ]),
     h('p', [
       h('a', {href: '#' + post.author}, [

@@ -12,7 +12,7 @@ function getHeader (post, mini) {
       getRaw.parentNode.replaceChild(removeRaw, getRaw)      
       head.appendChild(raw)
     }
-  }, ['src'])
+  }, ['raw'])
 
   var head = h('span', [
     h('p', {classList: 'right'}, [

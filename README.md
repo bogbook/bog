@@ -1,6 +1,10 @@
 # bogbook
 
-### secure blockchain logging (blogging). 
+### secure blockchain logging (blogging) 
+
+or
+
+### a social network that works 
 
 To avoid confusion we're dropping the 'l' and calling them 'bogs'. 
 

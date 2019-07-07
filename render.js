@@ -37,15 +37,35 @@ function render (msg, keys, preview) {
   var message = h('div', {classList: 'message'})
 
   bog().then(log => {
-    log.reverse().forEach(function (nextPost) {
-      if (nextPost.reply == msg.key) {
-        var messageExists = (document.getElementById(nextPost.key) !== null);
+    if (log) {
+      log.reverse().forEach(function (nextPost) {
+        if (nextPost.edited == msg.key) {
+          var messageExists = (document.getElementById(nextPost.key) !== null)
+          var msgcontents = document.getElementById('content:' + msg.key)
 
-        if (!messageExists) {
-          messageDiv.appendChild(h('div', {classList: 'submessage'}, [render(nextPost, keys)]))
+          msg.text = nextPost.text
+
+          var editedcontents = h('span', {id : 'content:' + msg.key, innerHTML: marked(nextPost.text)}) 
+
+          msgcontents.parentNode.replaceChild(editedcontents, msgcontents)
+          
+          message.appendChild(h('div', [
+            'edited in:', 
+            h('a', {href: '#' + nextPost.key}, [nextPost.key.substring(0, 10) + '...'])
+          ]))
+          if (!messageExists) {
+            messageDiv.appendChild(h('div', {classList: 'submessage'}, [render(nextPost, keys)]))
+          }
         }
-      }
-    })
+
+        if (nextPost.reply == msg.key) {
+
+          if (!messageExists) {
+            messageDiv.appendChild(h('div', {classList: 'submessage'}, [render(nextPost, keys)]))
+          }
+        }
+      })
+    }
   })
 
   var renderer = new marked.Renderer();
@@ -62,6 +82,46 @@ function render (msg, keys, preview) {
   })
 
 
+  if (msg.type == 'edit') {
+    message.appendChild(getHeader(msg))
+
+    message.appendChild(h('span', [
+      'edited: ',
+       h('a', {href: '#' + msg.edited}, [msg.edited.substring(0, 10) + '...'])
+    ]))
+
+    var contents = h('div')
+    message.appendChild(contents)
+
+    get(msg.edited).then(previous => {
+      fragment = document.createDocumentFragment()
+      var diff = JsDiff.diffWords(previous.text, msg.text)
+      diff.forEach(function (part) {
+        if (part.added === true) {
+          color = 'blue'
+        } else if (part.removed === true) {
+          color = 'gray'
+        } else {color = '#333'}
+        var span = h('span')
+        span.style.color = color
+        if (part.removed === true) {
+          span.appendChild(h('del', document.createTextNode(part.value)))
+        } else {
+          span.appendChild(document.createTextNode(part.value))
+        }
+        /*color = part.added ? 'green' :
+          part.removed ? 'red' : 'grey'
+        span = document.createElement('span')
+        span.style.color = color
+        span.appendChild(document.createTextNode(part.value))*/
+        fragment.appendChild(span)
+      })
+      contents.appendChild(h('code', [fragment]))
+    })
+    //message.appendChild(h('div', {innerHTML: marked(msg.text)}))
+
+  }
+
   if (msg.type == 'post') {
     message.appendChild(getHeader(msg))
 
@@ -72,7 +132,7 @@ function render (msg, keys, preview) {
       ]))
     }
     var gotName = getName(msg.author)
-    message.appendChild(h('div', {innerHTML: marked(msg.text)}))
+    message.appendChild(h('div',{id: 'content:' + msg.key, innerHTML: marked(msg.text)}))
     if (!preview) {
       message.appendChild(h('button', {
         onclick: function () {
@@ -83,6 +143,15 @@ function render (msg, keys, preview) {
           }
         }
       }, ['Reply']))
+      if (msg.author === keys.publicKey) {
+        message.appendChild(h('button', {
+          onclick: function () {
+            var editor = h('div', [composer(keys, msg, {gotName: false}, {edit: true})])
+
+            message.appendChild(editor)
+          }
+        }, ['Edit']))
+      }
     }
   } else if (msg.type == 'name') {
     message.appendChild(getHeader(msg))

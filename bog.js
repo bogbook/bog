@@ -147,6 +147,7 @@ async function publish (post, keys, preview) {
     var openedMsg = await open(message)
 
     if (!preview) {
+      console.log('ADDING TO LOG AND FEED')
       localforage.getItem('log').then(log => {
         if (log) {
           log.unshift(openedMsg)
@@ -176,23 +177,25 @@ async function publish (post, keys, preview) {
 
     var openedMsg = await open(message)
 
-    localforage.getItem('log').then(log => {
-      if (log) {
-        log.unshift(openedMsg)
-        localforage.setItem('log', log)
-      } else {
-        var feed = [openedMsg]
-        localforage.setItem('log', feed)
-      }
-    })
+    if (!preview) {
+      localforage.getItem('log').then(log => {
+        if (log) {
+          log.unshift(openedMsg)
+          localforage.setItem('log', log)
+        } else {
+          var feed = [openedMsg]
+          localforage.setItem('log', feed)
+        }
+      })
 
-    var feed = [message]
+      var feed = [message]
 
-    var subs = [keys.publicKey]
+      var subs = [keys.publicKey]
 
-    localforage.setItem(keys.publicKey, feed).then(function () {
-      sync(subs, keys)    
-    })
+      localforage.setItem(keys.publicKey, feed).then(function () {
+        sync(subs, keys)    
+      })
+    }
 
     return message
   }

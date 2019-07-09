@@ -59,7 +59,7 @@ function render (msg, keys, preview) {
         }
 
         if (nextPost.reply == msg.key) {
-
+          var messageExists = (document.getElementById(nextPost.key) !== null)
           if (!messageExists) {
             messageDiv.appendChild(h('div', {classList: 'submessage'}, [render(nextPost, keys)]))
           }

@@ -29,7 +29,7 @@ h5 { font-size: 1.15em; }
 h6 { font-size: 1.1em; }
 
 hr {
-  border: solid #222;
+  border: solid #ddd;
   clear: both;
   border-width: 1px 0 0;
   height: 0;

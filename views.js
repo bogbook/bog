@@ -15,7 +15,7 @@ function profilePage (src, keys) {
 
   var input = h('input', {placeholder: 'New name'})
 
-  profile.appendChild(h('a', {href: '#' + src}, [getName(src)]))
+  profile.appendChild(h('a', {href: '#' + src}, [getName(src, keys)]))
 
   profile.appendChild(h('div', [
     input,

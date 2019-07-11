@@ -1,4 +1,4 @@
-function getHeader (post, mini) {
+function getHeader (post, keys, mini) {
 
   var getRaw = h('button', {
     onclick: function () {
@@ -24,7 +24,7 @@ function getHeader (post, mini) {
     ]),
     h('p', [
       h('a', {href: '#' + post.author}, [
-        getName(post.author)
+        getName(post.author, keys)
       ]),
       mini 
     ])
@@ -83,7 +83,7 @@ function render (msg, keys, preview) {
 
 
   if (msg.type == 'edit') {
-    message.appendChild(getHeader(msg))
+    message.appendChild(getHeader(msg, keys))
 
     message.appendChild(h('span', [
       'edited: ',
@@ -123,7 +123,7 @@ function render (msg, keys, preview) {
   }
 
   if (msg.type == 'post') {
-    message.appendChild(getHeader(msg))
+    message.appendChild(getHeader(msg, keys))
 
     if (msg.reply) {
       message.appendChild(h('span', [
@@ -131,7 +131,7 @@ function render (msg, keys, preview) {
         h('a', {href: '#' + msg.reply}, [msg.reply.substring(0, 10) + '...'])
       ]))
     }
-    var gotName = getName(msg.author)
+    var gotName = getName(msg.author, keys)
     message.appendChild(h('div',{id: 'content:' + msg.key, innerHTML: marked(msg.text)}))
     if (!preview) {
       message.appendChild(h('button', {
@@ -154,7 +154,7 @@ function render (msg, keys, preview) {
       }
     }
   } else if (msg.type == 'name') {
-    message.appendChild(getHeader(msg))
+    message.appendChild(getHeader(msg, keys))
 
     message.appendChild(h('span', ['identified ', h('a', {href: '#' + msg.named }, [msg.named.substring(0, 10) + '...']), ' as ' + msg.name]))
   } 

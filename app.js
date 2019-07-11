@@ -26,7 +26,7 @@ keys().then(key => {
   var navbar = h('div', {classList: 'navbar'}, [
     h('div', {classList: 'internal'}, [
       h('li', [h('a', {href: '#'}, ['Home'])]),
-      h('li', [h('a', {href: '#' + key.publicKey}, [getName(key.publicKey)])]),
+      h('li', [h('a', {href: '#' + key.publicKey}, [getName(key.publicKey, keys)])]),
       h('li', [h('a', {href: '#key'}, ['Key'])]),
       h('li', [h('a', {href: '#pubs'}, ['Pubs'])]),
       h('li', {classList: 'right'}, [h('a', {href: 'http://github.com/bogbook/bog/'}, ['Git'])])

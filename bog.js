@@ -54,7 +54,7 @@ async function get (key) {
 
 // bog.getName -- iterates over a feed and returns a person's name
 
-function getName (id) {
+function getName (id, keys) {
   var name = h('span')
 
   name.textContent = id.substring(0, 10) + '...'
@@ -62,10 +62,16 @@ function getName (id) {
   bog().then(log => {
     if (log) {
       for (var i = 0; i < log.length; i++ ) {
-        if (log[i].named == id) {
-          console.log(log[i].name)
+        if ((log[i].named === id) && (log[i].author === keys.publicKey)) {
+          // if you've identified someone as something else show that something else
+          console.log('I NAMED THEM ' + log[i].name)
+          return name.textContent = '@' + log[i].name
+        } else if ((log[i].named === id) && (log[i].author === id)) {
+          // else if show the name they gave themselves
+          console.log('THEY NAMED THEMSELVES ' + log[i].name)
           return name.textContent = '@' + log[i].name
         }
+        // there should probably be some sort of sybil attack resiliance here (weight avatar name based on number of times used by individuals), but this will do for now.
       }
     } 
   })

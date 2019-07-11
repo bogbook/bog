@@ -60,6 +60,7 @@ function composer (keys, reply, gotName, edit) {
                       }
                       if (reply) {
                         messageDiv.removeChild(messageDiv.firstChild)
+                        messageDiv.appendChild(render(msg, keys))
                       } 
                       else if (messageDiv.firstChild) {
                         messageDiv.removeChild(messageDiv.firstChild)

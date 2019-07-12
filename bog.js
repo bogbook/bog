@@ -64,11 +64,9 @@ function getName (id, keys) {
       for (var i = 0; i < log.length; i++ ) {
         if ((log[i].named === id) && (log[i].author === keys.publicKey)) {
           // if you've identified someone as something else show that something else
-          console.log('I NAMED THEM ' + log[i].name)
           return name.textContent = '@' + log[i].name
         } else if ((log[i].named === id) && (log[i].author === id)) {
           // else if show the name they gave themselves
-          console.log('THEY NAMED THEMSELVES ' + log[i].name)
           return name.textContent = '@' + log[i].name
         }
         // there should probably be some sort of sybil attack resiliance here (weight avatar name based on number of times used by individuals), but this will do for now.

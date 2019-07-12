@@ -44,7 +44,7 @@ function profilePage (src, keys) {
       profile.appendChild(identify)
       identifyButton.parentNode.removeChild(identifyButton) 
     }
-  }, ['Identify ' + keys.publicKey.substring(0, 10) + '...'])
+  }, ['Identify ' + src.substring(0, 10) + '...'])
 
   profile.appendChild(identifyButton)
 

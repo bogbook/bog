@@ -17,7 +17,9 @@ function profilePage (src, keys) {
 
   profile.appendChild(h('a', {href: '#' + src}, [getName(src, keys)]))
 
-  profile.appendChild(h('div', [
+  profile.appendChild(h('br'))
+
+  var identify = h('div', [
     input,
     h('button', {
       onclick: function () {
@@ -35,7 +37,16 @@ function profilePage (src, keys) {
         })
       }
     }, ['Identify'])
-  ]))
+  ])
+
+  var identifyButton = h('button', {
+    onclick: function () {
+      profile.appendChild(identify)
+      identifyButton.parentNode.removeChild(identifyButton) 
+    }
+  }, ['Identify ' + keys.publicKey.substring(0, 10) + '...'])
+
+  profile.appendChild(identifyButton)
 
   localforage.getItem('subscriptions').then(function (subs) {
     if (subs.includes(src)) {

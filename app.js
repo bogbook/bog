@@ -15,9 +15,9 @@ function route (keys) {
 
     scroller.appendChild(identify)
 
-    identify.appendChild(h('span', {innerHTML: marked("Hey! Welcome to Bogbook. If you have any questions be sure to reach out to [@ev](/#@Q++V5BbvWIg8B+TqtC9ZKFhetruuw+nOgxEqfjlOZI0=).")}))
+    identify.appendChild(h('span', {innerHTML: marked("Hey [" + keys.publicKey.substring(0, 10) + "...](/#"+ keys.publicKey +")! Welcome to Bogbook. If you have any questions be sure to reach out to [@ev](/#@Q++V5BbvWIg8B+TqtC9ZKFhetruuw+nOgxEqfjlOZI0=).")}))
 
-    identify.appendChild(h('span', {innerHTML: marked("We noticed that your current public key doesn't have a name yet. Either import your existing id on the [key](/#key) page, or identify yourself using the box below. Identifying is optional, but you'll see this welcome message as long as you don't give yourself a name.")}))
+    identify.appendChild(h('span', {innerHTML: marked("Your current public key doesn't have a name yet. Either import your existing id on the [key](/#key) page, or identify yourself using the box below. Identifying is optional, but you'll see this welcome message as long as you don't give yourself a name.")}))
 
     var input = h('input', {placeholder: 'Give yourself a name'})
 
@@ -31,21 +31,18 @@ function route (keys) {
             name: input.value
           }
 
-          publish(content, keys).then(post => {
-            open(post).then(msg => {
-              input.value = ''
-              scroller.insertBefore(render(msg, keys), scroller.childNodes[1])
-              identify.parentNode.removeChild(identify)
-            })
-          })
+          publish(content, keys)
+          setTimeout(function () {
+            location.reload()
+          }, 1000)
         }
       }, ['Identify'])
     ]))
 
 
-    identify.appendChild(h('span', {innerHTML: marked("Next, make sure to save your public/private keypair on the [key](/#key) page, so that you can continue to use the same identity. No one has access to your private key, so no one can restore your ability to publish under this identity if you lose your keypair.")}))
+    identify.appendChild(h('span', {innerHTML: marked("Next, make sure to save your public/private keypair on the [key](/#key) page, so that you can continue to use the same identity. No one but you access to your private key, so no one can restore your ability to publish under this identity if you lose your keypair.")}))
 
-    identify.appendChild(h('span', {innerHTML: marked("Finally, be sure to check out the code on [Github](http://github.com/bogbook/bog) or [SourceHut](http://git.sr.ht/~ev/bogbook)")}))
+    identify.appendChild(h('span', {innerHTML: marked("Finally, be sure to check out the code on [SourceHut](http://git.sr.ht/~ev/bogbook)")}))
 
     bog(keys.publicKey).then(log => {
       if (log) {
@@ -97,7 +94,7 @@ keys().then(key => {
       h('li', [h('a', {href: '#' + key.publicKey}, [getName(key.publicKey, keys)])]),
       h('li', [h('a', {href: '#key'}, ['Key'])]),
       h('li', [h('a', {href: '#pubs'}, ['Pubs'])]),
-      h('li', {classList: 'right'}, [h('a', {href: 'http://github.com/bogbook/bog/'}, ['Git'])])
+      h('li', {classList: 'right'}, [h('a', {href: 'http://git.sr.ht/~ev/bogbook'}, ['Git'])])
     ])
   ])
   document.body.appendChild(navbar)

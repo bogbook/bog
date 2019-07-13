@@ -8,41 +8,48 @@ function route (keys) {
   var screen = document.getElementById('screen')
   screen.appendChild(scroller)
 
-  var identify = h('div', {id: 'identify', classList: 'message'}) 
+  var identify = h('div', {id: 'identify'}) 
+
+  var mess = h('div', {classList: 'message'})
 
   function nameCheck (id) {
     console.log('Checking for name of ' + id)
 
     scroller.appendChild(identify)
 
-    identify.appendChild(h('span', {innerHTML: marked("Hey [" + keys.publicKey.substring(0, 10) + "...](/#"+ keys.publicKey +")! Welcome to Bogbook. If you have any questions be sure to reach out to [@ev](/#@Q++V5BbvWIg8B+TqtC9ZKFhetruuw+nOgxEqfjlOZI0=).")}))
 
-    identify.appendChild(h('span', {innerHTML: marked("Your current public key doesn't have a name yet. Either import your existing id on the [key](/#key) page, or identify yourself using the box below. Identifying is optional, but you'll see this welcome message as long as you don't give yourself a name.")}))
+    setTimeout(function () {
+      
+      identify.appendChild(mess)
+      mess.appendChild(h('span', {innerHTML: marked("Hey [" + keys.publicKey.substring(0, 10) + "...](/#"+ keys.publicKey +")! Welcome to Bogbook. If you have any questions be sure to reach out to [@ev](/#@Q++V5BbvWIg8B+TqtC9ZKFhetruuw+nOgxEqfjlOZI0=).")}))
 
-    var input = h('input', {placeholder: 'Give yourself a name'})
+      mess.appendChild(h('span', {innerHTML: marked("Your current public key doesn't have a name yet. Either import your existing id on the [key](/#key) page, or identify yourself using the box below. Identifying is optional, but you'll see this welcome message as long as you don't give yourself a name.")}))
 
-    identify.appendChild(h('div', [
-      input,
-      h('button', {
-        onclick: function () {
-          content = {
-            type: 'name',
-            named: id,
-            name: input.value
+      var input = h('input', {placeholder: 'Give yourself a name'})
+
+      mess.appendChild(h('div', [
+        input,
+        h('button', {
+          onclick: function () {
+            content = {
+              type: 'name',
+              named: id,
+              name: input.value
+            }
+
+            publish(content, keys)
+            setTimeout(function () {
+              location.reload()
+            }, 10000)
           }
-
-          publish(content, keys)
-          setTimeout(function () {
-            location.reload()
-          }, 1000)
-        }
-      }, ['Identify'])
-    ]))
+        }, ['Identify'])
+      ]))
 
 
-    identify.appendChild(h('span', {innerHTML: marked("Next, make sure to save your public/private keypair on the [key](/#key) page, so that you can continue to use the same identity. No one but you can access your private key, so only you can restore your ability to publish to this identity. If you lose your key, you lose your ability to publish to this identity forever.")}))
+      mess.appendChild(h('span', {innerHTML: marked("Next, make sure to save your public/private keypair on the [key](/#key) page, so that you can continue to use the same identity. No one but you can access your private key, so only you can restore your ability to publish to this identity. If you lose your key, you lose your ability to publish to this identity forever.")}))
 
-    identify.appendChild(h('span', {innerHTML: marked("Finally, be sure to check out the code on [SourceHut](http://git.sr.ht/~ev/bogbook)")}))
+      mess.appendChild(h('span', {innerHTML: marked("Finally, be sure to check out the code on [SourceHut](http://git.sr.ht/~ev/bogbook)")}))
+    }, 1000)
 
     bog(keys.publicKey).then(log => {
       if (log) {

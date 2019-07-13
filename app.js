@@ -40,7 +40,7 @@ function route (keys) {
     ]))
 
 
-    identify.appendChild(h('span', {innerHTML: marked("Next, make sure to save your public/private keypair on the [key](/#key) page, so that you can continue to use the same identity. No one but you access to your private key, so no one can restore your ability to publish under this identity if you lose your keypair.")}))
+    identify.appendChild(h('span', {innerHTML: marked("Next, make sure to save your public/private keypair on the [key](/#key) page, so that you can continue to use the same identity. No one but you can access your private key, so only you can restore your ability to publish to this identity. If you lose your key, you lose your ability to publish to this identity forever.")}))
 
     identify.appendChild(h('span', {innerHTML: marked("Finally, be sure to check out the code on [SourceHut](http://git.sr.ht/~ev/bogbook)")}))
 

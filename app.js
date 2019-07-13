@@ -40,7 +40,7 @@ function route (keys) {
             publish(content, keys)
             setTimeout(function () {
               location.reload()
-            }, 10000)
+            }, 1000)
           }
         }, ['Identify'])
       ]))
@@ -49,7 +49,7 @@ function route (keys) {
       mess.appendChild(h('span', {innerHTML: marked("Next, make sure to save your public/private keypair on the [key](/#key) page, so that you can continue to use the same identity. No one but you can access your private key, so only you can restore your ability to publish to this identity. If you lose your key, you lose your ability to publish to this identity forever.")}))
 
       mess.appendChild(h('span', {innerHTML: marked("Finally, be sure to check out the code on [SourceHut](http://git.sr.ht/~ev/bogbook)")}))
-    }, 1000)
+    }, 2000)
 
     bog(keys.publicKey).then(log => {
       if (log) {

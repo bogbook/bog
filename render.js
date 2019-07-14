@@ -78,9 +78,8 @@ function render (msg, keys, preview) {
   }
 
   marked.setOptions({
-      renderer: renderer
+    renderer: renderer
   })
-
 
   if (msg.type == 'edit') {
     message.appendChild(getHeader(msg, keys))
@@ -109,17 +108,10 @@ function render (msg, keys, preview) {
         } else {
           span.appendChild(document.createTextNode(part.value))
         }
-        /*color = part.added ? 'green' :
-          part.removed ? 'red' : 'grey'
-        span = document.createElement('span')
-        span.style.color = color
-        span.appendChild(document.createTextNode(part.value))*/
         fragment.appendChild(span)
       })
       contents.appendChild(h('code', [fragment]))
     })
-    //message.appendChild(h('div', {innerHTML: marked(msg.text)}))
-
   }
 
   if (msg.type == 'post') {
@@ -147,7 +139,6 @@ function render (msg, keys, preview) {
         message.appendChild(h('button', {
           onclick: function () {
             var editor = h('div', [composer(keys, msg, {gotName: false}, {edit: true})])
-
             message.appendChild(editor)
           }
         }, ['Edit']))
@@ -155,7 +146,6 @@ function render (msg, keys, preview) {
     }
   } else if (msg.type == 'name') {
     message.appendChild(getHeader(msg, keys))
-
     message.appendChild(h('span', ['identified ', h('a', {href: '#' + msg.named }, [msg.named.substring(0, 10) + '...']), ' as ' + msg.name]))
   } 
 

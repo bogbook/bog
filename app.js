@@ -8,6 +8,47 @@ function route (keys) {
   var screen = document.getElementById('screen')
   screen.appendChild(scroller)
 
+  function nameCheck (id) {
+    localforage.getItem('name:' + id).then(name => {
+      if (!name) {
+        var identify = h('div', {id: 'identify', classList: 'message'}) 
+        scroller.appendChild(identify)
+        identify.appendChild(h('span', {innerHTML: marked("Hey [" + keys.publicKey.substring(0, 10) + "...](/#"+ keys.publicKey +")! Welcome to Bogbook. If you have any questions be sure to reach out to [@ev](/#@Q++V5BbvWIg8B+TqtC9ZKFhetruuw+nOgxEqfjlOZI0=).")}))
+
+        identify.appendChild(h('span', {innerHTML: marked("Your current public key doesn't have a name yet. Either import your existing id on the [key](/#key) page, or identify yourself using the box below. Identifying is optional, but you'll see this welcome message as long as you don't give yourself a name.")}))
+
+        var input = h('input', {placeholder: 'Give yourself a name'})
+
+        identify.appendChild(h('div', [
+          input,
+          h('button', {
+            onclick: function () {
+              content = {
+                type: 'name',
+                named: id,
+                name: input.value
+              }
+              console.log('GETTING NAME')
+              publish(content, keys)
+              setTimeout(function () {
+                getName(id, keys)
+                setTimeout(function () {
+                  location.reload()
+                }, 1000)
+              }, 1000)
+            }
+          }, ['Identify'])
+        ]))
+
+        identify.appendChild(h('span', {innerHTML: marked("Next, make sure to save your public/private keypair on the [key](/#key) page, so that you can continue to use the same identity. No one but you can access your private key, so only you can restore your ability to publish to this identity. If you lose your key, you lose your ability to publish to this identity forever.")}))
+
+        identify.appendChild(h('span', {innerHTML: marked("Finally, be sure to check out the code on [SourceHut](http://git.sr.ht/~ev/bogbook)")}))
+
+      }
+    })
+  }
+
+  nameCheck(keys.publicKey)
 
   if (src === 'key') {
     keyPage(keys)
@@ -23,70 +64,6 @@ function route (keys) {
 }
 
 keys().then(key => { 
-  function nameCheck (id) {
-
-    console.log('Checking for name of ' + id)
-    var scroller = h('div', {id: 'scroller'})
-    var screen = document.getElementById('screen')
-    screen.appendChild(scroller)
-
-    var identify = h('div', {id: 'identify'}) 
-
-    var mess = h('div', {classList: 'message'})
-
-    scroller.appendChild(identify)
-
-    setTimeout(function () {
-      
-      identify.appendChild(mess)
-      mess.appendChild(h('span', {innerHTML: marked("Hey [" + key.publicKey.substring(0, 10) + "...](/#"+ key.publicKey +")! Welcome to Bogbook. If you have any questions be sure to reach out to [@ev](/#@Q++V5BbvWIg8B+TqtC9ZKFhetruuw+nOgxEqfjlOZI0=).")}))
-
-      mess.appendChild(h('span', {innerHTML: marked("Your current public key doesn't have a name yet. Either import your existing id on the [key](/#key) page, or identify yourself using the box below. Identifying is optional, but you'll see this welcome message as long as you don't give yourself a name.")}))
-
-      var input = h('input', {placeholder: 'Give yourself a name'})
-
-      mess.appendChild(h('div', [
-        input,
-        h('button', {
-          onclick: function () {
-            content = {
-              type: 'name',
-              named: id,
-              name: input.value
-            }
-
-            publish(content, key)
-            setTimeout(function () {
-              location.reload()
-            }, 1000)
-          }
-        }, ['Identify'])
-      ]))
-
-      mess.appendChild(h('span', {innerHTML: marked("Next, make sure to save your public/private keypair on the [key](/#key) page, so that you can continue to use the same identity. No one but you can access your private key, so only you can restore your ability to publish to this identity. If you lose your key, you lose your ability to publish to this identity forever.")}))
-
-      mess.appendChild(h('span', {innerHTML: marked("Finally, be sure to check out the code on [SourceHut](http://git.sr.ht/~ev/bogbook)")}))
-    }, 2000)
-
-    bog(key.publicKey).then(log => {
-      if (log) {
-        log.forEach(function (msg) {
-          open(msg).then(post => {
-            if (post.named == id) {
-              var identifyExists = (document.getElementById('identify') !== null)
-              console.log('You named yourself ' + post.name)
-              if (identifyExists) {
-                identify.parentNode.removeChild(identify)
-              }
-            }
-          })
-        })
-      }
-    })
-  }
-
-  nameCheck(key.publicKey)
-
   var navbar = h('div', {classList: 'navbar'}, [
     h('div', {classList: 'internal'}, [
       h('li', [h('a', {href: '#'}, ['Home'])]),

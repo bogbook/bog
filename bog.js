@@ -59,22 +59,33 @@ function getName (id, keys) {
 
   name.textContent = id.substring(0, 10) + '...'
 
-  bog().then(log => {
-    if (log) {
-      for (var i = 0; i < log.length; i++ ) {
-        if ((log[i].named === id) && (log[i].author === keys.publicKey)) {
-          // if you've identified someone as something else show that something else
-          return name.textContent = '@' + log[i].name
-        } else if ((log[i].named === id) && (log[i].author === id)) {
-          // else if show the name they gave themselves
-          return name.textContent = '@' + log[i].name
-        }
-        // there should probably be some sort of sybil attack resiliance here (weight avatar name based on number of times used by individuals), but this will do for now.
-      }
-    } 
+  localforage.getItem('name:' + id).then(cache => {
+    if (cache) {
+      console.log('GOT NAME FROM CACHE: ' + cache)
+      return name.textContent = '@' + cache
+    } else {
+      bog().then(log => {
+        if (log) {
+          for (var i = 0; i < log.length; i++ ) {
+            if ((log[i].named === id) && (log[i].author === keys.publicKey)) {
+              // if you've identified someone as something else show that something else
+              localforage.setItem('name:' + id, log[i].name)
+              console.log('FINDING NAME AND SAVING TO CACHE: ' + log[i].name)
+              return name.textContent = '@' + log[i].name
+            } else if ((log[i].named === id) && (log[i].author === id)) {
+              // else if show the name they gave themselves
+              localforage.setItem('name:' + id, log[i].name)
+              console.log('FINDING NAME AND SAVING TO CACHE: ' + log[i].name)
+              return name.textContent = '@' + log[i].name
+            }
+            // there should probably be some sort of sybil attack resiliance here (weight avatar name based on number of times used by individuals), but this will do for now.
+          }
+        } 
+      })
+    }
   })
-
   return name
+
 }
 
 // bog.regenerate -- regenerates main log by taking all of the feed logs, combinging them, and then sorting them

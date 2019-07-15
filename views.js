@@ -28,7 +28,7 @@ function profilePage (src, keys) {
           named: src,
           name: input.value
         }
-
+        localforage.removeItem('name:' + src)
         publish(content, keys).then(post => {
           open(post).then(msg => {
             input.value = ''

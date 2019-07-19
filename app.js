@@ -23,19 +23,20 @@ function route (keys) {
           input,
           h('button', {
             onclick: function () {
-              content = {
-                type: 'name',
-                named: id,
-                name: input.value
-              }
-              console.log('GETTING NAME')
-              publish(content, keys)
-              setTimeout(function () {
-                getName(id, keys)
+              if (input.value) {
+                content = {
+                  type: 'name',
+                  named: id,
+                  name: input.value
+                }
+                publish(content, keys)
                 setTimeout(function () {
-                  location.reload()
+                  getName(id, keys)
+                  setTimeout(function () {
+                    location.reload()
+                  }, 1000)
                 }, 1000)
-              }, 1000)
+              }
             }
           }, ['Identify'])
         ]))

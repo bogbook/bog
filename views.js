@@ -23,18 +23,20 @@ function profilePage (src, keys) {
     input,
     h('button', {
       onclick: function () {
-        content = {
-          type: 'name',
-          named: src,
-          name: input.value
-        }
-        localforage.removeItem('name:' + src)
-        publish(content, keys).then(post => {
-          open(post).then(msg => {
-            input.value = ''
-            scroller.insertBefore(render(msg, keys), scroller.childNodes[1])
+        if (input.value) {
+          content = {
+            type: 'name',
+            named: src,
+            name: input.value
+          }
+          localforage.removeItem('name:' + src)
+          publish(content, keys).then(post => {
+            open(post).then(msg => {
+              input.value = ''
+              scroller.insertBefore(render(msg, keys), scroller.childNodes[1])
+            })
           })
-        })
+        }
       }
     }, ['Identify'])
   ])

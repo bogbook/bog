@@ -37,7 +37,7 @@ wserver.on('connection', function (ws) {
             }
             ws.send(JSON.stringify(res))
             if(res.seq > req.seq) {
-              console.log('Sending diff of' + req.src + ' to ' + req.requester)
+              console.log('Sending diff of' + req.src /*+ ' to ' + req.requester*/)
               var diff = res.seq - req.seq
               var sendlog = log.slice(0, diff)
               var send = {
@@ -63,7 +63,7 @@ wserver.on('connection', function (ws) {
             src: req.src,
             log
           }
-          console.log('Sending full log of ' + req.src + ' to ' + req.requester )
+          console.log('Sending full log of ' + req.src /*+ ' to ' + req.requester*/ )
           ws.send(JSON.stringify(res))
         })
       }
@@ -76,7 +76,7 @@ wserver.on('connection', function (ws) {
           var newlog = req.log.concat(serverlog)
 
           fs.writeFile(__dirname + '/bogs/' + req.src, JSON.stringify(newlog), 'UTF-8', function (err, success) {
-            console.log('Appending diff of ' + req.src + ' from ' + req.requester + ' and saved to server')
+            console.log('Appending diff of ' + req.src /*+ ' from ' + req.requester + ' and saved to server'*/)
           })
 
         })
@@ -84,7 +84,7 @@ wserver.on('connection', function (ws) {
         fs.writeFile(__dirname + '/bogs/' + req.src, JSON.stringify(req.log), 'UTF-8', function (err, success) {
           if (err) throw err
           else
-            console.log('Saved new log of ' + req.src + ' that was sent from ' + req.requester )
+            console.log('Saved new log of ' + req.src /*+ ' that was sent from ' + req.requester */)
         })
       }
     }

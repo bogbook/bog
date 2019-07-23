@@ -23,8 +23,8 @@ function sync (subs, keys) {
             open(srclog[0]).then(msg => {
               var req = {
                 src: sub,
-                seq: msg.seq,
-                requester: keys.publicKey
+                seq: msg.seq
+                //requester: keys.publicKey
               }
               ws.onopen = function () {
                 ws.send(JSON.stringify(req))
@@ -37,8 +37,8 @@ function sync (subs, keys) {
                   var sendlog = srclog.slice(0, diff)
                   var send = {
                     src: sub,
-                    log: sendlog,
-                    requester: keys.publicKey
+                    log: sendlog
+                    //requester: keys.publicKey
                   }
                   ws.send(JSON.stringify(send))
                 } else {
@@ -52,8 +52,8 @@ function sync (subs, keys) {
           } else {
             var req = {
               src: sub,
-              seq: null,
-              requester: keys.publicKey
+              seq: null
+              //requester: keys.publicKey
             }
 
             ws.onopen = function () {

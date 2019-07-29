@@ -48,7 +48,15 @@ function profilePage (src, keys) {
     }
   }, ['Identify ' + src.substring(0, 10) + '...'])
 
+  var mentionsButton = h('button', {
+    onclick: function () {
+      location.href = '#?' + src
+    }
+  }, ['Mentions'])
+
   profile.appendChild(identifyButton)
+
+  profile.appendChild(mentionsButton)
 
   localforage.getItem('subscriptions').then(function (subs) {
     if (subs.includes(src)) {

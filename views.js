@@ -91,8 +91,17 @@ function profilePage (src, keys) {
     }
   }, ['Delete feed']))
   
+  bog().then(log => {
+    if (log) {
+      log.forEach(function (msg) {
+        if (msg.author === src) {
+          scroller.appendChild(render(msg, keys))
+        }
+      })
+    }
+  })
 
-  bog(src).then(log => {
+  /*bog(src).then(log => {
     if (log) {
       log.forEach(function (msg) {
         open(msg).then(post => {
@@ -100,7 +109,7 @@ function profilePage (src, keys) {
         })
       })
     }
-  })
+  })*/
 }
 
 function searchPage (src, keys) {

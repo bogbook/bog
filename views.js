@@ -96,14 +96,14 @@ function profilePage (src, keys) {
 }
 
 function searchPage (src, keys) {
-  var search = src.substring(1).replace("%20"," ")
-  console.log(search)
-  scroller.appendChild(composer(keys))
+  var search = src.substring(1).replace("%20"," ").toUpperCase()
+
+  //scroller.appendChild(composer(keys))
   bog().then(log => {
     if (log) {
       log.forEach(function (msg) {
         if (msg.text) {
-          if (msg.text.includes(search)) {
+          if (msg.text.toUpperCase().includes(search)) {
             scroller.appendChild(render(msg, keys))
           }
         }

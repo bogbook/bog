@@ -57,6 +57,8 @@ function route (keys) {
     pubs()
   } else if (src[0] === '@') {
     profilePage(src, keys)
+  } else if (src[0] === '?') {
+    searchPage(src, keys)
   } else if (src[0] === '%') {
     threadPage(src, keys)
   } else {

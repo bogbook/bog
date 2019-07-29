@@ -166,6 +166,20 @@ textarea {
   list-style-type: none;
 }
 
+form.search, input.search {
+  width: 100px;
+  float: right;
+  margin: 0;
+  padding: 0;
+  color: #f5f5f5;
+  background: #444;
+  border-radius: 3px;
+}
+
+form.search {
+  margin-top: .3em;
+}
+
 .navbar li.right {
   padding-left: .4em;
   padding-right: .4em;

@@ -67,13 +67,22 @@ function route (keys) {
 }
 
 keys().then(key => { 
+  var search = h('input', {placeholder: 'Search', classList: 'search'})
+
   var navbar = h('div', {classList: 'navbar'}, [
     h('div', {classList: 'internal'}, [
       h('li', [h('a', {href: '#'}, ['Home'])]),
       h('li', [h('a', {href: '#' + key.publicKey}, [getName(key.publicKey, keys)])]),
       h('li', [h('a', {href: '#key'}, ['Key'])]),
       h('li', [h('a', {href: '#pubs'}, ['Pubs'])]),
-      h('li', {classList: 'right'}, [h('a', {href: 'http://git.sr.ht/~ev/bogbook'}, ['Git'])])
+      h('li', {classList: 'right'}, [h('a', {href: 'http://git.sr.ht/~ev/bogbook'}, ['Git'])]),
+      h('form', { classList: 'search', 
+        onsubmit: function (e) {
+          window.location.hash = '?' + search.value
+          e.preventDefault()
+        }},
+        [search]
+      )
     ])
   ])
   document.body.appendChild(navbar)

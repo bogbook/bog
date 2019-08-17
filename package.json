@@ -1,6 +1,6 @@
 {
   "name": "bogbook",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "description": "secure blockchain logging (blogging, without the l) -- bogging",
   "main": "server.js",
   "scripts": {

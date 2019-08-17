@@ -5,9 +5,18 @@ function threadPage (src, keys) {
 }
 
 function profilePage (src, keys) {
+
   var profile = h('div', {classList: 'profile'})
 
   scroller.appendChild(profile)
+
+
+  if (src != keys.publicKey) {
+    reply = { author: src }
+    scroller.appendChild(composer(keys, reply))
+  } else {
+    scroller.appendChild(composer(keys))
+  }
 
   var subs = [src]
 
@@ -141,17 +150,21 @@ function publicPage (keys) {
     }
   })
 
-  scroller.appendChild(h('button', {
+  var div = h('div')
+
+  div.appendChild(h('button', {
     onclick: function () {
       localforage.clear().then(function () {location.reload()})
     }
   }, ['Delete Everything']))
 
-  scroller.appendChild(h('button', {
+  div.appendChild(h('button', {
     onclick: function () {
       regenerate()
     }
   }, ['Regenerate']))
+
+  scroller.appendChild(div)
 
   scroller.appendChild(composer(keys))
   bog().then(log => {

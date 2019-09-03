@@ -1,3 +1,12 @@
+
+// so bog.js works in node.js and the browser
+if ((typeof process !== 'undefined') && (process.release.name === 'node')) {
+  var fs = require('fs')
+  var nacl = require('tweetnacl')
+      nacl.util = require('tweetnacl-util')
+  var ed2curve = require('ed2curve')
+}
+
 // bog.open -- opens a signature and returns content if you pass a signature and a public key
 // EX:  open(msg).then(content => { console.log(content) })
 
@@ -15,28 +24,63 @@ async function open (msg) {
 // bog.keys -- gets your public/private keypair, generates one if there is none
 // EX: keys().then(key => { console.log(key)})
 
-async function keys (key) { 
-  var keypair = await localforage.getItem('id')
-  if (keypair != null) {
-    return keypair
-  } else {
-    var genkey = nacl.sign.keyPair()
-    var keypair = {
-      publicKey: '@' + nacl.util.encodeBase64(genkey.publicKey),
-      privateKey: nacl.util.encodeBase64(genkey.secretKey)
-    }
-    if (keypair.publicKey.includes('/')) {
-      console.log('TRYING AGAIN')
-      setTimeout(function () {
-        location.reload()
-      }, 10)
-    } else {
-      localforage.setItem('id', keypair)
-    }
 
-    return keypair 
+function generatekey () {
+  var keypair = {
+    publicKey : '@/'
   }
+  console.log('generating new keypair')
+  while (keypair.publicKey.includes('/')) {
+    var genkey = nacl.sign.keyPair()
+    keypair.publicKey = '@' + nacl.util.encodeBase64(genkey.publicKey),
+    keypair.privateKey = nacl.util.encodeBase64(genkey.secretKey)
+  }
+  return keypair
 }
+
+async function keys () {
+  try {
+    if (fs) {
+      var keypair = JSON.parse(fs.readFileSync(__dirname + '/keypair'))
+    } else {
+      var keypair = await localforage.getItem('id')
+      if (keypair === null) {
+        var keypair = generatekey()
+        localforage.setItem('id', keypair)
+      }
+    }
+  } catch (err) {
+    var keypair = generatekey()
+    if (fs) {
+      fs.writeFileSync(__dirname + '/keypair', JSON.stringify(keypair), 'UTF-8')
+    }
+  }
+  return keypair
+}
+
+// bog.box -- encrypts a message to a pubkey
+
+async function box (msg, recp, keys) {
+  var nonce = nacl.randomBytes(nacl.box.nonceLength)
+  var message = nacl.util.decodeUTF8(msg)
+  var encrypted = nacl.box(message, nonce, ed2curve.convertPublicKey(nacl.util.decodeBase64(recp.substring(1))), ed2curve.convertSecretKey(nacl.util.decodeBase64(keys.privateKey)))
+  var nonceMsg = nacl.util.encodeBase64(nonce) + nacl.util.encodeBase64(encrypted)
+  return nonceMsg 
+}
+
+//bog.unbox -- decrypts a message sent to our pubkey
+async function unbox (boxed, sender, keys) {
+  console.log(sender)
+  console.log(keys.privateKey)
+  console.log(boxed)
+  var nonceMsg = nacl.util.decodeBase64(boxed)
+  var nonce = nonceMsg.slice(0, nacl.box.nonceLength)
+  var msg = nonceMsg.slice(nacl.box.nonceLength, nonceMsg.length)
+  //var message = nacl.box.open(msg, nonce, ed2curve.convertPublicKey(sender.substring(1)), ed2curve.convertSecretKey(nacl.util.decodeBase64(keys.privateKey)))
+  var message = nacl.box.open(msg, nonce, ed2curve.convertPublicKey(nacl.util.decodeBase64(sender.substring(1))), ed2curve.convertSecretKey(nacl.util.decodeBase64(keys.privateKey)))
+  return message
+}
+
 
 // bog.get -- iterates over log and returns a post.
 // EX: get('%x5T7KZ5haR2F59ynUuCggwEdFXlLHEtFoBQIyKYppZYerq9oMoIqH76YzXQpw2DnYiM0ugEjePXv61g3E4l/Gw==').then(msg => { console.log(msg)})
@@ -216,4 +260,11 @@ async function publish (post, keys, preview) {
   }
 }
 
-
+if ((typeof process !== 'undefined') && (process.release.name === 'node')) {
+  module.exports = {
+    keys,
+    open,
+    box,
+    unbox
+  }
+}

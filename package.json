@@ -11,6 +11,7 @@
   "license": "MIT",
   "dependencies": {
     "ecstatic": "^4.1.2",
+    "ed2curve": "^0.2.1",
     "open": "^6.2.0",
     "tweetnacl": "^1.0.1",
     "tweetnacl-util": "^0.15.0",

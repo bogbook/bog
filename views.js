@@ -85,12 +85,6 @@ function profilePage (src, keys) {
     }
   })
   
-  /*profile.appendChild(h('button', {
-    onclick: function () {
-      sync(src, keys)
-    }
-  }, ['Sync feed']))*/
-
   profile.appendChild(h('button', {
     onclick: function () {
       localforage.removeItem(src).then(function () {

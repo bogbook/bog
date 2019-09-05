@@ -37,13 +37,75 @@ function sync (subs, keys) {
                   })
                 }
                 ws.onmessage = function (message) {
+                  var req = JSON.parse(message.data) 
+                  console.log(req)
+                  unbox(req.box, req.requester, keys).then(unboxed => {
+                    var nextreq = JSON.parse(nacl.util.encodeUTF8(unboxed))
+                    console.log(nextreq)
+                    if (nextreq.seq === 0) {
+                      var feed = JSON.stringify(srclog)
+                      box(feed, serverpub, keys).then(boxed => {
+                        var obj = {
+                          requester: keys.publicKey,
+                          box: boxed
+                        }
+                        console.log('Sending entire log of ' + msg.author + ' to ' + serverpub)
+                        console.log(obj)
+                        ws.send(JSON.stringify(obj))
+                      })
+                    }
+                  })        
                 }
               })
-            } else if (srclog === null) {
+            } else {
+              console.log('NO LOG IN CLIENT')
               ws.onopen = function () {
-                console.log('NO LOG IN CLIENT')
+                var reqwhole = JSON.stringify({author: sub, seq: 0})
+                console.log(reqwhole)
+                box(reqwhole, serverpub, keys).then(boxed => {
+                  var obj = {
+                    requester: keys.publicKey,
+                    box: boxed
+                  }
+                  console.log(boxed)
+                  ws.send(JSON.stringify(obj))
+                })
               }
               ws.onmessage = function (message) {
+                var req = JSON.parse(message.data) 
+                console.log('received message from ' + req.requester)
+                unbox(req.box, req.requester, keys).then(unboxed => {
+                  var unboxedreq = JSON.parse(nacl.util.encodeUTF8(unboxed))
+                  console.log(unboxedreq)
+                  if (Array.isArray(unboxedreq)) {
+                    open(unboxedreq[0]).then(msg => {
+                      console.log(msg.seq)
+                      localforage.getItem(msg.author).then(feed => {
+                        if (!feed) {
+                          localforage.setItem(msg.author, unboxedreq).then(success => { 
+                            console.log('saved log of ' + msg.author + ' to localforage')
+                          })
+                          localforage.getItem('log').then(log => {
+                            for (var i = unboxedreq.length -1; i >= 0; --i) {
+                              console.log(i)
+                              open(unboxedreq[i]).then(opened => {
+                                log.unshift(opened)
+                                var scroller = document.getElementById('scroller')
+                                scroller.insertBefore(render(opened, keys), scroller.childNodes[2])
+                                console.log(opened)
+                                if (opened.seq === unboxedreq.length) { 
+                                  localforage.setItem('log', log).then(success => {
+                                    console.log('saved log with ' + opened.author  + ' prepended to localForage')       
+                                  })
+                                }
+                              })
+                            }
+                          })
+                        }
+                      })
+                    })
+                  }
+                })
               }
             }
           })

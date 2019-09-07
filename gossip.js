@@ -40,11 +40,11 @@ function sync (subs, keys) {
                   var req = JSON.parse(message.data) 
                   console.log(req)
                   unbox(req.box, req.requester, keys).then(unboxed => {
-                    var nextreq = JSON.parse(nacl.util.encodeUTF8(unboxed))
-                    console.log(nextreq)
-                    if (nextreq.seq === 0) {
-                      var feed = JSON.stringify(srclog)
-                      box(feed, serverpub, keys).then(boxed => {
+                    var unboxedreq = JSON.parse(nacl.util.encodeUTF8(unboxed))
+                    console.log(unboxedreq)
+                    if (unboxedreq.seq === 0) {
+                      var stringedfeed = JSON.stringify(srclog)
+                      box(stringedfeed, serverpub, keys).then(boxed => {
                         var obj = {
                           requester: keys.publicKey,
                           box: boxed
@@ -54,6 +54,68 @@ function sync (subs, keys) {
                         ws.send(JSON.stringify(obj))
                       })
                     }
+                    
+                    if (unboxedreq.seq > msg.seq) {
+                      console.log('server feed is longer, requesting diff from server')
+                      var reqdiff = JSON.stringify({author: unboxedreq.author, seq: msg.seq})
+                      box(reqdiff, serverpub, keys).then(boxed => {
+                        var obj = {
+                          requester: keys.publicKey,
+                          box: boxed
+                        }
+                        ws.send(JSON.stringify(obj))
+                      })
+                    }
+
+                    if (unboxedreq.seq < msg.seq) { 
+                      console.log('server feed is shorter, sending diff to server')
+                      var diff = JSON.stringify(srclog.slice(0, msg.seq - unboxedreq.seq))
+                      box(diff, serverpub, keys).then(boxed => {
+                        var obj = {
+                          requester: keys.publicKey,
+                          box: boxed
+                        }
+                        ws.send(JSON.stringify(obj))
+                      })
+                    }
+
+                    if (Array.isArray(unboxedreq)) {
+                      console.log('received diff from server')
+                      open(unboxedreq[0]).then(msg => {
+                        localforage.getItem(msg.author).then(feed => {
+                          open(feed[0]).then(lastmsg => {
+                            if (unboxedreq.length + lastmsg.seq === msg.seq) {
+                              console.log('combinable feeds')
+                              var newlog = unboxedreq.concat(feed)
+                              localforage.setItem(msg.author, newlog).then(success => {
+                                console.log('combined existing feed with diff and saved to client')
+                              })
+                              localforage.getItem('log').then(log => {
+                                if (!log) {
+                                  var log = []
+                                }
+                                for (var i = unboxedreq.length -1; i >= 0; --i) {
+                                  open(unboxedreq[i]).then(opened => {
+                                    log.unshift(opened)
+                                    var scroller = document.getElementById('scroller')
+                                    scroller.insertBefore(render(opened, keys), scroller.childNodes[2])
+                                    if (unboxedreq.length + lastmsg.seq === opened.seq) {
+                                      log.sort((a, b) => a.timestamp - b.timestamp)
+                                      var reversed = log.reverse()
+                                      localforage.setItem('log', reversed).then(success => {
+                                        console.log('saved log with ' + opened.author  + ' prepended to localForage')
+                                      })
+                                    }
+                                  })
+                                }
+                              })
+                            }
+                          })
+                        })
+                      })
+                      
+                    }
+ 
                   })        
                 }
               })
@@ -61,13 +123,11 @@ function sync (subs, keys) {
               console.log('NO LOG IN CLIENT')
               ws.onopen = function () {
                 var reqwhole = JSON.stringify({author: sub, seq: 0})
-                console.log(reqwhole)
                 box(reqwhole, serverpub, keys).then(boxed => {
                   var obj = {
                     requester: keys.publicKey,
                     box: boxed
                   }
-                  console.log(boxed)
                   ws.send(JSON.stringify(obj))
                 })
               }
@@ -76,25 +136,26 @@ function sync (subs, keys) {
                 console.log('received message from ' + req.requester)
                 unbox(req.box, req.requester, keys).then(unboxed => {
                   var unboxedreq = JSON.parse(nacl.util.encodeUTF8(unboxed))
-                  console.log(unboxedreq)
                   if (Array.isArray(unboxedreq)) {
                     open(unboxedreq[0]).then(msg => {
-                      console.log(msg.seq)
                       localforage.getItem(msg.author).then(feed => {
                         if (!feed) {
                           localforage.setItem(msg.author, unboxedreq).then(success => { 
                             console.log('saved log of ' + msg.author + ' to localforage')
                           })
                           localforage.getItem('log').then(log => {
+                            if (!log) {
+                              var log = []
+                            } 
                             for (var i = unboxedreq.length -1; i >= 0; --i) {
-                              console.log(i)
                               open(unboxedreq[i]).then(opened => {
                                 log.unshift(opened)
                                 var scroller = document.getElementById('scroller')
                                 scroller.insertBefore(render(opened, keys), scroller.childNodes[2])
-                                console.log(opened)
-                                if (opened.seq === unboxedreq.length) { 
-                                  localforage.setItem('log', log).then(success => {
+                                if (opened.seq === unboxedreq.length) {
+                                  log.sort((a, b) => a.timestamp - b.timestamp)
+                                  var reversed = log.reverse() 
+                                  localforage.setItem('log', reversed).then(success => {
                                     console.log('saved log with ' + opened.author  + ' prepended to localForage')       
                                   })
                                 }

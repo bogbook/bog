@@ -59,7 +59,7 @@ bog.keys().then(key => {
                 if (unboxedreq.seq > msg.seq) {
                   // right now the client is still sending the entire log, which works just fine but isn't optimal
                   console.log('client feed is longer, requesting diff from client')
-                  var reqdiff = JSON.stringify({author: unboxedreq.author, seq: 0})
+                  var reqdiff = JSON.stringify({author: unboxedreq.author, seq: msg.seq})
                   bog.box(reqdiff, req.requester, key).then(boxed => {
                     var obj = {
                       requester: key.publicKey,
@@ -71,8 +71,15 @@ bog.keys().then(key => {
                 
                 if (unboxedreq.seq < msg.seq) {
                   console.log('client feed is shorter, sending diff to client')
-                  var diff = feed.slice(0, unboxedreq.seq)
+                  var diff = JSON.stringify(feed.slice(0, msg.seq - unboxedreq.seq))
                   console.log(diff)
+                  bog.box(diff, req.requester, key).then(boxed => {
+                    var obj = {
+                      requester: key.publicKey,
+                      box: boxed
+                    }
+                    ws.send(JSON.stringify(obj))
+                  })
                 }  
               }) 
             } else {
@@ -92,14 +99,29 @@ bog.keys().then(key => {
         } else if (Array.isArray(unboxedreq)) {
           // first check to make sure that we have an entire log
           bog.open(unboxedreq[0]).then(msg => {
+            console.log(msg)
             if (msg.seq === unboxedreq.length) {
               fs.writeFile(__dirname + '/bogs/' + msg.author, JSON.stringify(unboxedreq), 'UTF-8', function (err, success) {
-                 // TODO this should check to make sure the sequence number is equal to the length of the array, otherwise we might have bunk feed 
                 console.log('Saved full log of ' + msg.author + ' sent by ' + req.requester)
               })
-            }
+            } if (msg.seq > unboxedreq.length) {
+              fs.readFile(__dirname + '/bogs/' + msg.author, 'UTF-8', function (err, data) {
+                console.log('read existing feed from disk')
+                var feed = JSON.parse(data)
+                bog.open(feed[0]).then(lastmsg => {
+                  console.log(msg.seq)
+                  console.log(lastmsg.seq)
+                  if (unboxedreq.length + lastmsg.seq === msg.seq) {
+                    console.log('combinable feeds')
+                    var newlog = unboxedreq.concat(feed)
+                    fs.writeFile(__dirname + '/bogs/' + msg.author, JSON.stringify(newlog), 'UTF-8', function (err, success) {
+                      console.log('combined existing feed with diff and saved to server')
+                    })
+                  }
+                })
+              })
+            } 
           })
-          // TODO if we have a partial log then load the log we have, concat, and then save the log
         } 
       })
     })

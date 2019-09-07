@@ -106,16 +106,12 @@ bog.keys().then(key => {
               })
             } if (msg.seq > unboxedreq.length) {
               fs.readFile(__dirname + '/bogs/' + msg.author, 'UTF-8', function (err, data) {
-                console.log('read existing feed from disk')
                 var feed = JSON.parse(data)
                 bog.open(feed[0]).then(lastmsg => {
-                  console.log(msg.seq)
-                  console.log(lastmsg.seq)
                   if (unboxedreq.length + lastmsg.seq === msg.seq) {
-                    console.log('combinable feeds')
                     var newlog = unboxedreq.concat(feed)
                     fs.writeFile(__dirname + '/bogs/' + msg.author, JSON.stringify(newlog), 'UTF-8', function (err, success) {
-                      console.log('combined existing feed with diff and saved to server')
+                      console.log('combined existing feed of ' + msg.author + ' with diff and saved to server')
                     })
                   }
                 })

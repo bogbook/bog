@@ -85,10 +85,9 @@ function sync (subs, keys) {
                         localforage.getItem(msg.author).then(feed => {
                           open(feed[0]).then(lastmsg => {
                             if (unboxedreq.length + lastmsg.seq === msg.seq) {
-                              console.log('combinable feeds')
                               var newlog = unboxedreq.concat(feed)
                               localforage.setItem(msg.author, newlog).then(success => {
-                                console.log('combined existing feed with diff and saved to client')
+                                console.log('combined existing feed of ' + msg.author + ' with diff and saved to client')
                               })
                               localforage.getItem('log').then(log => {
                                 if (!log) {

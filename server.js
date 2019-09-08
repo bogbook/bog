@@ -26,7 +26,6 @@ bog.keys().then(key => {
       var req = JSON.parse(message)
       bog.unbox(req.box, req.requester, key).then(unboxed => {
         var unboxedreq = JSON.parse(nacl.util.encodeUTF8(unboxed))
-        console.log(unboxedreq)
         if (unboxedreq.seq === 0) {
           console.log(req.requester + ' asked the full log of ' + unboxedreq.author)
           fs.readFile(__dirname + '/bogs/' + unboxedreq.author, 'UTF-8', function (err, data) {

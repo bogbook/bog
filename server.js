@@ -71,7 +71,6 @@ bog.keys().then(key => {
                 if (unboxedreq.seq < msg.seq) {
                   console.log('client feed is shorter, sending diff to client')
                   var diff = JSON.stringify(feed.slice(0, msg.seq - unboxedreq.seq))
-                  console.log(diff)
                   bog.box(diff, req.requester, key).then(boxed => {
                     var obj = {
                       requester: key.publicKey,
@@ -98,7 +97,6 @@ bog.keys().then(key => {
         } else if (Array.isArray(unboxedreq)) {
           // first check to make sure that we have an entire log
           bog.open(unboxedreq[0]).then(msg => {
-            console.log(msg)
             if (msg.seq === unboxedreq.length) {
               fs.writeFile(__dirname + '/bogs/' + msg.author, JSON.stringify(unboxedreq), 'UTF-8', function (err, success) {
                 console.log('Saved full log of ' + msg.author + ' sent by ' + req.requester)

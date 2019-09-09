@@ -5,6 +5,7 @@ if ((typeof process !== 'undefined') && (process.release.name === 'node')) {
   var nacl = require('tweetnacl')
       nacl.util = require('tweetnacl-util')
   var ed2curve = require('ed2curve')
+  var homedir = require('os').homedir();
 }
 
 // bog.open -- opens a signature and returns content if you pass a signature and a public key
@@ -41,7 +42,7 @@ function generatekey () {
 async function keys () {
   try {
     if (fs) {
-      var keypair = JSON.parse(fs.readFileSync(__dirname + '/keypair'))
+      var keypair = JSON.parse(fs.readFileSync(homedir + '/.bogbook/keypair'))
     } else {
       var keypair = await localforage.getItem('id')
       if (keypair === null) {
@@ -52,7 +53,10 @@ async function keys () {
   } catch (err) {
     var keypair = generatekey()
     if (fs) {
-      fs.writeFileSync(__dirname + '/keypair', JSON.stringify(keypair), 'UTF-8')
+      if (!fs.existsSync(homedir + '/.bogbook')){
+        fs.mkdirSync(homedir + '/.bogbook')
+      }
+      fs.writeFileSync(homedir + '/.bogbook/keypair', JSON.stringify(keypair), 'UTF-8')
     }
   }
   return keypair

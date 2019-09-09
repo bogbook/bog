@@ -5,7 +5,7 @@ if ((typeof process !== 'undefined') && (process.release.name === 'node')) {
   var nacl = require('tweetnacl')
       nacl.util = require('tweetnacl-util')
   var ed2curve = require('ed2curve')
-  var homedir = require('os').homedir();
+  var homedir = require('os').homedir()
 }
 
 // bog.open -- opens a signature and returns content if you pass a signature and a public key

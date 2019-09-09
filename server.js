@@ -17,6 +17,13 @@ var WS = require('ws')
 var fs = require('fs')
 var nacl = require('tweetnacl')
     nacl.util = require('tweetnacl-util')
+var homedir = require('os').homedir()
+
+var bogdir = homedir + '/.bogbook/bogs/'
+
+if (!fs.existsSync(bogdir)){
+  fs.mkdirSync(bogdir)
+}
 
 var wserve = new WS.Server({ port: 8080 })
 
@@ -28,7 +35,7 @@ bog.keys().then(key => {
         var unboxedreq = JSON.parse(nacl.util.encodeUTF8(unboxed))
         if (unboxedreq.seq === 0) {
           console.log(req.requester + ' asked the full log of ' + unboxedreq.author)
-          fs.readFile(__dirname + '/bogs/' + unboxedreq.author, 'UTF-8', function (err, data) {
+          fs.readFile(bogdir + unboxedreq.author, 'UTF-8', function (err, data) {
             if (data) {
               //var feed = JSON.stringify(data)
               var feed = data
@@ -46,7 +53,7 @@ bog.keys().then(key => {
         if (unboxedreq.seq) {
           console.log(req.requester + ' asked for feed ' + unboxedreq.author + ' after sequence ' + unboxedreq.seq)
           // check to see if we have the feed on disk
-          fs.readFile(__dirname + '/bogs/' + unboxedreq.author, 'UTF-8', function (err, data) {
+          fs.readFile(bogdir + unboxedreq.author, 'UTF-8', function (err, data) {
             if (data) {
               // TODO open the latest message, and check the sequence number
               var feed = JSON.parse(data)
@@ -98,16 +105,16 @@ bog.keys().then(key => {
           // first check to make sure that we have an entire log
           bog.open(unboxedreq[0]).then(msg => {
             if (msg.seq === unboxedreq.length) {
-              fs.writeFile(__dirname + '/bogs/' + msg.author, JSON.stringify(unboxedreq), 'UTF-8', function (err, success) {
+              fs.writeFile(bogdir + msg.author, JSON.stringify(unboxedreq), 'UTF-8', function (err, success) {
                 console.log('Saved full log of ' + msg.author + ' sent by ' + req.requester)
               })
             } if (msg.seq > unboxedreq.length) {
-              fs.readFile(__dirname + '/bogs/' + msg.author, 'UTF-8', function (err, data) {
+              fs.readFile(bogdir + msg.author, 'UTF-8', function (err, data) {
                 var feed = JSON.parse(data)
                 bog.open(feed[0]).then(lastmsg => {
                   if (unboxedreq.length + lastmsg.seq === msg.seq) {
                     var newlog = unboxedreq.concat(feed)
-                    fs.writeFile(__dirname + '/bogs/' + msg.author, JSON.stringify(newlog), 'UTF-8', function (err, success) {
+                    fs.writeFile(bogdir + msg.author, JSON.stringify(newlog), 'UTF-8', function (err, success) {
                       console.log('combined existing feed of ' + msg.author + ' with diff and saved to server')
                     })
                   }

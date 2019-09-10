@@ -206,7 +206,7 @@ function pubs () {
 
   var add = h('input', {placeholder: 'Add a pub'})
 
-  localforage.getItem('pubs').then(function (servers) {
+  localforage.getItem('securepubs').then(function (servers) {
 
     message.appendChild(h('div', [
       add,
@@ -214,7 +214,7 @@ function pubs () {
         onclick: function () {
           if (add.value) {
             servers.push(add.value)
-            localforage.setItem('pubs', servers).then(function () { location.reload() })
+            localforage.setItem('securepubs', servers).then(function () { location.reload() })
           }
         }
       }, ['Add a pub'])
@@ -226,7 +226,7 @@ function pubs () {
         h('button', {
           onclick: function () {
             var newServers = servers.filter(item => item !== pub)
-            localforage.setItem('pubs', newServers).then(function () { location.reload() })
+            localforage.setItem('securepubs', newServers).then(function () { location.reload() })
           }
         }, ['Remove'])
       ]))
@@ -235,7 +235,7 @@ function pubs () {
 
   message.appendChild(h('button', {
     onclick: function () {
-      localforage.removeItem('pubs').then(function () {
+      localforage.removeItem('securepubs').then(function () {
         location.hash = ''
         location.reload()
       })

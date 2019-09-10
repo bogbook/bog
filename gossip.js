@@ -2,15 +2,23 @@ function sync (subs, keys) {
 
   var wsServers
 
-  localforage.getItem('pubs').then(function (servers) {
+  localforage.getItem('securepubs').then(function (servers) {
     if (servers) {
-      console.log(servers)
       wsServers = servers
     } else {
-      servers = ['ws://localhost:8080/~@OXJ7Ma1eu8HOEakF+TW9yk1k09FbOqUSyMVneXWdLaM=']
-      localforage.setItem('pubs', servers)
-      console.log(servers)
-      wsServers = servers
+      servers = ['ws://localhost:8080', 'ws://bogbook.com']
+      var pubs = []
+      servers.forEach(server => {
+        var ws = new WebSocket(server)
+        ws.onopen = function () {
+          ws.send(JSON.stringify({requester: keys.publicKey, sendpub: true}))
+        }
+        ws.onmessage = function (message) {
+          pubs.push(server + '/~' + message.data)
+          localforage.setItem('securepubs', pubs)
+        }
+      })
+      wsServers = pubs
     }
   }).then(function () {
     subs.forEach(function (sub) {

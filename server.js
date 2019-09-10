@@ -21,6 +21,10 @@ var homedir = require('os').homedir()
 
 var bogdir = homedir + '/.bogbook/bogs/'
 
+if (!fs.existsSync(homedir + '/.bogbook/')) {
+  fs.mkdirSync(homedir + '/.bogbook/')
+}
+
 if (!fs.existsSync(bogdir)){
   fs.mkdirSync(bogdir)
 }

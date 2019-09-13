@@ -186,7 +186,6 @@ async function bog (feed) {
 
 async function publish (post, keys, preview) {
   post.author = keys.publicKey
-
   post.timestamp = Date.now() 
 
   var message = { 
@@ -197,67 +196,41 @@ async function publish (post, keys, preview) {
 
   if (feed) {
     var firstMsg = await open(feed[0])
-
     post.seq = ++firstMsg.seq
-
-    message.key = '%' + nacl.util.encodeBase64(nacl.hash(nacl.util.decodeUTF8(JSON.stringify(post)))),
-    message.signature = nacl.util.encodeBase64(nacl.sign(nacl.util.decodeUTF8(JSON.stringify(post)), nacl.util.decodeBase64(keys.privateKey)))
-
-    var openedMsg = await open(message)
-
-    if (!preview) {
-      console.log('ADDING TO LOG AND FEED')
-      localforage.getItem('log').then(log => {
-        if (log) {
-          log.unshift(openedMsg)
-          localforage.setItem('log', log)
-        } else {
-          var feed = [openedMsg]
-          localforage.setItem('log', feed)
-        }
-      })
-
-      var subs = [keys.publicKey]
-
-      feed.unshift(message)
-
-      localforage.setItem(keys.publicKey, feed).then(function () {
-        sync(subs, keys)    
-      })
-    }
-    return message
-
   } else {
+    post.seq = 1
+  }
 
-    post.seq = 1 
+  message.key = '%' + nacl.util.encodeBase64(nacl.hash(nacl.util.decodeUTF8(JSON.stringify(post)))),
+  message.signature = nacl.util.encodeBase64(nacl.sign(nacl.util.decodeUTF8(JSON.stringify(post)), nacl.util.decodeBase64(keys.privateKey)))
 
-    message.key = '%' + nacl.util.encodeBase64(nacl.hash(nacl.util.decodeUTF8(JSON.stringify(post)))),
-    message.signature = nacl.util.encodeBase64(nacl.sign(nacl.util.decodeUTF8(JSON.stringify(post)), nacl.util.decodeBase64(keys.privateKey)))
+  var openedMsg = await open(message)
 
-    var openedMsg = await open(message)
+  if (!preview) {
+    console.log('ADDING TO LOG AND FEED')
+    localforage.getItem('log').then(log => {
+      if (log) {
+        log.unshift(openedMsg)
+        localforage.setItem('log', log)
+      } else {
+        var newlog = [openedMsg]
+        localforage.setItem('log', newlog)
+      }
+    })
 
-    if (!preview) {
-      localforage.getItem('log').then(log => {
-        if (log) {
-          log.unshift(openedMsg)
-          localforage.setItem('log', log)
-        } else {
-          var feed = [openedMsg]
-          localforage.setItem('log', feed)
-        }
-      })
+    var subs = [keys.publicKey]
 
+    if (feed) {
+      feed.unshift(message)
+    } else {
       var feed = [message]
-
-      var subs = [keys.publicKey]
-
-      localforage.setItem(keys.publicKey, feed).then(function () {
-        sync(subs, keys)    
-      })
     }
 
-    return message
+    localforage.setItem(keys.publicKey, feed).then(function () {
+      sync(subs, keys)    
+    })
   }
+  return message
 }
 
 if ((typeof process !== 'undefined') && (process.release.name === 'node')) {

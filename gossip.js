@@ -6,7 +6,7 @@ function sync (subs, keys) {
     if (servers) {
       wsServers = servers
     } else {
-      servers = ['ws://secure.bogbook.com', 'ws://localhost:8080']
+      servers = ['ws://bogbook.com', 'ws://localhost:8080']
       var pubs = []
       servers.forEach(server => {
         var ws = new WebSocket(server)

@@ -5,9 +5,34 @@ function addButton (post, message, keys) {
       var fr = new FileReader()
   
       fr.addEventListener("load", function(e) {
+        
         var image = e.target.result
-        document.getElementById("img").src = image
-      });
+        var signed = nacl.sign(nacl.util.decodeUTF8(image), nacl.util.decodeBase64(keys.privateKey))
+        var signed64 = nacl.util.encodeBase64(signed)
+        var hash64 = nacl.util.encodeBase64(nacl.hash(signed))
+        // we should probably throw out blobs that are too big!
+        localforage.setItem(hash64, signed64).then(function () {
+          console.log('saved image to localforage')
+          var obj = {
+            type: 'blob',
+            blobbed: post.key, 
+            hash: hash64
+          }
+          publish(obj, keys).then(published => {
+            var getPost = document.getElementById(post.key)
+            open(published).then(opened => {
+              localforage.getItem(opened.hash).then(signed => {
+                var openedImg = nacl.sign.open(nacl.util.decodeBase64(signed), nacl.util.decodeBase64(post.author.substring(1)))
+                console.log(openedImg)
+                var image = h('img', {src: nacl.util.encodeUTF8(openedImg)})
+                getPost.appendChild(image)
+                message.appendChild(render(published))
+              })
+            })
+          })
+        })
+
+      })
   
       fr.readAsDataURL( this.files[0] )
     }
@@ -19,7 +44,6 @@ function addButton (post, message, keys) {
     h('input', {id: 'inp', type:'file'}),
     h('img', {id: 'img'})
   ])
-
 
   var locInput = h('input', {placeholder: 'New location'})
   var locDiv = h('div', [
@@ -64,7 +88,7 @@ function addButton (post, message, keys) {
     }, ['Publish'])
   ])
 
-  var button = h('button', {classList: 'right',
+  var button = h('button', {/*classList: 'right',*/
     onclick: function () {
       message.appendChild(h('button', {classList: 'right', 
         onclick: function () {
@@ -141,6 +165,20 @@ function render (msg, keys, preview) {
             locatedExists.parentNode.removeChild(locatedExists)  
           }
           message.appendChild(located)
+        }
+
+        if (nextPost.blobbed == msg.key) {
+          localforage.getItem(nextPost.hash).then(signed => {
+            if (signed) {
+              var openedImg = nacl.sign.open(nacl.util.decodeBase64(signed), nacl.util.decodeBase64(nextPost.author.substring(1)))
+              var image = h('img', {src: nacl.util.encodeUTF8(openedImg)})
+              blobSync(nextPost.hash, nextPost.author, keys, false ) 
+              message.appendChild(image)
+            } else {
+              console.log('we don\'t have the blob') 
+              blobSync(nextPost.hash, nextPost.author, keys, true )
+            } 
+          })
         }
 
         if (nextPost.valuated == msg.key) {
@@ -267,6 +305,13 @@ function render (msg, keys, preview) {
   } else if (msg.type == 'value') {
     message.appendChild(getHeader(msg, keys))
     message.appendChild(h('span', [h('a', {href: '#' + msg.valuated}, [msg.valuated.substring(0, 10) + '...']), ' is worth: ' + msg.value + ' ' + msg.currency]))
+  } else if (msg.type == 'blob') {
+    message.appendChild(getHeader(msg, keys))
+    localforage.getItem(msg.hash).then(signed => {
+      var openedImg = nacl.sign.open(nacl.util.decodeBase64(signed), nacl.util.decodeBase64(msg.author.substring(1)))
+      var image = h('img', {src: nacl.util.encodeUTF8(openedImg)})
+      message.appendChild(image)
+    })
   }
 
   messageDiv.appendChild(message)

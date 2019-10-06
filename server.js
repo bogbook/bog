@@ -18,16 +18,15 @@ var fs = require('fs')
 var nacl = require('tweetnacl')
     nacl.util = require('tweetnacl-util')
 var homedir = require('os').homedir()
+var sanitize = require('sanitize-filename')
+
 
 var bogdir = homedir + '/.bogbook/bogs/'
+var blobdir = homedir + '/.bogbook/blobs/'
 
-if (!fs.existsSync(homedir + '/.bogbook/')) {
-  fs.mkdirSync(homedir + '/.bogbook/')
-}
-
-if (!fs.existsSync(bogdir)){
-  fs.mkdirSync(bogdir)
-}
+if (!fs.existsSync(homedir + '/.bogbook/')) {fs.mkdirSync(homedir + '/.bogbook/')}
+if (!fs.existsSync(bogdir)){fs.mkdirSync(bogdir)}
+if (!fs.existsSync(blobdir)){fs.mkdirSync(blobdir)}
 
 var wserve = new WS.Server({ port: 8080 })
 
@@ -41,6 +40,51 @@ bog.keys().then(key => {
       else { 
         bog.unbox(req.box, req.requester, key).then(unboxed => {
           var unboxedreq = JSON.parse(nacl.util.encodeUTF8(unboxed))
+          //console.log(unboxedreq)
+          if (unboxedreq.blobFile) {
+            var openedimg = nacl.sign.open(nacl.util.decodeBase64(unboxedreq.blobFile), nacl.util.decodeBase64(unboxedreq.author.substring(1)))
+            if (openedimg) {
+              //console.log(openedimg)
+              fs.writeFileSync(blobdir + '/' + sanitize(unboxedreq.blob), unboxedreq.blobFile, 'UTF-8')
+              console.log('received blob ' + unboxedreq.blob + ' from ' + req.requester + ' and saved to blobs folder')
+            }
+          }
+          if (unboxedreq.blob) {
+            console.log(req.requester + ' has requested the blob ' + unboxedreq.blob)
+            var blobExists = fs.existsSync(blobdir + '/' + sanitize(unboxedreq.blob))
+            if (unboxedreq.needs) {
+              console.log(req.requester + ' needs ' + unboxedreq.blob + ' do we have it?')
+              if (blobExists) { 
+                console.log('We have it, so send it to the client')
+                var blobToSend = fs.readFileSync(blobdir + '/' + sanitize(unboxedreq.blob), 'UTF-8')
+                var sendblob = {
+                  blob: unboxedreq.blob,
+                  blobFile: blobToSend
+                }
+                console.log(sendblob)
+                bog.box(JSON.stringify(sendblob), req.requester, key).then(boxed => {
+                  var obj = {
+                    requester: key.publicKey,
+                    box: boxed
+                  }
+                  ws.send(JSON.stringify(obj))
+                })
+              }
+            } else {
+              console.log(req.requester + ' has ' + unboxedreq.blob + ' do we need it?')
+              if (!blobExists) { 
+                console.log('We need it, so request it from the client')
+                var blobreq = { blob: unboxedreq.blob, needs: true }
+                bog.box(JSON.stringify(blobreq), req.requester, key).then(boxed => {
+                  var obj = {
+                    requester: key.publicKey,
+                    box: boxed
+                  }
+                  ws.send(JSON.stringify(obj))
+                })
+              }
+            } 
+          }
           if (unboxedreq.seq === 0) {
             console.log(req.requester + ' asked the full log of ' + unboxedreq.author)
             fs.readFile(bogdir + unboxedreq.author, 'UTF-8', function (err, data) {

@@ -41,7 +41,7 @@ bog.keys().then(key => {
         bog.unbox(req.box, req.requester, key).then(unboxed => {
           var unboxedreq = JSON.parse(nacl.util.encodeUTF8(unboxed))
           //console.log(unboxedreq)
-          if (unboxedreq.blobFile) {
+          /*if (unboxedreq.blobFile) {
             var openedimg = nacl.sign.open(nacl.util.decodeBase64(unboxedreq.blobFile), nacl.util.decodeBase64(unboxedreq.author.substring(1)))
             if (openedimg) {
               //console.log(openedimg)
@@ -84,7 +84,7 @@ bog.keys().then(key => {
                 })
               }
             } 
-          }
+          }*/
           if (unboxedreq.seq === 0) {
             console.log(req.requester + ' asked the full log of ' + unboxedreq.author)
             fs.readFile(bogdir + unboxedreq.author, 'UTF-8', function (err, data) {

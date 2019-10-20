@@ -260,7 +260,7 @@ function sync (subs, keys) {
               }
             }
           })
-        }, index * 100000)
+        }, index * 1000)
       })
     })
   })

@@ -1,4 +1,4 @@
-function addButton (post, message, keys) {
+/*function addButton (post, message, keys) {
   function readFile () {
     if (this.files && this.files[0]) {
   
@@ -88,7 +88,7 @@ function addButton (post, message, keys) {
     }, ['Publish'])
   ])
 
-  var button = h('button', {/*classList: 'right',*/
+  var button = h('button', {classList: 'right',
     onclick: function () {
       message.appendChild(h('button', {classList: 'right', 
         onclick: function () {
@@ -115,7 +115,7 @@ function addButton (post, message, keys) {
   
 
   return button
-}
+}*/
 
 function getHeader (post, keys, mini) {
 
@@ -158,7 +158,7 @@ function render (msg, keys, preview) {
   bog().then(log => {
     if (log) {
       log.reverse().forEach(function (nextPost) {
-        if (nextPost.located == msg.key) {
+        /*if (nextPost.located == msg.key) {
           var locatedExists = document.getElementById('located:' + msg.key)
           var located = h('div', {id: 'located:' + msg.key}, [h('strong', ['Location: ']), nextPost.loc])
           if (locatedExists) {
@@ -188,7 +188,7 @@ function render (msg, keys, preview) {
             valuatedExists.parentNode.removeChild(valuatedExists)
           }
           message.appendChild(valuated)
-        }
+        }*/
 
         if (nextPost.edited == msg.key) {
           var messageExists = (document.getElementById(nextPost.key) !== null)
@@ -294,12 +294,12 @@ function render (msg, keys, preview) {
           }
         }, ['Edit']))
       }
-      message.appendChild(addButton(msg, message, keys))
+      /*message.appendChild(addButton(msg, message, keys))*/
     }
   } else if (msg.type == 'name') {
     message.appendChild(getHeader(msg, keys))
     message.appendChild(h('span', ['identified ', h('a', {href: '#' + msg.named }, [msg.named.substring(0, 10) + '...']), ' as ' + msg.name]))
-  } else if (msg.type == 'location') {
+  } /*else if (msg.type == 'location') {
     message.appendChild(getHeader(msg, keys))
     message.appendChild(h('span', [h('a', {href: '#' + msg.located }, [msg.located.substring(0, 10) + '...']), ' is located: ' + msg.loc]))
   } else if (msg.type == 'value') {
@@ -312,7 +312,7 @@ function render (msg, keys, preview) {
       var image = h('img', {src: nacl.util.encodeUTF8(openedImg)})
       message.appendChild(image)
     })
-  }
+  }*/
 
   messageDiv.appendChild(message)
   return messageDiv

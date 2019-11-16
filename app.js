@@ -8,49 +8,6 @@ function route (keys) {
   var screen = document.getElementById('screen')
   screen.appendChild(scroller)
 
-  function nameCheck (id) {
-    localforage.getItem('name:' + id).then(name => {
-      if (!name) {
-        var identify = h('div', {id: 'identify', classList: 'message'}) 
-        scroller.appendChild(identify)
-        identify.appendChild(h('span', {innerHTML: marked("Hey [" + keys.publicKey.substring(0, 10) + "...](/#"+ keys.publicKey +")! Welcome to Bogbook. If you have any questions be sure to reach out to [@ev](/#@Q++V5BbvWIg8B+TqtC9ZKFhetruuw+nOgxEqfjlOZI0=).")}))
-
-        identify.appendChild(h('span', {innerHTML: marked("Your current public key doesn't have a name yet. Either import your existing id on the [key](/#key) page, or identify yourself using the box below. Identifying is optional, but you'll see this welcome message as long as you don't give yourself a name.")}))
-
-        var input = h('input', {placeholder: 'Give yourself a name'})
-
-        identify.appendChild(h('div', [
-          input,
-          h('button', {
-            onclick: function () {
-              if (input.value) {
-                content = {
-                  type: 'name',
-                  named: id,
-                  name: input.value
-                }
-                publish(content, keys)
-                setTimeout(function () {
-                  getName(id, keys)
-                  setTimeout(function () {
-                    location.reload()
-                  }, 1000)
-                }, 1000)
-              }
-            }
-          }, ['Identify'])
-        ]))
-
-        identify.appendChild(h('span', {innerHTML: marked("Next, make sure to save your public/private keypair on the [key](/#key) page, so that you can continue to use the same identity. No one but you can access your private key, so only you can restore your ability to publish to this identity. If you lose your key, you lose your ability to publish to this identity forever.")}))
-
-        identify.appendChild(h('span', {innerHTML: marked("Finally, be sure to check out the code on [SourceHut](http://git.sr.ht/~ev/bogbook)")}))
-
-      }
-    })
-  }
-
-  nameCheck(keys.publicKey)
-
   if (src === 'key') {
     keyPage(keys)
   } else if (src === 'pubs') {

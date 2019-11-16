@@ -96,6 +96,40 @@ async function get (key) {
   }
 }
 
+// bog.getImage
+
+function getImage (id, keys) {
+  var image = h('img', {classList: 'avatar'})
+
+  localforage.getItem('image:' + id).then(cache => {
+    if (cache) {
+      console.log('GOT IMAGE FROM CACHE: ' + cache)
+      return image.src = cache
+    } else {
+      bog().then(log => {
+        if (log) {
+          for (var i = 0; i < log.length; i++) {
+            if ((log[i].imaged === id) && (log[i].author === keys.publicKey)) {
+              // if you've identified someone as something else show that something else
+              localforage.setItem('image:' + id, log[i].image)
+              console.log('FINDING IMAGE AND SAVING TO CACHE: ' + log[i].image)
+              image.src = cache
+              return image.src = cache
+            } else if ((log[i].imaged === id) && (log[i].author === id)) {
+              // else if show the image they gave themselves
+              localforage.setItem('image:' + id, log[i].image)
+              console.log('FINDING IMAGE AND SAVING TO CACHE: ' + log[i].image)
+              image.src = cache
+              return image.src = cache
+            }
+          }
+        }
+      })
+    }
+  })
+  return image
+}
+
 // bog.getName -- iterates over a feed and returns a person's name
 
 function getName (id, keys) {
@@ -129,7 +163,6 @@ function getName (id, keys) {
     }
   })
   return name
-
 }
 
 // bog.regenerate -- regenerates main log by taking all of the feed logs, combinging them, and then sorting them

@@ -10,7 +10,6 @@ function profilePage (src, keys) {
 
   scroller.appendChild(profile)
 
-
   if (src != keys.publicKey) {
     reply = { author: src }
     scroller.appendChild(composer(keys, reply))
@@ -22,40 +21,8 @@ function profilePage (src, keys) {
 
   sync(subs, keys)
 
-  var input = h('input', {placeholder: 'New name'})
-
   profile.appendChild(h('a', {href: '#' + src}, [getName(src, keys)]))
-
   profile.appendChild(h('br'))
-
-  var identify = h('div', [
-    input,
-    h('button', {
-      onclick: function () {
-        if (input.value) {
-          content = {
-            type: 'name',
-            named: src,
-            name: input.value
-          }
-          localforage.removeItem('name:' + src)
-          publish(content, keys).then(post => {
-            open(post).then(msg => {
-              input.value = ''
-              scroller.insertBefore(render(msg, keys), scroller.childNodes[1])
-            })
-          })
-        }
-      }
-    }, ['Identify'])
-  ])
-
-  var identifyButton = h('button', {
-    onclick: function () {
-      profile.appendChild(identify)
-      identifyButton.parentNode.removeChild(identifyButton) 
-    }
-  }, ['Identify ' + src.substring(0, 10) + '...'])
 
   var mentionsButton = h('button', {
     onclick: function () {
@@ -63,8 +30,7 @@ function profilePage (src, keys) {
     }
   }, ['Mentions'])
 
-  profile.appendChild(identifyButton)
-
+  profile.appendChild(identify(src, profile, keys))
   profile.appendChild(mentionsButton)
 
   localforage.getItem('subscriptions').then(function (subs) {
@@ -103,22 +69,11 @@ function profilePage (src, keys) {
       })
     }
   })
-
-  /*bog(src).then(log => {
-    if (log) {
-      log.forEach(function (msg) {
-        open(msg).then(post => {
-          scroller.appendChild(render(post, keys))
-        })
-      })
-    }
-  })*/
 }
 
 function searchPage (src, keys) {
   var search = src.substring(1).replace("%20"," ").toUpperCase()
 
-  //scroller.appendChild(composer(keys))
   bog().then(log => {
     if (log) {
       log.forEach(function (msg) {

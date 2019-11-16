@@ -1,124 +1,4 @@
-/*function addButton (post, message, keys) {
-  function readFile () {
-    if (this.files && this.files[0]) {
-  
-      var fr = new FileReader()
-  
-      fr.addEventListener("load", function(e) {
-        
-        var image = e.target.result
-        var signed = nacl.sign(nacl.util.decodeUTF8(image), nacl.util.decodeBase64(keys.privateKey))
-        var signed64 = nacl.util.encodeBase64(signed)
-        var hash64 = nacl.util.encodeBase64(nacl.hash(signed))
-        // we should probably throw out blobs that are too big!
-        localforage.setItem(hash64, signed64).then(function () {
-          console.log('saved image to localforage')
-          var obj = {
-            type: 'blob',
-            blobbed: post.key, 
-            hash: hash64
-          }
-          publish(obj, keys).then(published => {
-            var getPost = document.getElementById(post.key)
-            open(published).then(opened => {
-              localforage.getItem(opened.hash).then(signed => {
-                var openedImg = nacl.sign.open(nacl.util.decodeBase64(signed), nacl.util.decodeBase64(post.author.substring(1)))
-                console.log(openedImg)
-                var image = h('img', {src: nacl.util.encodeUTF8(openedImg)})
-                getPost.appendChild(image)
-                message.appendChild(render(published))
-              })
-            })
-          })
-        })
-
-      })
-  
-      fr.readAsDataURL( this.files[0] )
-    }
-  }
-
-  readFile()
-
-  var imageInput = h('span', [
-    h('input', {id: 'inp', type:'file'}),
-    h('img', {id: 'img'})
-  ])
-
-  var locInput = h('input', {placeholder: 'New location'})
-  var locDiv = h('div', [
-    locInput,
-    h('button', {
-      onclick: function () {
-        var obj = {
-          type: 'location',
-          located: post.key,
-          loc: locInput.value 
-        }
-        publish(obj, keys).then(published => {
-          open(published).then(opened => {
-	    message.parentNode.appendChild(h('div', {classList: 'submessage'}, [render(opened, keys)]))
-            locDiv.parentNode.removeChild(locDiv)
-          })
-        })
-      }
-    }, ['Publish'])
-  ]) 
-
-  var valueInput = h('input', {placeholder: '0.00'})
-  var currencyInput = h('input', {placeholder: 'Currency'})
-  var valueDiv = h('div', [
-    valueInput,
-    currencyInput,
-    h('button', {
-      onclick: function () {
-        var obj = {
-          type: 'value',
-          value: valueInput.value,
-          valuated: post.key,
-          currency: currencyInput.value
-        }
-        publish(obj, keys).then(published => {
-          open(published).then(opened => {
-            message.parentNode.appendChild(h('div', {classList: 'submessage'}, [render(opened, keys)]))
-            valueDiv.parentNode.removeChild(valueDiv)
-          })
-        })
-      }
-    }, ['Publish'])
-  ])
-
-  var button = h('button', {classList: 'right',
-    onclick: function () {
-      message.appendChild(h('button', {classList: 'right', 
-        onclick: function () {
-          message.appendChild(locDiv)
-        }
-      }, ['Location']))
-           
-      message.appendChild(h('button', {classList: 'right',
-        onclick: function () { 
-          message.appendChild(imageInput)
-          document.getElementById("inp").addEventListener("change", readFile);
-        }
-      }, ['Image']))     
-
-      message.appendChild(h('button', {classList: 'right',
-        onclick: function () {
-          message.appendChild(valueDiv)
-        }
-      }, ['Value']))     
-    }
-
-  }, ['Add'])
-
-  
-
-  return button
-}*/
-
 function getHeader (post, keys, mini) {
-
   var getRaw = h('button', {
     onclick: function () {
       var raw = h('pre', [h('code', [JSON.stringify(post)])])
@@ -143,6 +23,7 @@ function getHeader (post, keys, mini) {
     ]),
     h('p', [
       h('a', {href: '#' + post.author}, [
+        getImage(post.author, keys),
         getName(post.author, keys)
       ]),
       mini 
@@ -158,38 +39,6 @@ function render (msg, keys, preview) {
   bog().then(log => {
     if (log) {
       log.reverse().forEach(function (nextPost) {
-        /*if (nextPost.located == msg.key) {
-          var locatedExists = document.getElementById('located:' + msg.key)
-          var located = h('div', {id: 'located:' + msg.key}, [h('strong', ['Location: ']), nextPost.loc])
-          if (locatedExists) {
-            locatedExists.parentNode.removeChild(locatedExists)  
-          }
-          message.appendChild(located)
-        }
-
-        if (nextPost.blobbed == msg.key) {
-          localforage.getItem(nextPost.hash).then(signed => {
-            if (signed) {
-              var openedImg = nacl.sign.open(nacl.util.decodeBase64(signed), nacl.util.decodeBase64(nextPost.author.substring(1)))
-              var image = h('img', {src: nacl.util.encodeUTF8(openedImg)})
-              blobSync(nextPost.hash, nextPost.author, keys, false ) 
-              message.appendChild(image)
-            } else {
-              console.log('we don\'t have the blob') 
-              blobSync(nextPost.hash, nextPost.author, keys, true )
-            } 
-          })
-        }
-
-        if (nextPost.valuated == msg.key) {
-          var valuatedExists = document.getElementById('valuated:' + msg.key)
-          var valuated = h('div', {id: 'valuated:' + msg.key}, [h('strong', ['Price: ' ]), nextPost.value + ' ' + nextPost.currency])
-          if (valuatedExists) {
-            valuatedExists.parentNode.removeChild(valuatedExists)
-          }
-          message.appendChild(valuated)
-        }*/
-
         if (nextPost.edited == msg.key) {
           var messageExists = (document.getElementById(nextPost.key) !== null)
           var msgcontents = document.getElementById('content:' + msg.key)
@@ -294,25 +143,19 @@ function render (msg, keys, preview) {
           }
         }, ['Edit']))
       }
-      /*message.appendChild(addButton(msg, message, keys))*/
     }
   } else if (msg.type == 'name') {
     message.appendChild(getHeader(msg, keys))
     message.appendChild(h('span', ['identified ', h('a', {href: '#' + msg.named }, [msg.named.substring(0, 10) + '...']), ' as ' + msg.name]))
-  } /*else if (msg.type == 'location') {
+  } else if (msg.type == 'image') {
     message.appendChild(getHeader(msg, keys))
-    message.appendChild(h('span', [h('a', {href: '#' + msg.located }, [msg.located.substring(0, 10) + '...']), ' is located: ' + msg.loc]))
-  } else if (msg.type == 'value') {
-    message.appendChild(getHeader(msg, keys))
-    message.appendChild(h('span', [h('a', {href: '#' + msg.valuated}, [msg.valuated.substring(0, 10) + '...']), ' is worth: ' + msg.value + ' ' + msg.currency]))
-  } else if (msg.type == 'blob') {
-    message.appendChild(getHeader(msg, keys))
-    localforage.getItem(msg.hash).then(signed => {
-      var openedImg = nacl.sign.open(nacl.util.decodeBase64(signed), nacl.util.decodeBase64(msg.author.substring(1)))
-      var image = h('img', {src: nacl.util.encodeUTF8(openedImg)})
-      message.appendChild(image)
-    })
-  }*/
+    message.appendChild(h('span', [
+      'identified ', 
+      h('a', { href: '#' + msg.imaged }, [msg.imaged.substring(0, 10) + '...']), 
+      ' as ', 
+      h('img', {src: msg.image})
+    ]))
+  } 
 
   messageDiv.appendChild(message)
   return messageDiv

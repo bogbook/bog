@@ -98,8 +98,12 @@ async function get (key) {
 
 // bog.getImage
 
-function getImage (id, keys) {
-  var image = h('img', {classList: 'avatar'})
+function getImage (id, keys, classList) {
+  if (classList) {
+    var image = h('img', {classList: classList})
+  } else {
+    var image = h('img', {classList: 'avatar'})
+  }
 
   localforage.getItem('image:' + id).then(cache => {
     if (cache) {

@@ -5,17 +5,14 @@ function threadPage (src, keys) {
 }
 
 function profilePage (src, keys) {
+  var gotName = getName(src, keys)
+  var msg = {}
+  msg.author = src
 
   var profile = h('div', {classList: 'profile'})
 
   scroller.appendChild(profile)
 
-  if (src != keys.publicKey) {
-    reply = { author: src }
-    scroller.appendChild(composer(keys, reply))
-  } else {
-    scroller.appendChild(composer(keys))
-  }
 
   var subs = [src]
 
@@ -34,8 +31,16 @@ function profilePage (src, keys) {
     }
   }, ['Mentions'])
 
+  var respond = h('button', {
+    onclick: function () {
+      scroller.insertBefore(composer(keys, msg, gotName), scroller.childNodes[1])
+    }
+  }, ['Reply to ' + gotName.textContent])
+
   profile.appendChild(identify(src, profile, keys))
   profile.appendChild(mentionsButton)
+
+  profile.appendChild(respond)
 
   localforage.getItem('subscriptions').then(function (subs) {
     if (subs.includes(src)) {

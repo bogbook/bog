@@ -21,7 +21,11 @@ function profilePage (src, keys) {
 
   sync(subs, keys)
 
-  profile.appendChild(h('a', {href: '#' + src}, [getName(src, keys)]))
+  profile.appendChild(h('a', {href: '#' + src}, [
+    getImage(src, keys, 'profileAvatar'),
+    getName(src, keys)
+  ]))
+
   profile.appendChild(h('br'))
 
   var mentionsButton = h('button', {

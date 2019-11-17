@@ -145,16 +145,16 @@ function render (msg, keys, preview) {
       }
     }
   } else if (msg.type == 'name') {
-    message.appendChild(getHeader(msg, keys))
-    message.appendChild(h('span', ['identified ', h('a', {href: '#' + msg.named }, [msg.named.substring(0, 10) + '...']), ' as ' + msg.name]))
+    var mini = h('span', [' identified ', h('a', {href: '#' + msg.named }, [msg.named.substring(0, 10) + '...']), ' as ' + msg.name])
+    message.appendChild(getHeader(msg, keys, mini))
   } else if (msg.type == 'image') {
-    message.appendChild(getHeader(msg, keys))
-    message.appendChild(h('span', [
-      'identified ', 
+    var mini = h('span', [
+      ' identified ', 
       h('a', { href: '#' + msg.imaged }, [msg.imaged.substring(0, 10) + '...']), 
       ' as ', 
-      h('img', {src: msg.image})
-    ]))
+      h('img', {src: msg.image, classList: 'avatar'})
+    ])
+    message.appendChild(getHeader(msg, keys, mini))
   } 
 
   messageDiv.appendChild(message)

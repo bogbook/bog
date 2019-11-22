@@ -107,7 +107,6 @@ function getImage (id, keys, classList) {
 
   localforage.getItem('image:' + id).then(cache => {
     if (cache) {
-      console.log('GOT IMAGE FROM CACHE: ' + cache)
       return image.src = cache
     } else {
       bog().then(log => {
@@ -116,13 +115,11 @@ function getImage (id, keys, classList) {
             if ((log[i].imaged === id) && (log[i].author === keys.publicKey)) {
               // if you've identified someone as something else show that something else
               localforage.setItem('image:' + id, log[i].image)
-              console.log('FINDING IMAGE AND SAVING TO CACHE: ' + log[i].image)
               image.src = cache
               return image.src = cache
             } else if ((log[i].imaged === id) && (log[i].author === id)) {
               // else if show the image they gave themselves
               localforage.setItem('image:' + id, log[i].image)
-              console.log('FINDING IMAGE AND SAVING TO CACHE: ' + log[i].image)
               image.src = cache
               return image.src = cache
             }
@@ -143,7 +140,6 @@ function getName (id, keys) {
 
   localforage.getItem('name:' + id).then(cache => {
     if (cache) {
-      console.log('GOT NAME FROM CACHE: ' + cache)
       return name.textContent = '@' + cache
     } else {
       bog().then(log => {
@@ -152,12 +148,10 @@ function getName (id, keys) {
             if ((log[i].named === id) && (log[i].author === keys.publicKey)) {
               // if you've identified someone as something else show that something else
               localforage.setItem('name:' + id, log[i].name)
-              console.log('FINDING NAME AND SAVING TO CACHE: ' + log[i].name)
               return name.textContent = '@' + log[i].name
             } else if ((log[i].named === id) && (log[i].author === id)) {
               // else if show the name they gave themselves
               localforage.setItem('name:' + id, log[i].name)
-              console.log('FINDING NAME AND SAVING TO CACHE: ' + log[i].name)
               return name.textContent = '@' + log[i].name
             }
             // there should probably be some sort of sybil attack resiliance here (weight avatar name based on number of times used by individuals), but this will do for now.

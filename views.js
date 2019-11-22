@@ -48,27 +48,28 @@ function profilePage (src, keys) {
 
   profile.appendChild(identify(src, profile, keys))
   profile.appendChild(mentionsButton)
-
   profile.appendChild(respond)
 
-  localforage.getItem('subscriptions').then(function (subs) {
-    if (subs.includes(src)) {
-      profile.appendChild(h('button', {
-        onclick: function () {
-          subs = subs.filter(a => a !== src)
-          localforage.setItem('subscriptions', subs).then(function () { location.reload() })
-        }
-      }, ['Unsubscribe']))
-    } else {
-      profile.appendChild(h('button', {
-        onclick: function () {
-          subs.push(src)
-          localforage.setItem('subscriptions', subs).then(function () { location.reload() })
-        }
-      }, ['Subscribe']))
-    }
-  })
-  
+  if (src != keys.publicKey) {
+    localforage.getItem('subscriptions').then(function (subs) {
+      if (subs.includes(src)) {
+        profile.appendChild(h('button', {
+          onclick: function () {
+            subs = subs.filter(a => a !== src)
+            localforage.setItem('subscriptions', subs).then(function () { location.reload() })
+          }
+        }, ['Unsubscribe']))
+      } else {
+        profile.appendChild(h('button', {
+          onclick: function () {
+            subs.push(src)
+            localforage.setItem('subscriptions', subs).then(function () { location.reload() })
+          }
+        }, ['Subscribe']))
+      }
+    })
+  }
+
   profile.appendChild(h('button', {
     onclick: function () {
       localforage.removeItem(src).then(function () {
@@ -106,29 +107,23 @@ function searchPage (src, keys) {
 }
 
 function publicPage (keys) {
-
   localforage.getItem('subscriptions').then(function (subs) {
-    if (subs) {
-      var interval = 1000
-      timer = function() {
-        if ('' === window.location.hash.substring(1)) {
-          if (interval < 10000) { interval = interval + 1000 }
-          sync(subs, keys)
-          setTimeout(timer, interval)
-        }
+    var interval = 1000
+    timer = function() {
+      if ('' === window.location.hash.substring(1)) {
+        if (interval < 10000) { interval = interval + 1000 }
+        sync(subs, keys)
+        setTimeout(timer, interval)
       }
+    }
+
+    if (subs) {
+      subs.push(keys.publicKey)
       timer()
     } else {
-      var subs = [keys.publicKey]
+      var subs = []
       localforage.setItem('subscriptions', subs)
-      var interval = 1000
-      timer = function() {
-        if ('' === window.location.hash.substring(1)) {
-          if (interval < 10000) { interval = interval + 1000 }
-          sync(subs, keys)
-          setTimeout(timer, interval)
-        }
-      }
+      subs.push(keys.publicKey)
       timer()
     }
   })

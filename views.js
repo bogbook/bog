@@ -12,11 +12,20 @@ function profilePage (src, keys) {
   var profile = h('div', {classList: 'profile'})
 
   scroller.appendChild(profile)
-
+  scroller.appendChild(h('div'))
 
   var subs = [src]
 
-  sync(subs, keys)
+  var interval = 1000
+  timer = function() {
+    if (src === window.location.hash.substring(1)) {
+      if (interval < 10000) { interval = interval + 200 }
+      sync(subs, keys)
+      setTimeout(timer, interval)
+    }
+  }
+  timer()
+
 
   profile.appendChild(h('a', {href: '#' + src}, [
     getImage(src, keys, 'profileAvatar'),
@@ -100,11 +109,27 @@ function publicPage (keys) {
 
   localforage.getItem('subscriptions').then(function (subs) {
     if (subs) {
-      sync(subs, keys)
+      var interval = 1000
+      timer = function() {
+        if ('' === window.location.hash.substring(1)) {
+          if (interval < 10000) { interval = interval + 1000 }
+          sync(subs, keys)
+          setTimeout(timer, interval)
+        }
+      }
+      timer()
     } else {
       var subs = [keys.publicKey]
       localforage.setItem('subscriptions', subs)
-      sync(subs, keys)
+      var interval = 1000
+      timer = function() {
+        if ('' === window.location.hash.substring(1)) {
+          if (interval < 10000) { interval = interval + 1000 }
+          sync(subs, keys)
+          setTimeout(timer, interval)
+        }
+      }
+      timer()
     }
   })
 

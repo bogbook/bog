@@ -39,12 +39,10 @@ bog.keys().then(key => {
       } else { 
         bog.unbox(req.box, req.requester, key).then(unboxed => {
           var unboxedreq = JSON.parse(nacl.util.encodeUTF8(unboxed))
-          if (unboxedreq.seq) {
+          if (unboxedreq.seq >= 0) {
             console.log(req.requester + ' asked for feed ' + unboxedreq.author + ' after sequence ' + unboxedreq.seq)
-            // check to see if we have the feed on disk
             fs.readFile(bogdir + unboxedreq.author, 'UTF-8', function (err, data) {
               if (data) {
-                // TODO open the latest message, and check the sequence number
                 var feed = JSON.parse(data)
                 bog.open(feed[0]).then(msg => {
                   if (unboxedreq.seq === msg.seq) { 
@@ -63,10 +61,21 @@ bog.keys().then(key => {
                       ws.send(JSON.stringify(obj))
                     })
                   }
-                  
+                          
                   if (unboxedreq.seq < msg.seq) {
-                    console.log('client feed is shorter, sending diff to client')
-                    var diff = JSON.stringify(feed.slice(0, msg.seq - unboxedreq.seq))
+                    var endrange = feed.length - unboxedreq.seq - 25
+                    if (endrange < 0) {
+                      endrange = feed.length - unboxedreq.seq - 1
+                    }
+                    var baserange = feed.length - unboxedreq.seq
+                    
+                    console.log('client feed is shorter, sending from ' + baserange + ' to ' + endrange + ' to client')
+                    var diff = JSON.stringify(
+                      feed.slice(
+                        endrange, 
+                        baserange)
+                      )
+                    //var diff = JSON.stringify(feed.slice(0, msg.seq - unboxedreq.seq))
                     bog.box(diff, req.requester, key).then(boxed => {
                       var obj = {
                         requester: key.publicKey,

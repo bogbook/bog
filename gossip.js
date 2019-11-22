@@ -46,10 +46,8 @@ function sync (subs, keys) {
                 }
                 ws.onmessage = function (message) {
                   var req = JSON.parse(message.data) 
-                  console.log(req)
                   unbox(req.box, req.requester, keys).then(unboxed => {
                     var unboxedreq = JSON.parse(nacl.util.encodeUTF8(unboxed))
-                    console.log(unboxedreq)
                     if (unboxedreq.seq === 0) {
                       var stringedfeed = JSON.stringify(srclog)
                       box(stringedfeed, serverpub, keys).then(boxed => {
@@ -58,7 +56,6 @@ function sync (subs, keys) {
                           box: boxed
                         }
                         console.log('Sending entire log of ' + msg.author + ' to ' + serverpub)
-                        console.log(obj)
                         ws.send(JSON.stringify(obj))
                       })
                     }

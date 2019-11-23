@@ -79,11 +79,25 @@ function profilePage (src, keys) {
     }
   }, ['Delete feed']))
   
+  async function addPosts (posts, keys) {
+    posts.forEach(function (msg) {
+      if (msg.author === src) {
+        scroller.appendChild(render(msg, keys))
+      }
+    })
+  }
   bog().then(log => {
+    var index = 0
     if (log) {
-      log.forEach(function (msg) {
-        if (msg.author === src) {
-          scroller.appendChild(render(msg, keys))
+      var posts = log.slice(index, index + 25)
+      addPosts(posts, keys).then(done => {
+        window.onscroll = function(ev) {
+          if ((window.innerHeight + window.scrollY) >= document.body.scrollHeight) {
+            posts = log.slice(index, index + 25)
+            index = index + 25
+            addPosts(posts, keys)   
+            console.log("Bottom of page");
+          }
         }
       })
     }
@@ -145,10 +159,26 @@ function publicPage (keys) {
   scroller.appendChild(div)
 
   scroller.appendChild(composer(keys))
+
+  async function addPosts (posts, keys) {
+    posts.forEach(function (msg) {
+      scroller.appendChild(render(msg, keys))
+    })
+  }
+
   bog().then(log => {
+    var index = 0
     if (log) {
-      log.forEach(function (msg) {
-        scroller.appendChild(render(msg, keys))
+      var posts = log.slice(index, index + 25)
+      addPosts(posts, keys).then(done => {
+        window.onscroll = function(ev) {
+          if ((window.innerHeight + window.scrollY) >= document.body.scrollHeight) {
+            posts = log.slice(index, index + 25)
+            index = index + 25
+            addPosts(posts, keys)
+            console.log("Bottom of page");
+          }
+        }
       })
     }
   })

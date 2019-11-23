@@ -39,15 +39,18 @@ function profilePage (src, keys) {
     }
   }, ['Mentions'])
 
-  var respond = h('button', {
-    onclick: function () {
-      scroller.insertBefore(composer(keys, msg, gotName), scroller.childNodes[1])
-    }
-  }, ['Reply to ' + gotName.textContent])
+  quickName(src).then(name => {
+    console.log(name)
+    var respond = h('button', {
+      onclick: function () {
+        scroller.insertBefore(composer(keys, msg, name), scroller.childNodes[1])
+      }
+    }, ['Reply to ' + name])
+    profile.appendChild(respond)
+  })
 
   profile.appendChild(identify(src, profile, keys))
   profile.appendChild(mentionsButton)
-  profile.appendChild(respond)
 
   if (src != keys.publicKey) {
     localforage.getItem('subscriptions').then(function (subs) {

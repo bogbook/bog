@@ -81,7 +81,6 @@ async function unbox (boxed, sender, keys) {
   return message
 }
 
-
 // bog.get -- iterates over log and returns a post.
 // EX: get('%x5T7KZ5haR2F59ynUuCggwEdFXlLHEtFoBQIyKYppZYerq9oMoIqH76YzXQpw2DnYiM0ugEjePXv61g3E4l/Gw==').then(msg => { console.log(msg)})
 
@@ -140,6 +139,7 @@ function getName (id, keys) {
 
   localforage.getItem('name:' + id).then(cache => {
     if (cache) {
+      console.log(cache)
       return name.textContent = '@' + cache
     } else {
       bog().then(log => {
@@ -161,6 +161,16 @@ function getName (id, keys) {
     }
   })
   return name
+}
+
+async function quickName (id, keys) {
+  var cache = await localforage.getItem('name:' + id)
+
+  if (cache) {
+    return '@' + cache
+  } else {
+    return id.substring(0, 10)
+  }
 }
 
 // bog.regenerate -- regenerates main log by taking all of the feed logs, combinging them, and then sorting them
@@ -200,7 +210,6 @@ function regenerate (home) {
 // bog.log (feed) -- returns a specific feed if a parameter is passed, if not returns the entire log
 // EX: bog().then(log => { console.log(log)})
 // EX: bog('@ExE3QXmBhYQlGVA3WM2BD851turNzwhruWbIpMd7rbQ=').then(log => { console.log(log)})
-
 
 async function bog (feed) {
   if (feed) {

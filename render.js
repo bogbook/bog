@@ -46,9 +46,9 @@ function render (msg, keys, preview) {
           msg.text = nextPost.text
 
           var editedcontents = h('span', {id : 'content:' + msg.key, innerHTML: marked(nextPost.text)}) 
-
-          msgcontents.parentNode.replaceChild(editedcontents, msgcontents)
-          
+          if (msgcontents) {
+            msgcontents.parentNode.replaceChild(editedcontents, msgcontents)
+          }
           message.appendChild(h('div', [
             'edited in:', 
             h('a', {href: '#' + nextPost.key}, [nextPost.key.substring(0, 10) + '...'])
@@ -70,11 +70,11 @@ function render (msg, keys, preview) {
 
   var renderer = new marked.Renderer();
   renderer.link = function(href, title, text) {
-      if ((href[0] == '@') || (href[0] == '%')) {
-        href = '#' + href
-      }
-      var link = marked.Renderer.prototype.link.call(this, href, title, text);
-      return link
+    if ((href[0] == '@') || (href[0] == '%')) {
+      href = '#' + href
+    }
+    var link = marked.Renderer.prototype.link.call(this, href, title, text);
+    return link
   }
 
   marked.setOptions({
@@ -123,27 +123,28 @@ function render (msg, keys, preview) {
         h('a', {href: '#' + msg.reply}, [msg.reply.substring(0, 10) + '...'])
       ]))
     }
-    var gotName = getName(msg.author, keys)
-    message.appendChild(h('div',{id: 'content:' + msg.key, innerHTML: marked(msg.text)}))
-    if (!preview) {
-      message.appendChild(h('button', {
-        onclick: function () {
-          if (messageDiv.firstChild) {
-            messageDiv.insertBefore(h('div', {classList: 'submessage'}, [composer(keys, msg, gotName)]), messageDiv.childNodes[1])
-          } else {
-            messageDiv.appendChild(h('div', {classList: 'submessage'}, [composer(keys, msg, gotName)])) 
-          }
-        }
-      }, ['Reply']))
-      if (msg.author === keys.publicKey) {
+    quickName(msg.author).then(name => {
+      message.appendChild(h('div',{id: 'content:' + msg.key, innerHTML: marked(msg.text)}))
+      if (!preview) {
         message.appendChild(h('button', {
           onclick: function () {
-            var editor = h('div', [composer(keys, msg, {gotName: false}, {edit: true})])
-            message.appendChild(editor)
+            if (messageDiv.firstChild) {
+              messageDiv.insertBefore(h('div', {classList: 'submessage'}, [composer(keys, msg, name)]), messageDiv.childNodes[1])
+            } else {
+              messageDiv.appendChild(h('div', {classList: 'submessage'}, [composer(keys, msg, name)])) 
+            }
           }
-        }, ['Edit']))
+        }, ['Reply']))
+        if (msg.author === keys.publicKey) {
+          message.appendChild(h('button', {
+            onclick: function () {
+              var editor = h('div', [composer(keys, msg, {name: false}, {edit: true})])
+              message.appendChild(editor)
+            }
+          }, ['Edit']))
+        }
       }
-    }
+    })
   } else if (msg.type == 'name') {
     var mini = h('span', [' identified ', h('a', {href: '#' + msg.named }, [msg.named.substring(0, 10) + '...']), ' as ' + msg.name])
     message.appendChild(getHeader(msg, keys, mini))

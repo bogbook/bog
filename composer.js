@@ -6,7 +6,7 @@ function composer (keys, reply, gotName, edit) {
     console.log(reply)
     var textarea = h('textarea', [reply.text])
   } else if (gotName) {
-    var textarea = h('textarea', ['[' + gotName.textContent + '](' + reply.author + ')'])
+    var textarea = h('textarea', ['[' + gotName + '](' + reply.author + ')'])
   } else {
     var textarea = h('textarea', {placeholder: 'Write a new bog post...'})
   }

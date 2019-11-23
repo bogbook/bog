@@ -33,54 +33,52 @@ function profilePage (src, keys) {
 
   profile.appendChild(h('br'))
 
-  var mentionsButton = h('button', {
-    onclick: function () {
-      location.href = '#?' + src
-    }
-  }, ['Mentions'])
-
   quickName(src).then(name => {
-    console.log(name)
+    var mentionsButton = h('button', {
+      onclick: function () {
+        location.href = '#?' + src
+      }
+    }, [name + '\'s Mentions'])
+    profile.appendChild(mentionsButton)
     var respond = h('button', {
       onclick: function () {
         scroller.insertBefore(composer(keys, msg, name), scroller.childNodes[1])
       }
     }, ['Reply to ' + name])
     profile.appendChild(respond)
+
+    if (src != keys.publicKey) {
+      localforage.getItem('subscriptions').then(function (subs) {
+        if (subs.includes(src)) {
+          profile.appendChild(h('button', {
+            onclick: function () {
+              subs = subs.filter(a => a !== src)
+              localforage.setItem('subscriptions', subs).then(function () { location.reload() })
+            }
+          }, ['Unsubscribe from ' + name]))
+        } else {
+          profile.appendChild(h('button', {
+            onclick: function () {
+              subs.push(src)
+              localforage.setItem('subscriptions', subs).then(function () { location.reload() })
+            }
+          }, ['Subscribe to ' + name]))
+        }
+      })
+    }
+
+    profile.appendChild(h('button', {
+      onclick: function () {
+        localforage.removeItem(src).then(function () {
+          var home = true
+          regenerate(home)
+        })
+      }
+    }, ['Delete ' + name + '\'s feed']))
   })
 
   profile.appendChild(identify(src, profile, keys))
-  profile.appendChild(mentionsButton)
 
-  if (src != keys.publicKey) {
-    localforage.getItem('subscriptions').then(function (subs) {
-      if (subs.includes(src)) {
-        profile.appendChild(h('button', {
-          onclick: function () {
-            subs = subs.filter(a => a !== src)
-            localforage.setItem('subscriptions', subs).then(function () { location.reload() })
-          }
-        }, ['Unsubscribe']))
-      } else {
-        profile.appendChild(h('button', {
-          onclick: function () {
-            subs.push(src)
-            localforage.setItem('subscriptions', subs).then(function () { location.reload() })
-          }
-        }, ['Subscribe']))
-      }
-    })
-  }
-
-  profile.appendChild(h('button', {
-    onclick: function () {
-      localforage.removeItem(src).then(function () {
-        var home = true
-        regenerate(home)
-      })
-    }
-  }, ['Delete feed']))
-  
   async function addPosts (posts, keys) {
     posts.forEach(function (msg) {
       if (msg.author === src) {

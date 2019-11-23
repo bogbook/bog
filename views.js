@@ -91,6 +91,7 @@ function profilePage (src, keys) {
     if (log) {
       var posts = log.slice(index, index + 25)
       addPosts(posts, keys).then(done => {
+        index = index + 25
         window.onscroll = function(ev) {
           if ((window.innerHeight + window.scrollY) >= document.body.scrollHeight) {
             posts = log.slice(index, index + 25)
@@ -171,6 +172,7 @@ function publicPage (keys) {
     if (log) {
       var posts = log.slice(index, index + 25)
       addPosts(posts, keys).then(done => {
+        index = index + 25
         window.onscroll = function(ev) {
           if ((window.innerHeight + window.scrollY) >= document.body.scrollHeight) {
             posts = log.slice(index, index + 25)

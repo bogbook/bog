@@ -26,7 +26,6 @@ function profilePage (src, keys) {
   }
   timer()
 
-
   profile.appendChild(h('a', {href: '#' + src}, [
     getImage(src, keys, 'profileAvatar'),
     getName(src, keys)
@@ -96,7 +95,9 @@ function profilePage (src, keys) {
           if ((window.innerHeight + window.scrollY) >= document.body.scrollHeight) {
             posts = log.slice(index, index + 25)
             index = index + 25
-            addPosts(posts, keys)   
+            if (src === window.location.hash.substring(1)) {
+              addPosts(posts, keys)
+            }
             console.log("Bottom of page");
           }
         }
@@ -177,7 +178,9 @@ function publicPage (keys) {
           if ((window.innerHeight + window.scrollY) >= document.body.scrollHeight) {
             posts = log.slice(index, index + 25)
             index = index + 25
-            addPosts(posts, keys)
+            if ('' === window.location.hash.substring(1)) {
+              addPosts(posts, keys)
+            }
             console.log("Bottom of page");
           }
         }

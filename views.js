@@ -5,7 +5,6 @@ function threadPage (src, keys) {
 }
 
 function profilePage (src, keys) {
-  var gotName = getName(src, keys)
   var msg = {}
   msg.author = src
 

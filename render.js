@@ -1,3 +1,29 @@
+function renderAd (ad) {
+  var screen = document.getElementById('screen')
+  var adspot = document.getElementById('ad')
+
+  if (adspot) {
+    adspot.parentNode.removeChild(adspot)
+  }
+
+  newAd = h('div', {id: 'ad'}, [
+    h('span', {classList: 'right'}, [h('pre', ['Ad'])]),
+    h('p', {innerHTML: marked(ad.content)}),
+    h('button', {classList: 'right',
+      onclick: function () {
+        adspot = document.getElementById('ad')
+        adspot.parentNode.removeChild(adspot)
+      }
+    }, ['Heard']),
+    h('span', [
+      '—',
+      h('a', {href: ad.name}, [ad.name])
+    ])
+  ])
+
+  screen.appendChild(newAd)
+}
+
 function getHeader (post, keys, mini) {
   var getRaw = h('button', {
     onclick: function () {

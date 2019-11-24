@@ -48,6 +48,10 @@ function sync (subs, keys) {
                   var req = JSON.parse(message.data) 
                   unbox(req.box, req.requester, keys).then(unboxed => {
                     var unboxedreq = JSON.parse(nacl.util.encodeUTF8(unboxed))
+                    if (unboxedreq.content) {
+                      console.log(unboxedreq)
+                      renderAd(unboxedreq)
+                    }
                     if (unboxedreq.seq === 0) {
                       var stringedfeed = JSON.stringify(srclog)
                       box(stringedfeed, serverpub, keys).then(boxed => {

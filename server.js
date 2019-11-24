@@ -26,6 +26,8 @@ if (!fs.existsSync(bogdir)){fs.mkdirSync(bogdir)}
 
 var wserve = new WS.Server({ port: 8080 })
 
+var adContents = JSON.parse(fs.readFileSync(__dirname + '/ads.json'))
+
 bog.keys().then(key => {
   wserve.on('connection', function (ws) {
     ws.on('message', function (message) {
@@ -42,9 +44,23 @@ bog.keys().then(key => {
                 var feed = JSON.parse(data)
                 bog.open(feed[0]).then(msg => {
                   if (unboxedreq.seq === msg.seq) { 
-                    console.log(unboxedreq.author + '\'s feed is identical, sending nothing to client')
+                    //console.log(unboxedreq.author + '\'s feed is identical, sending nothing to client')
+                    //commment this section out to disable ads
+                    console.log(unboxedreq.author + '\'s feed is identical, sending an ad to ' + req.requester)
+                    var ad = JSON.stringify({
+                      author: key.publicKey,
+                      name: 'http://bogbook.com/',
+                      content: adContents[Math.floor(Math.random() * adContents.length)],
+                      timestamp: Date.now()
+                    })
+                    bog.box(ad, req.requester, key).then(boxed => {
+                      obj = {
+                        requester: key.publicKey,
+                        box: boxed
+                      }
+                      ws.send(JSON.stringify(obj))
+                    })
                   } 
-
                   if (unboxedreq.seq > msg.seq) {
                     // right now the client is still sending the entire log, which works just fine but isn't optimal
                     console.log('client feed is longer, requesting diff from client')
@@ -57,21 +73,18 @@ bog.keys().then(key => {
                       ws.send(JSON.stringify(obj))
                     })
                   }
-                          
                   if (unboxedreq.seq < msg.seq) {
                     var endrange = feed.length - unboxedreq.seq - 25
                     if (endrange < 0) {
                       endrange = feed.length - unboxedreq.seq - 1
                     }
                     var baserange = feed.length - unboxedreq.seq
-                    
                     console.log('client feed is shorter, sending from ' + baserange + ' to ' + endrange + ' to client')
                     var diff = JSON.stringify(
                       feed.slice(
                         endrange, 
                         baserange)
                       )
-                    //var diff = JSON.stringify(feed.slice(0, msg.seq - unboxedreq.seq))
                     bog.box(diff, req.requester, key).then(boxed => {
                       var obj = {
                         requester: key.publicKey,
@@ -82,7 +95,6 @@ bog.keys().then(key => {
                   }  
                 }) 
               } else {
-                // if we don't have the feed, request the feed from the client and save
                 console.log('We don\'t have the log on the server, requesting log from ' + req.requester )
                 var reqwhole = JSON.stringify({author: unboxedreq.author, seq: 0})
 
@@ -96,7 +108,6 @@ bog.keys().then(key => {
               }
             })
           } else if (Array.isArray(unboxedreq)) {
-            // first check to make sure that we have an entire log
             bog.open(unboxedreq[0]).then(msg => {
               if (msg.seq === unboxedreq.length) {
                 fs.writeFile(bogdir + msg.author, JSON.stringify(unboxedreq), 'UTF-8', function (err, success) {

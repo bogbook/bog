@@ -46,20 +46,23 @@ bog.keys().then(key => {
                   if (unboxedreq.seq === msg.seq) { 
                     //console.log(unboxedreq.author + '\'s feed is identical, sending nothing to client')
                     //commment this section out to disable ads
-                    console.log(unboxedreq.author + '\'s feed is identical, sending an ad to ' + req.requester)
-                    var ad = JSON.stringify({
-                      author: key.publicKey,
-                      name: 'http://bogbook.com/',
-                      content: adContents[Math.floor(Math.random() * adContents.length)],
-                      timestamp: Date.now()
-                    })
-                    bog.box(ad, req.requester, key).then(boxed => {
-                      obj = {
-                        requester: key.publicKey,
-                        box: boxed
-                      }
-                      ws.send(JSON.stringify(obj))
-                    })
+                    console.log(unboxedreq.author + '\'s feed is identical')
+                    if (Math.floor(Math.random() * 4) == 2) {
+                      console.log('sending an ad to ' + req.requester)
+                      var ad = JSON.stringify({
+                        author: key.publicKey,
+                        name: 'http://bogbook.com/',
+                        content: adContents[Math.floor(Math.random() * adContents.length)],
+                        timestamp: Date.now()
+                      })
+                      bog.box(ad, req.requester, key).then(boxed => {
+                        obj = {
+                          requester: key.publicKey,
+                          box: boxed
+                        }
+                        ws.send(JSON.stringify(obj))
+                      })
+                    }
                   } 
                   if (unboxedreq.seq > msg.seq) {
                     // right now the client is still sending the entire log, which works just fine but isn't optimal

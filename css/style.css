@@ -36,7 +36,6 @@ hr {
   margin-bottom: .9em;
 }
 
-
 #screen {
   position: absolute;
   top: 35px; 
@@ -51,6 +50,10 @@ hr {
   margin-left: auto;
 }
 
+@media only screen and (max-width: 480px) {
+  #screen { top: 57px; }
+}
+ 
 .right { float: right;}
 
 .message, .profile {

@@ -66,8 +66,8 @@ function composer (keys, reply, gotName, edit) {
                         messageDiv.removeChild(messageDiv.firstChild)
                         messageDiv = h('div')
                         messageDiv.appendChild(cache)
-                        scroller.insertBefore(messageDiv, scroller.childNodes[2])
-                        scroller.insertBefore(render(msg, keys), scroller.childNodes[3])
+                        scroller.insertBefore(messageDiv, scroller.childNodes[1])
+                        scroller.insertBefore(render(msg, keys), scroller.childNodes[2])
                       } else {
                         messageDiv.appendChild(render(msg, keys))
                       }

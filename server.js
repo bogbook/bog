@@ -1,3 +1,72 @@
+const HTTPPORT = 8089
+const WSPORT = 8080
+const URL = 'localhost'
+const ADVERTISEMENTS = true
+
+// const fullURL = 'http://bogbook.com/'
+const fullURL = 'http://' + URL + ':' + HTTPPORT + '/'
+
+if (process.argv[2] === 'verbose') {
+  var VERBOSE = true
+} else {
+  var VERBOSE = false
+}
+
+console.log('Verbose output is ' + VERBOSE + ' run with `node server verbose` to see all output')
+console.log('Advertisements are ' + ADVERTISEMENTS)
+
+// log messages
+
+function printAsk(req, unboxedreq) {
+  if (VERBOSE) {
+    console.log(req.requester + ' asked for feed ' + unboxedreq.author + ' after sequence ' + unboxedreq.seq)
+  }
+}
+
+function printNewFeed (msg, req) {
+  if (VERBOSE) 
+    console.log('Saved full log of ' + msg.author + ' sent by ' + req.requester)
+  else 
+    console.log('NEW FEED from ' + msg.author)
+}
+
+function printUpdateFeed (msg, req) {
+  if (VERBOSE)
+    console.log('combined existing feed of ' + msg.author + ' sent from ' + req.requester + ' with diff and saved to server')
+  else
+    console.log('NEW UPDATE from ' + msg.author)
+}
+
+function printNoFeed (msg, req) {
+  if (VERBOSE) { 
+    console.log('We don\'t have the log on the server, requesting log from ' + req.requester )
+  }
+}
+
+function printClientLonger (msg, req) {
+  if (VERBOSE) {
+    console.log(req.requester + '\'s feed of ' + msg.author  + ' is longer, requesting diff from ' + req.requester)
+  }
+}
+
+function printClientShorter (msg, req, baserange, endrange) {
+  if (VERBOSE) {
+    console.log(req.requester + ' feed of ' + msg.author + ' is shorter, sending from ' + baserange + ' to ' + endrange + ' to ' + req.requester)
+  }
+}
+
+function printFeedIdentical (msg, req) {
+  if (VERBOSE) { 
+    console.log(msg.author + '\'s feed sent from ' + req.requester + ' is identical')
+  }
+}
+
+function printSendAd (msg, req) {
+  if (VERBOSE) {
+    console.log('sent ad ' + msg.content + ' to ' + req.requester)  
+  }
+}
+
 // static server (8089)
 
 var fs = require('fs')
@@ -7,9 +76,11 @@ var open = require('open')
 
 http.createServer(
   serve({ root: __dirname})
-).listen(8089)
+).listen(HTTPPORT)
 
-open('http://localhost:8089')
+open(fullURL)
+
+console.log('Bogbook is running at: ' + fullURL)
 
 // ws server (8080)
 
@@ -24,7 +95,7 @@ var bogdir = homedir + '/.bogbook/bogs/'
 if (!fs.existsSync(homedir + '/.bogbook/')) {fs.mkdirSync(homedir + '/.bogbook/')}
 if (!fs.existsSync(bogdir)){fs.mkdirSync(bogdir)}
 
-var wserve = new WS.Server({ port: 8080 })
+var wserve = new WS.Server({ port: WSPORT })
 
 var adContents = JSON.parse(fs.readFileSync(__dirname + '/ads.json'))
 
@@ -38,35 +109,34 @@ bog.keys().then(key => {
         bog.unbox(req.box, req.requester, key).then(unboxed => {
           var unboxedreq = JSON.parse(nacl.util.encodeUTF8(unboxed))
           if (unboxedreq.seq >= 0) {
-            console.log(req.requester + ' asked for feed ' + unboxedreq.author + ' after sequence ' + unboxedreq.seq)
+            printAsk(req, unboxedreq)
             fs.readFile(bogdir + unboxedreq.author, 'UTF-8', function (err, data) {
               if (data) {
                 var feed = JSON.parse(data)
                 bog.open(feed[0]).then(msg => {
                   if (unboxedreq.seq === msg.seq) { 
-                    //console.log(unboxedreq.author + '\'s feed is identical, sending nothing to client')
-                    //commment this section out to disable ads
-                    console.log(unboxedreq.author + '\'s feed is identical')
-                    if (Math.floor(Math.random() * 4) == 2) {
-                      console.log('sending an ad to ' + req.requester)
-                      var ad = JSON.stringify({
-                        author: key.publicKey,
-                        name: 'http://bogbook.com/',
-                        content: adContents[Math.floor(Math.random() * adContents.length)],
-                        timestamp: Date.now()
-                      })
-                      bog.box(ad, req.requester, key).then(boxed => {
-                        obj = {
-                          requester: key.publicKey,
-                          box: boxed
+                    printFeedIdentical(msg, req)
+                    if (ADVERTISEMENTS) {
+                      if (Math.floor(Math.random() * 4) == 2) {
+                        var ad = {
+                          author: key.publicKey,
+                          name: fullURL,
+                          content: adContents[Math.floor(Math.random() * adContents.length)],
+                          timestamp: Date.now()
                         }
-                        ws.send(JSON.stringify(obj))
-                      })
+                        printSendAd(ad, req)
+                        bog.box(JSON.stringify(ad), req.requester, key).then(boxed => {
+                          obj = {
+                            requester: key.publicKey,
+                            box: boxed
+                          }
+                          ws.send(JSON.stringify(obj))
+                        })
+                      }
                     }
                   } 
                   if (unboxedreq.seq > msg.seq) {
-                    // right now the client is still sending the entire log, which works just fine but isn't optimal
-                    console.log('client feed is longer, requesting diff from client')
+                    printClientLonger(msg, req)
                     var reqdiff = JSON.stringify({author: unboxedreq.author, seq: msg.seq})
                     bog.box(reqdiff, req.requester, key).then(boxed => {
                       var obj = {
@@ -82,7 +152,7 @@ bog.keys().then(key => {
                       endrange = feed.length - unboxedreq.seq - 1
                     }
                     var baserange = feed.length - unboxedreq.seq
-                    console.log('client feed is shorter, sending from ' + baserange + ' to ' + endrange + ' to client')
+                    printClientShorter(msg, req, baserange, endrange)
                     var diff = JSON.stringify(
                       feed.slice(
                         endrange, 
@@ -98,7 +168,7 @@ bog.keys().then(key => {
                   }  
                 }) 
               } else {
-                console.log('We don\'t have the log on the server, requesting log from ' + req.requester )
+                printNoFeed(unboxedreq, req)
                 var reqwhole = JSON.stringify({author: unboxedreq.author, seq: 0})
 
                 bog.box(reqwhole, req.requester, key).then(boxed => {
@@ -114,7 +184,7 @@ bog.keys().then(key => {
             bog.open(unboxedreq[0]).then(msg => {
               if (msg.seq === unboxedreq.length) {
                 fs.writeFile(bogdir + msg.author, JSON.stringify(unboxedreq), 'UTF-8', function (err, success) {
-                  console.log('Saved full log of ' + msg.author + ' sent by ' + req.requester)
+                  printNewFeed(msg, req)
                 })
               } if (msg.seq > unboxedreq.length) {
                 fs.readFile(bogdir + msg.author, 'UTF-8', function (err, data) {
@@ -123,7 +193,7 @@ bog.keys().then(key => {
                     if (unboxedreq.length + lastmsg.seq === msg.seq) {
                       var newlog = unboxedreq.concat(feed)
                       fs.writeFile(bogdir + msg.author, JSON.stringify(newlog), 'UTF-8', function (err, success) {
-                        console.log('combined existing feed of ' + msg.author + ' with diff and saved to server')
+                        printUpdateFeed(msg, req)
                       })
                     }
                   })

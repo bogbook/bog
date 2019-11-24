@@ -123,16 +123,18 @@ function render (msg, keys, preview) {
         h('a', {href: '#' + msg.reply}, [msg.reply.substring(0, 10) + '...'])
       ]))
     }
-    quickName(msg.author).then(name => {
+    //quickName(msg.author).then(name => {
       message.appendChild(h('div',{id: 'content:' + msg.key, innerHTML: marked(msg.text)}))
       if (!preview) {
         message.appendChild(h('button', {
           onclick: function () {
-            if (messageDiv.firstChild) {
-              messageDiv.insertBefore(h('div', {classList: 'submessage'}, [composer(keys, msg, name)]), messageDiv.childNodes[1])
-            } else {
-              messageDiv.appendChild(h('div', {classList: 'submessage'}, [composer(keys, msg, name)])) 
-            }
+            quickName(msg.author).then(name => {
+              if (messageDiv.firstChild) {
+                messageDiv.insertBefore(h('div', {classList: 'submessage'}, [composer(keys, msg, name)]), messageDiv.childNodes[1])
+              } else {
+                messageDiv.appendChild(h('div', {classList: 'submessage'}, [composer(keys, msg, name)])) 
+              }
+            })
           }
         }, ['Reply']))
         if (msg.author === keys.publicKey) {
@@ -144,7 +146,7 @@ function render (msg, keys, preview) {
           }, ['Edit']))
         }
       }
-    })
+    //})
   } else if (msg.type == 'name') {
     var mini = h('span', [' identified ', h('a', {href: '#' + msg.named }, [msg.named.substring(0, 10) + '...']), ' as ' + msg.name])
     message.appendChild(getHeader(msg, keys, mini))

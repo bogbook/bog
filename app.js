@@ -8,10 +8,8 @@ function route (keys) {
   var screen = document.getElementById('screen')
   screen.appendChild(scroller)
 
-  if (src === 'key') {
-    keyPage(keys)
-  } else if (src === 'pubs') {
-    pubs()
+  if (src === 'settings') {
+    settingsPage(keys)
   } else if (src[0] === '@') {
     profilePage(src, keys)
   } else if (src[0] === '?') {
@@ -30,9 +28,7 @@ keys().then(key => {
     h('div', {classList: 'internal'}, [
       h('li', [h('a', {href: '#'}, ['Home'])]),
       h('li', [h('a', {href: '#' + key.publicKey}, [getName(key.publicKey, keys)])]),
-      h('li', [h('a', {href: '#key'}, ['Key'])]),
-      h('li', [h('a', {href: '#pubs'}, ['Pubs'])]),
-      h('li', {classList: 'right'}, [h('a', {href: 'http://git.sr.ht/~ev/bogbook'}, ['Git'])]),
+      h('li', {classList: 'right'}, [h('a', {href: '#settings'}, ['Settings'])]),
       h('form', { classList: 'search', 
         onsubmit: function (e) {
           window.location.hash = '?' + search.value

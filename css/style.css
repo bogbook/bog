@@ -61,6 +61,8 @@ hr {
   border-radius: 5px;
 }
 
+#scroller:last-child { margin-bottom: 10em; }
+
 .message, .message > *, .navbar, .navbar > * {
   animation: fadein .5s;
 }
@@ -167,17 +169,18 @@ textarea {
 }
 
 form.search, input.search {
-  width: 100px;
+  width: 175px;
   float: right;
   margin: 0;
   padding: 0;
+  padding-left: .1em;
   color: #f5f5f5;
   background: #444;
   border-radius: 3px;
 }
 
 form.search {
-  margin-top: .3em;
+  margin-top: .20em;
 }
 
 .navbar li.right {

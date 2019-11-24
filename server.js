@@ -1,5 +1,6 @@
 // static server (8089)
 
+var fs = require('fs')
 var http = require('http')
 var serve = require('ecstatic')
 var open = require('open')
@@ -14,19 +15,14 @@ open('http://localhost:8089')
 
 var bog = require('./bog')
 var WS = require('ws')
-var fs = require('fs')
 var nacl = require('tweetnacl')
     nacl.util = require('tweetnacl-util')
+
 var homedir = require('os').homedir()
-var sanitize = require('sanitize-filename')
-
-
 var bogdir = homedir + '/.bogbook/bogs/'
-var blobdir = homedir + '/.bogbook/blobs/'
 
 if (!fs.existsSync(homedir + '/.bogbook/')) {fs.mkdirSync(homedir + '/.bogbook/')}
 if (!fs.existsSync(bogdir)){fs.mkdirSync(bogdir)}
-if (!fs.existsSync(blobdir)){fs.mkdirSync(blobdir)}
 
 var wserve = new WS.Server({ port: 8080 })
 

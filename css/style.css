@@ -51,7 +51,7 @@ hr {
 }
 
 @media only screen and (max-width: 480px) {
-  #screen { top: 57px; }
+  #screen { top: 57px; right: 5px; left: 5px; }
 }
  
 .right { float: right;}

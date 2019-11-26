@@ -91,6 +91,7 @@ var nacl = require('tweetnacl')
 
 var homedir = require('os').homedir()
 var bogdir = homedir + '/.bogbook/bogs/'
+var addir = homedir + '/.bogbook/ads/'
 
 if (!fs.existsSync(homedir + '/.bogbook/')) {fs.mkdirSync(homedir + '/.bogbook/')}
 if (!fs.existsSync(bogdir)){fs.mkdirSync(bogdir)}
@@ -118,19 +119,31 @@ bog.keys().then(key => {
                     printFeedIdentical(msg, req)
                     if (ADVERTISEMENTS) {
                       if (Math.floor(Math.random() * 4) == 2) {
-                        var ad = {
-                          author: key.publicKey,
-                          name: fullURL,
-                          content: adContents[Math.floor(Math.random() * adContents.length)],
-                          timestamp: Date.now()
-                        }
-                        printSendAd(ad, req)
-                        bog.box(JSON.stringify(ad), req.requester, key).then(boxed => {
-                          obj = {
-                            requester: key.publicKey,
-                            box: boxed
-                          }
-                          ws.send(JSON.stringify(obj))
+                        fs.readdir(addir, function (err, adfiles) {
+                          var num = Math.floor(Math.random() * (adfiles.length)) 
+                          console.log(num)
+                          fs.readFile(addir + adfiles[num], 'UTF-8', function (err, adFile) {
+                            console.log(adFile)
+                            var obj = JSON.parse(adFile)
+                            console.log(obj)
+                            var ad = {
+                              author: key.publicKey,
+                              name: fullURL,
+                              content: obj.ad,
+                              timestamp: Date.now(),
+                              views: obj.views
+                            }
+                            obj.views++
+                            fs.writeFileSync(addir + obj.hash, JSON.stringify(obj), 'UTF-8')
+                            printSendAd(ad, req)
+                            bog.box(JSON.stringify(ad), req.requester, key).then(boxed => {
+                              sendobj = {
+                                requester: key.publicKey,
+                                box: boxed
+                              }
+                              ws.send(JSON.stringify(sendobj))    
+                            })
+                          })
                         })
                       }
                     }

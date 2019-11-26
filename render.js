@@ -7,7 +7,7 @@ function renderAd (ad) {
   }
 
   newAd = h('div', {id: 'ad'}, [
-    h('span', {classList: 'right'}, [h('pre', ['Ad'])]),
+    h('span', {classList: 'right'}, [h('pre', [ad.views + ' views'])]),
     h('p', {innerHTML: marked(ad.content)}),
     h('button', {classList: 'right',
       onclick: function () {

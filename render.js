@@ -6,8 +6,16 @@ function renderAd (ad) {
     adspot.parentNode.removeChild(adspot)
   }
 
+  var adspace = h('span')
+
+  if (ad.views) {
+    adspace.appendChild(h('span', {classList: 'right'}, [h('pre', [ad.views + ' views'])]))
+  } else {
+    adspace.appendChild(h('span', {classList: 'right'}, [h('pre', ['ad'])]))
+  }
+
   newAd = h('div', {id: 'ad'}, [
-    h('span', {classList: 'right'}, [h('pre', [ad.views + ' views'])]),
+    adspace,
     h('p', {innerHTML: marked(ad.content)}),
     h('button', {classList: 'right',
       onclick: function () {

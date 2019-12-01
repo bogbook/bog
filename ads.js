@@ -27,12 +27,7 @@ function make (ad) {
 if (process.argv[2]) { 
   var ad = process.argv[2]
   make(ad)
-} if (ad) {
-  console.log(ad)
-  makeAd(ad)
-} else {
-  console.log('Please write an ad. Ex: `node ads.js "Hello World"')
-}
+} 
 
 module.exports = {
   make

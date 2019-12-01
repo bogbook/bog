@@ -26,7 +26,7 @@ function make (ad) {
 
 if (process.argv[2]) { 
   var ad = process.argv[2]
-  makeAd(ad)
+  make(ad)
 } if (ad) {
   console.log(ad)
   makeAd(ad)

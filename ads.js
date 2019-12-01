@@ -8,7 +8,7 @@ var addir = homedir + '/.bogbook/ads/'
 if (!fs.existsSync(homedir + '/.bogbook/')) {fs.mkdirSync(homedir + '/.bogbook/')}
 if (!fs.existsSync(addir)){fs.mkdirSync(addir)}
 
-function makeAd (ad) {
+function make (ad) {
   console.log(ad)
   
   var hex = Buffer.from(nacl.hash(nacl.util.decodeUTF8(ad))).toString('hex')
@@ -27,6 +27,13 @@ function makeAd (ad) {
 if (process.argv[2]) { 
   var ad = process.argv[2]
   makeAd(ad)
+} if (ad) {
+  console.log(ad)
+  makeAd(ad)
 } else {
   console.log('Please write an ad. Ex: `node ads.js "Hello World"')
+}
+
+module.exports = {
+  make
 }

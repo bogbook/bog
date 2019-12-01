@@ -3,7 +3,8 @@ const WSPORT = 8080
 const URL = 'localhost'
 const ADVERTISEMENTS = true
 
-// const fullURL = 'http://bogbook.com/'
+var ads = require('./ads')
+
 const fullURL = 'http://' + URL + ':' + HTTPPORT + '/'
 
 if (process.argv[2] === 'verbose') {
@@ -98,8 +99,6 @@ if (!fs.existsSync(bogdir)){fs.mkdirSync(bogdir)}
 
 var wserve = new WS.Server({ port: WSPORT })
 
-var adContents = JSON.parse(fs.readFileSync(__dirname + '/ads.json'))
-
 bog.keys().then(key => {
   wserve.on('connection', function (ws) {
     ws.on('message', function (message) {
@@ -120,30 +119,31 @@ bog.keys().then(key => {
                     if (ADVERTISEMENTS) {
                       if (Math.floor(Math.random() * 4) == 2) {
                         fs.readdir(addir, function (err, adfiles) {
-                          var num = Math.floor(Math.random() * (adfiles.length)) 
-                          console.log(num)
-                          fs.readFile(addir + adfiles[num], 'UTF-8', function (err, adFile) {
-                            console.log(adFile)
-                            var obj = JSON.parse(adFile)
-                            console.log(obj)
-                            var ad = {
-                              author: key.publicKey,
-                              name: fullURL,
-                              content: obj.ad,
-                              timestamp: Date.now(),
-                              views: obj.views
-                            }
-                            obj.views++
-                            fs.writeFileSync(addir + obj.hash, JSON.stringify(obj), 'UTF-8')
-                            printSendAd(ad, req)
-                            bog.box(JSON.stringify(ad), req.requester, key).then(boxed => {
-                              sendobj = {
-                                requester: key.publicKey,
-                                box: boxed
+                          if (adfiles[0]) {
+                            var num = Math.floor(Math.random() * (adfiles.length)) 
+                            fs.readFile(addir + adfiles[num], 'UTF-8', function (err, adFile) {
+                              var obj = JSON.parse(adFile)
+                              var ad = {
+                                author: key.publicKey,
+                                name: fullURL,
+                                content: obj.ad,
+                                timestamp: Date.now(),
+                                views: obj.views
                               }
-                              ws.send(JSON.stringify(sendobj))    
+                              obj.views++
+                              fs.writeFileSync(addir + obj.hash, JSON.stringify(obj), 'UTF-8')
+                              printSendAd(ad, req)
+                              bog.box(JSON.stringify(ad), req.requester, key).then(boxed => {
+                                sendobj = {
+                                  requester: key.publicKey,
+                                  box: boxed
+                                }
+                                ws.send(JSON.stringify(sendobj))    
+                              })
                             })
-                          })
+                          } else {
+                            ads.make('Hello World.')
+                          }
                         })
                       }
                     }

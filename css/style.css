@@ -214,7 +214,6 @@ form.search {
   margin-right: 1.7em;
   float: right;
   list-style-type: none;
-  background: #333;
   border-radius: 100%;
 }
 
@@ -236,7 +235,7 @@ button {
   display: inline-block;
   *display: inline;
   padding: 4px 12px;
-  margin-top: 0;
+  margin-top: 5px;
   margin-bottom: 0;
   *margin-left: .3em;
   font-size: 14px;

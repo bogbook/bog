@@ -14,22 +14,27 @@ function renderAd (ad) {
     adspace.appendChild(h('span', {classList: 'right'}, [h('pre', ['ad'])]))
   }
 
-  newAd = h('div', {id: 'ad'}, [
-    adspace,
-    h('p', {innerHTML: marked(ad.content)}),
-    h('button', {classList: 'right',
-      onclick: function () {
-        adspot = document.getElementById('ad')
-        adspot.parentNode.removeChild(adspot)
-      }
-    }, ['Heard']),
-    h('span', [
-      '—',
-      h('a', {href: ad.name}, [ad.name])
-    ])
-  ])
-
-  screen.appendChild(newAd)
+  open(ad).then(opened => {
+    quickName(ad.author).then(gotName => {
+      newAd = h('div', {id: 'ad'}, [
+        adspace,
+        h('p', {innerHTML: marked(opened)}),
+        h('button', {classList: 'right',
+          onclick: function () {
+            adspot = document.getElementById('ad')
+            adspot.parentNode.removeChild(adspot)
+          }
+        }, ['Heard']),
+        h('span', [
+          '—',
+          h('a', {href: '#' + ad.author}, [gotName]),
+          ' from ',
+          h('a', {href: ad.name}, [ad.name])
+        ])
+      ])
+      screen.appendChild(newAd)
+    }) 
+  })
 }
 
 function getHeader (post, keys, mini) {

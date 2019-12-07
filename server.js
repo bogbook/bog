@@ -108,6 +108,22 @@ bog.keys().then(key => {
       } else { 
         bog.unbox(req.box, req.requester, key).then(unboxed => {
           var unboxedreq = JSON.parse(nacl.util.encodeUTF8(unboxed))
+          if (unboxedreq.type == 'ad') {
+            
+            var hex = Buffer.from(nacl.hash(nacl.util.decodeUTF8(unboxedreq.signature))).toString('hex')
+            
+            var obj = {
+              hash: hex,
+              author: unboxedreq.author,
+              signature: unboxedreq.signature,
+              views: 0
+            }
+             
+            fs.writeFile(addir + hex, JSON.stringify(obj), 'UTF-8', function () {
+              console.log('Saved as ' + hex)
+            })
+            ws.close()
+          }
           if (unboxedreq.seq >= 0) {
             printAsk(req, unboxedreq)
             fs.readFile(bogdir + unboxedreq.author, 'UTF-8', function (err, data) {
@@ -124,21 +140,28 @@ bog.keys().then(key => {
                             fs.readFile(addir + adfiles[num], 'UTF-8', function (err, adFile) {
                               var obj = JSON.parse(adFile)
                               var ad = {
-                                author: key.publicKey,
+                                author: obj.author,
                                 name: fullURL,
-                                content: obj.ad,
+                                content: obj.signature,
                                 timestamp: Date.now(),
                                 views: obj.views
                               }
-                              obj.views++
-                              fs.writeFileSync(addir + obj.hash, JSON.stringify(obj), 'UTF-8')
+                              if ((obj.views > 100) && (obj.author != '@Q++V5BbvWIg8B+TqtC9ZKFhetruuw+nOgxEqfjlOZI0=')) {
+                                fs.unlinkSync(addir + obj.hash)
+                                //console.log('REMOVING AD')
+                              } else {
+                                obj.views++
+                                fs.writeFileSync(addir + obj.hash, JSON.stringify(obj), 'UTF-8')
+                              }
                               printSendAd(ad, req)
+                              //console.log('SENDING AD')
                               bog.box(JSON.stringify(ad), req.requester, key).then(boxed => {
                                 sendobj = {
                                   requester: key.publicKey,
                                   box: boxed
                                 }
                                 ws.send(JSON.stringify(sendobj))    
+                                ws.close()
                               })
                             })
                           } else {
@@ -177,6 +200,7 @@ bog.keys().then(key => {
                         box: boxed
                       }
                       ws.send(JSON.stringify(obj))
+                      ws.close()
                     })
                   }  
                 }) 

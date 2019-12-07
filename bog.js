@@ -12,7 +12,6 @@ if ((typeof process !== 'undefined') && (process.release.name === 'node')) {
 // EX:  open(msg).then(content => { console.log(content) })
 
 async function open (msg) {
-
   var pubkey = nacl.util.decodeBase64(msg.author.substring(1))
   var sig = nacl.util.decodeBase64(msg.signature)
   var opened = await JSON.parse(nacl.util.encodeUTF8(nacl.sign.open(sig, pubkey)))
@@ -139,7 +138,7 @@ function getName (id, keys) {
 
   localforage.getItem('name:' + id).then(cache => {
     if (cache) {
-      console.log(cache)
+      //console.log(cache)
       return name.textContent = '@' + cache
     } else {
       bog().then(log => {
@@ -182,7 +181,7 @@ function regenerate (home) {
     if (key[0] == '@') {
       newlog = newlog.concat(value)
     }
-    console.log(newlog)
+    //console.log(newlog)
   }).then(function () {
     newlog.forEach(function (msg) {
       var pubkey = nacl.util.decodeBase64(msg.author.substring(1))
@@ -192,7 +191,7 @@ function regenerate (home) {
 
       openedlog.push(opened)
     })
-    console.log(openedlog)
+    //console.log(openedlog)
 
     openedlog.sort((a, b) => a.timestamp - b.timestamp)
 

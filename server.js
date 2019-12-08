@@ -1,11 +1,30 @@
-const HTTPPORT = 8089
-const WSPORT = 8080
-const URL = 'localhost'
-const ADVERTISEMENTS = true
+var fs = require('fs')
+var homedir = require('os').homedir()
 
-var ads = require('./ads')
+var path = homedir + '/.bogbook/'
+var bogdir = path + 'bogs/'
+var addir = path + 'ads/'
+var confpath = path + 'config.json'
 
-const fullURL = 'http://' + URL + ':' + HTTPPORT + '/'
+if (fs.existsSync(confpath)) {
+  console.log('loading config from ' + confpath)
+  var config = require(confpath)
+} else {
+  var config = {
+    port: '8089',
+    wsport: '8080',
+    url: 'localhost',
+    ads: true,
+    author: '@Q++V5BbvWIg8B+TqtC9ZKFhetruuw+nOgxEqfjlOZI0='
+  }
+  config.fullurl = 'http://' + config.url + ':' + config.port + '/' 
+  fs.writeFileSync(confpath, JSON.stringify(config), 'utf-8')
+}
+
+console.log(config)
+
+if (!fs.existsSync(homedir + '/.bogbook/')) {fs.mkdirSync(homedir + '/.bogbook/')}
+if (!fs.existsSync(bogdir)){fs.mkdirSync(bogdir)}
 
 if (process.argv[2] === 'verbose') {
   var VERBOSE = true
@@ -14,7 +33,7 @@ if (process.argv[2] === 'verbose') {
 }
 
 console.log('Verbose output is ' + VERBOSE + ' run with `node server verbose` to see all output')
-console.log('Advertisements are ' + ADVERTISEMENTS)
+console.log('Advertisements are ' + config.ads)
 
 // log messages
 
@@ -70,34 +89,26 @@ function printSendAd (msg, req) {
 
 // static server (8089)
 
-var fs = require('fs')
-var http = require('http')
-var serve = require('ecstatic')
+var serve = require('koa-static-server')
+var koa = require('koa')
 var open = require('open')
 
-http.createServer(
-  serve({ root: __dirname})
-).listen(HTTPPORT)
+var app = new koa()
 
-open(fullURL)
+app.use(serve({rootDir: '.', notFoundFile: 'index.html'}))
 
-console.log('Bogbook is running at: ' + fullURL)
+app.listen(config.port)
 
-// ws server (8080)
+open(config.fullurl)
+
+console.log('Bogbook is running at: ' + config.fullurl)
 
 var bog = require('./bog')
 var WS = require('ws')
 var nacl = require('tweetnacl')
     nacl.util = require('tweetnacl-util')
 
-var homedir = require('os').homedir()
-var bogdir = homedir + '/.bogbook/bogs/'
-var addir = homedir + '/.bogbook/ads/'
-
-if (!fs.existsSync(homedir + '/.bogbook/')) {fs.mkdirSync(homedir + '/.bogbook/')}
-if (!fs.existsSync(bogdir)){fs.mkdirSync(bogdir)}
-
-var wserve = new WS.Server({ port: WSPORT })
+var wserve = new WS.Server({ port: config.wsport })
 
 bog.keys().then(key => {
   wserve.on('connection', function (ws) {
@@ -132,7 +143,7 @@ bog.keys().then(key => {
                 bog.open(feed[0]).then(msg => {
                   if (unboxedreq.seq === msg.seq) { 
                     printFeedIdentical(msg, req)
-                    if (ADVERTISEMENTS) {
+                    if (config.ads) {
                       if (Math.floor(Math.random() * 4) == 2) {
                         fs.readdir(addir, function (err, adfiles) {
                           if (adfiles[0]) {
@@ -141,12 +152,12 @@ bog.keys().then(key => {
                               var obj = JSON.parse(adFile)
                               var ad = {
                                 author: obj.author,
-                                name: fullURL,
+                                name: config.fullurl,
                                 content: obj.signature,
                                 timestamp: Date.now(),
                                 views: obj.views
                               }
-                              if ((obj.views > 100) && (obj.author != '@Q++V5BbvWIg8B+TqtC9ZKFhetruuw+nOgxEqfjlOZI0=')) {
+                              if ((obj.views > 100) && (obj.author != config.author)) {
                                 fs.unlinkSync(addir + obj.hash)
                                 //console.log('REMOVING AD')
                               } else {

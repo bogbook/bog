@@ -92,13 +92,11 @@ function profilePage (src, keys) {
       addPosts(posts, keys).then(done => {
         index = index + 25
         window.onscroll = function(ev) {
-          if ((window.innerHeight + window.scrollY) >= document.body.scrollHeight) {
+          if (((window.innerHeight + window.scrollY) >= document.body.scrollHeight) && (window.location.hash.substring(1) === src)) {
             posts = log.slice(index, index + 25)
             index = index + 25
-            if (src === window.location.hash.substring(1)) {
-              addPosts(posts, keys)
-            }
-            //console.log("Bottom of page");
+            addPosts(posts, keys)
+            console.log("Bottom of page")
           }
         }
       })
@@ -157,13 +155,11 @@ function publicPage (keys) {
       addPosts(posts, keys).then(done => {
         index = index + 25
         window.onscroll = function(ev) {
-          if ((window.innerHeight + window.scrollY) >= document.body.scrollHeight) {
+          if (((window.innerHeight + window.scrollY) >= document.body.scrollHeight) && window.location.hash.substring(1) === '') {
             posts = log.slice(index, index + 25)
             index = index + 25
-            if ('' === window.location.hash.substring(1)) {
-              addPosts(posts, keys)
-            }
-            //console.log("Bottom of page");
+            addPosts(posts, keys)
+            console.log("Bottom of page")
           }
         }
       })

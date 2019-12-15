@@ -54,8 +54,9 @@ function composer (keys, reply, gotName, edit) {
                       if (edit) {
                         console.log('APPENDING EDIT')
                         var gotit = document.getElementById(reply.key)
-                        gotit.appendChild(h('div', {classList: 'submessage'}, [render(msg, keys)]))
+                        //gotit.appendChild(h('div', {classList: 'submessage'}, [render(msg, keys)]))
                         var newContent = h('div', {innerHTML: marked(msg.text)})
+                        //console.log(gotit.childNodes.length)
                         gotit.firstChild.replaceChild(newContent, gotit.firstChild.childNodes[1])
                       }
                       if (reply) {

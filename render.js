@@ -102,6 +102,10 @@ function render (msg, keys, preview) {
           if (!messageExists) {
             messageDiv.appendChild(h('div', {classList: 'submessage'}, [render(nextPost, keys)]))
           }
+        } 
+
+        if (nextPost.imaged == msg.key) {
+          message.insertBefore(h('img', {src: nextPost.image, classList: 'image'}), message.childNodes[message.childNodes.length - 1])
         }
       })
     }
@@ -163,8 +167,9 @@ function render (msg, keys, preview) {
       ]))
     }
     message.appendChild(h('div',{id: 'content:' + msg.key, innerHTML: marked(msg.text)}))
+    var buttons = h('div')
     if (!preview) {
-      message.appendChild(h('button', {
+      buttons.appendChild(h('button', {
         onclick: function () {
           quickName(msg.author).then(name => {
             var compose = h('div', {classList: 'submessage'}, [composer(keys, msg, name)])
@@ -177,13 +182,16 @@ function render (msg, keys, preview) {
         }
       }, ['Reply']))
       if (msg.author === keys.publicKey) {
-        message.appendChild(h('button', {
+        buttons.appendChild(h('button', {
           onclick: function () {
             var editor = h('div', {classList: 'submessage'}, [composer(keys, msg, {name: false}, {edit: true})])
             messageDiv.appendChild(editor)
           }
         }, ['Edit']))
+        buttons.appendChild(identify(msg.key, message, keys))
       }
+
+      message.appendChild(buttons)
     }
   } else if (msg.type == 'name') {
     var mini = h('span', [' identified ', h('a', {href: '#' + msg.named }, [msg.named.substring(0, 10) + '...']), ' as ' + msg.name])

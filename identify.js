@@ -2,7 +2,7 @@ function identify (src, profile, keys) {
 
   var identifyDiv = h('div')
 
-  if (src != keys.publicKey) {
+  if ((src[0] == '@') && (src != keys.publicKey)) {
     identifyDiv.appendChild(h('p', ['Please note: ' + src + ' is not you.']))
   }
 
@@ -14,8 +14,8 @@ function identify (src, profile, keys) {
         var canvas = document.getElementById("canvas")
         var ctx = canvas.getContext("2d")
         
-        var maxW = 250
-        var maxH = 250
+        var maxW
+        var maxH
         
         var input = document.getElementById('input')
         input.addEventListener('change', handleFiles)
@@ -24,7 +24,23 @@ function identify (src, profile, keys) {
           var img = new Image
           img.onload = function() {
             var iw = img.width
+            console.log(iw)
             var ih = img.height
+            console.log(ih)
+
+            if (iw > ih) {
+              maxW = 680
+              maxH = 500
+            } 
+            if (iw < ih) {
+              maxW = 500
+              maxH = 680
+            } 
+            if (iw == ih) {
+              maxW = 500
+              maxH = 500
+            }  
+            
             var scale = Math.min((maxW/iw), (maxH/ih))
             var iwScaled = iw*scale
             var ihScaled = ih*scale
@@ -33,13 +49,11 @@ function identify (src, profile, keys) {
             ctx.drawImage(img, 0, 0, iwScaled, ihScaled)
             console.log(canvas.toDataURL('image/jpeg', 0.9))
             photoURL.value = canvas.toDataURL('image/jpeg', 0.9)
-            //identifyDiv.appendChild(h('img', {src: photoURL.value}))
           }
           img.src = URL.createObjectURL(e.target.files[0])
         } 
       }
     }),
-    h('p', ['We recommend uploading a square photo. It will automatically be cropped to 250 x 250 px.']),
     h('canvas', {id: 'canvas', width: '0', height: '0'}),
     h('button', {
       onclick: function () {
@@ -102,35 +116,49 @@ function identify (src, profile, keys) {
     }, ['Cancel'])
   ])
  
-  var identifyButtons = h('span', [
-    h('button', {
+  var identifyButtons = h('span')
+
+  if (src[0] == '@') {
+    identifyButtons.appendChild(h('button', {
       onclick: function () {
         identifyDiv.appendChild(newName)
         identifyButtons.parentNode.removeChild(identifyButtons)
       }
-    }, ['Identify ' + src.substring(0, 10) + '... with a new name']),
-    h('button', {
-      onclick: function () {
-        identifyDiv.appendChild(newPhoto)
-        identifyButtons.parentNode.removeChild(identifyButtons)
-      }
-    }, ['Identify ' + src.substring(0, 10) + '... with a new photo']),
-    h('button', {
-      onclick: function () {
-        identifyDiv.appendChild(identifyButton)
-        identifyButtons.parentNode.removeChild(identifyButtons)
-      }
-    }, ['Cancel'])
-  ])
+    }, ['New name']))
 
-  var identifyButton = h('button', {
+  }
+  //}, ['Identify ' + src.substring(0, 10) + '... with a new name']),
+  identifyButtons.appendChild(h('button', {
     onclick: function () {
-      profile.appendChild(identifyDiv) 
-      profile.appendChild(identifyButtons)
-      identifyButton.parentNode.removeChild(identifyButton)
+      identifyDiv.appendChild(newPhoto)
+      identifyButtons.parentNode.removeChild(identifyButtons)
     }
-  },['Identify ' + src.substring(0, 10) + '...'])
+  }, ['New image']))
+  //}, ['Identify ' + src.substring(0, 10) + '... with a new photo']),
+  identifyButtons.appendChild(h('button', {
+    onclick: function () {
+      identifyDiv.appendChild(identifyButton)
+      identifyButtons.parentNode.removeChild(identifyButtons)
+    }
+  }, ['Cancel']))
 
+  if (src[0] == '@') {
+    var identifyButton = h('button', {
+      onclick: function () {
+        profile.appendChild(identifyDiv) 
+        profile.appendChild(identifyButtons)
+        identifyButton.parentNode.removeChild(identifyButton)
+      }
+    }, ['Identify ' + src.substring(0, 10) + '...'])
+  } else {
+    var identifyButton = h('button', {
+      onclick: function () {
+        profile.appendChild(identifyDiv) 
+        profile.appendChild(identifyButtons)
+        identifyButton.parentNode.removeChild(identifyButton)
+      }
+    }, ['Add to ' + src.substring(0, 10) + '...'])
+  }
   return identifyButton
 }
 

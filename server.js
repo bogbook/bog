@@ -144,7 +144,7 @@ bog.keys().then(key => {
                   if (unboxedreq.seq === msg.seq) { 
                     printFeedIdentical(msg, req)
                     if (config.ads) {
-                      if (Math.floor(Math.random() * 4) == 2) {
+                      if (Math.floor(Math.random() * 6) == 2) {
                         fs.readdir(addir, function (err, adfiles) {
                           if (adfiles[0]) {
                             var num = Math.floor(Math.random() * (adfiles.length)) 

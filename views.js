@@ -15,7 +15,7 @@ function profilePage (src, keys) {
 
   var subs = [src]
 
-  var interval = 1000
+  var interval = 500
   timer = function() {
     if (src === window.location.hash.substring(1)) {
       if (interval < 10000) { interval = interval + 100 }
@@ -122,10 +122,10 @@ function searchPage (src, keys) {
 
 function publicPage (keys) {
   localforage.getItem('subscriptions').then(function (subs) {
-    var interval = 10000
+    var interval = 1000
     timer = function() {
       if ('' === window.location.hash.substring(1)) {
-        if (interval < 100000) { interval = interval + 1000 }
+        if (interval < 10000) { interval = interval + 1000 }
         sync(subs, keys)
         setTimeout(timer, interval)
       }

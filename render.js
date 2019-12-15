@@ -169,7 +169,7 @@ function render (msg, keys, preview) {
           quickName(msg.author).then(name => {
             var compose = h('div', {classList: 'submessage'}, [composer(keys, msg, name)])
             if (messageDiv.firstChild) {
-              messageDiv.insertBefore(compose), messageDiv.childNodes[1])
+              messageDiv.insertBefore(compose, messageDiv.childNodes[1])
             } else {
               messageDiv.appendChild(compose) 
             }

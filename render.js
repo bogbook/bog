@@ -157,7 +157,6 @@ function render (msg, keys, preview) {
     message.appendChild(getHeader(msg, keys))
 
     if (msg.reply) {
-      //message.appendChild(h('span', [
       message.firstChild.appendChild(h('span', [
         're: ',
         h('a', {href: '#' + msg.reply}, [msg.reply.substring(0, 10) + '...'])
@@ -168,10 +167,11 @@ function render (msg, keys, preview) {
       message.appendChild(h('button', {
         onclick: function () {
           quickName(msg.author).then(name => {
+            var compose = h('div', {classList: 'submessage'}, [composer(keys, msg, name)])
             if (messageDiv.firstChild) {
-              messageDiv.insertBefore(h('div', {classList: 'submessage'}, [composer(keys, msg, name)]), messageDiv.childNodes[1])
+              messageDiv.insertBefore(compose), messageDiv.childNodes[1])
             } else {
-              messageDiv.appendChild(h('div', {classList: 'submessage'}, [composer(keys, msg, name)])) 
+              messageDiv.appendChild(compose) 
             }
           })
         }

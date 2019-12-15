@@ -231,7 +231,11 @@ form.search {
 .profileAvatar { width: 75px; vertical-align: top; border-radius: 5px; object-fit: cover; margin-right: .25em; margin-bottom: .25em;}
 .avatar { width: 25px; height: 25px; vertical-align: middle; object-fit: cover; border-radius: 5px; margin-right: .2em; }
 
-.image { width: 75px; height: 75px; object-fit: cover; margin-right: .2em; border-radius: 5px;}
+.image { width: 75px; height: 75px; object-fit: cover; margin-right: .2em; border-radius: 5px; cursor: pointer;}
+
+#viewer {position: fixed; left: 2em; top: 3em; background: white; padding: .5em; border: 1px solid #ddd; border-radius: 5px;}
+
+#viewer img { border-radius: 5px; margin-left: auto; margin-right: auto; cursor: pointer;}
 
 button {
   display: inline-block;

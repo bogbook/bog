@@ -105,7 +105,24 @@ function render (msg, keys, preview) {
         } 
 
         if (nextPost.imaged == msg.key) {
-          message.insertBefore(h('img', {src: nextPost.image, classList: 'image'}), message.childNodes[message.childNodes.length - 1])
+
+          var img = h('img', {
+            src: nextPost.image,
+            classList: 'image',
+            onclick: function () {
+              var viewimg = h('div', {id: 'viewer', onclick: function () {
+                  var viewer = document.getElementById('viewer')
+                  viewer.parentNode.removeChild(viewer)
+                }}, [
+                h('img', {
+                  src: nextPost.image
+                })
+              ])
+              document.body.appendChild(viewimg)
+            }
+          })
+          
+          message.insertBefore(img, message.childNodes[message.childNodes.length - 1])
         }
       })
     }

@@ -70,7 +70,7 @@ hr {
   animation: fadein .5s;
 }
 
-#ad {
+#ad, #pm {
   background: white;
   font-size: .8em;
   border: 1px solid #ddd;
@@ -82,7 +82,7 @@ hr {
   width: 250px;
 }
 
-#ad button {
+#ad button, #pm button {
   font-size: .8em;
   margin: 0;
   padding: 0;

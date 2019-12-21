@@ -56,11 +56,7 @@ function settingsPage (keys) {
 
   var add = h('input', {placeholder: 'Add a pub'})
 
-  var pubslist = h('select')
-
   localforage.getItem('securepubs').then(function (servers) {
-
-
     pubs.appendChild(h('div', [
       add,
       h('button', {
@@ -74,9 +70,6 @@ function settingsPage (keys) {
     ]))
 
     servers.forEach(function (pub) {
-      pubslist.appendChild(
-        h('option', {value: pub}, [pub])
-      )
       pubs.appendChild(h('p', [
         pub,
         h('button', {
@@ -98,52 +91,10 @@ function settingsPage (keys) {
     }
   }, ['Reset pubs']))
 
-  var ads = h('div', {classList: 'message'}) 
-
-
-  ads.appendChild(h('span', {innerHTML: marked('Submit an advertisement. Right now advertisements are free for anyone to post to this pub. Ads from guests will run for 100 views before they are deleted by the pub. \n\nSelect a pub:')}))
-
-  ads.appendChild(pubslist)
-
-  var adstext = h('input', {placeholder: 'Hello World!'})
-
-  ads.appendChild(h('span', [
-    h('br'),
-    ' Write an ad: ',
-    h('br'),
-    adstext,
-    h('button', {
-      onclick: function () {
-        var split = pubslist.value.split('~')
-        console.log(split)
-        var serverurl = split[0]
-        var serverpub = split[1]
-        var ws = new WebSocket(serverurl)
-         
-        var msg = {
-          type: 'ad',
-          author: keys.publicKey
-        }
-        msg.signature = nacl.util.encodeBase64(nacl.sign(nacl.util.decodeUTF8(JSON.stringify(adstext.value)), nacl.util.decodeBase64(keys.privateKey)))
-        ws.onopen = function () {
-          box(JSON.stringify(msg), serverpub, keys).then(boxed => {
-            var obj = {
-              requester: keys.publicKey,
-              box: boxed
-            }
-            ws.send(JSON.stringify(obj))
-          })
-        }
-        adstext.value = ''
-      }
-    }, ['Publish'])
-  ]))
-
   scroller.appendChild(welcome)
   scroller.appendChild(keyDiv)
   scroller.appendChild(pubs)
   scroller.appendChild(everything)
   //scroller.appendChild(regenerate)
-  scroller.appendChild(ads)
 }
 

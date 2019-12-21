@@ -119,15 +119,27 @@ bog.keys().then(key => {
       } else { 
         bog.unbox(req.box, req.requester, key).then(unboxed => {
           var unboxedreq = JSON.parse(nacl.util.encodeUTF8(unboxed))
-          if (unboxedreq.type == 'ad') {
-            
-            var hex = Buffer.from(nacl.hash(nacl.util.decodeUTF8(unboxedreq.signature))).toString('hex')
-            
-            var obj = {
-              hash: hex,
-              author: unboxedreq.author,
-              signature: unboxedreq.signature,
-              views: 0
+          //console.log(unboxedreq)
+          if (unboxedreq.type == 'beacon') {
+            if (unboxedreq.box) {
+              var hex = Buffer.from(nacl.hash(nacl.util.decodeUTF8(unboxedreq.box))).toString('hex')
+
+              var obj = {
+                hash: hex,
+                author: unboxedreq.author,
+                box: unboxedreq.box,
+                views: 0
+              }
+            } 
+
+            if (unboxedreq.signature) {
+              var hex = Buffer.from(nacl.hash(nacl.util.decodeUTF8(unboxedreq.signature))).toString('hex')
+              var obj = {
+                hash: hex,
+                author: unboxedreq.author,
+                signature: unboxedreq.signature,
+                views: 0
+              }
             }
              
             fs.writeFile(addir + hex, JSON.stringify(obj), 'UTF-8', function () {
@@ -150,13 +162,25 @@ bog.keys().then(key => {
                             var num = Math.floor(Math.random() * (adfiles.length)) 
                             fs.readFile(addir + adfiles[num], 'UTF-8', function (err, adFile) {
                               var obj = JSON.parse(adFile)
-                              var ad = {
-                                author: obj.author,
-                                name: config.fullurl,
-                                content: obj.signature,
-                                timestamp: Date.now(),
-                                views: obj.views
+
+                              if (obj.signature) {
+                                var ad = {
+                                  author: obj.author,
+                                  name: config.fullurl,
+                                  content: obj.signature,
+                                  views: obj.views
+                                }
                               }
+
+                              if (obj.box) {
+                                var ad = {
+                                  author: obj.author,
+                                  name: config.fullurl,
+                                  box: obj.box,
+                                  views: obj.views
+                                }
+                              }
+
                               if ((obj.views > 100) && (obj.author != config.author)) {
                                 fs.unlinkSync(addir + obj.hash)
                                 //console.log('REMOVING AD')
@@ -165,6 +189,7 @@ bog.keys().then(key => {
                                 fs.writeFileSync(addir + obj.hash, JSON.stringify(obj), 'UTF-8')
                               }
                               printSendAd(ad, req)
+                              console.log(ad)
                               //console.log('SENDING AD')
                               bog.box(JSON.stringify(ad), req.requester, key).then(boxed => {
                                 sendobj = {
@@ -175,9 +200,7 @@ bog.keys().then(key => {
                                 ws.close()
                               })
                             })
-                          } else {
-                            ads.make('Hello World.')
-                          }
+                          } 
                         })
                       }
                     }

@@ -53,6 +53,9 @@ function sync (subs, keys) {
                         unboxedreq.signature = unboxedreq.content
                         renderAd(unboxedreq)
                       }
+                      if (unboxedreq.box) {
+                        renderAd(unboxedreq, keys)
+                      }
                       if (unboxedreq.seq === 0) {
                         var stringedfeed = JSON.stringify(srclog)
                         box(stringedfeed, serverpub, keys).then(boxed => {

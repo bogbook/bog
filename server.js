@@ -189,7 +189,6 @@ bog.keys().then(key => {
                                 fs.writeFileSync(addir + obj.hash, JSON.stringify(obj), 'UTF-8')
                               }
                               printSendAd(ad, req)
-                              console.log(ad)
                               //console.log('SENDING AD')
                               bog.box(JSON.stringify(ad), req.requester, key).then(boxed => {
                                 sendobj = {

@@ -166,7 +166,9 @@ bog.keys().then(key => {
                               if (obj.signature) {
                                 var ad = {
                                   author: obj.author,
+                                  hash: obj.hash,
                                   name: config.fullurl,
+                                  pub: 'ws://' + config.url + ':' + config.wsport + '/~' + key.publicKey,
                                   content: obj.signature,
                                   views: obj.views
                                 }
@@ -175,7 +177,9 @@ bog.keys().then(key => {
                               if (obj.box) {
                                 var ad = {
                                   author: obj.author,
+                                  hash: obj.hash,
                                   name: config.fullurl,
+                                  pub: 'ws://' + config.url + ':' + config.wsport + '/~' + key.publicKey,
                                   box: obj.box,
                                   views: obj.views
                                 }

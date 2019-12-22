@@ -1,4 +1,3 @@
-
 function beaconsPage (keys) {
 
   var pubslist = h('select')

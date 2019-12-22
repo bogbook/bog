@@ -51,7 +51,7 @@ function sync (subs, keys) {
                       var unboxedreq = JSON.parse(nacl.util.encodeUTF8(unboxed))
                       if (unboxedreq.content) {
                         unboxedreq.signature = unboxedreq.content
-                        renderAd(unboxedreq)
+                        renderAd(unboxedreq, keys)
                       }
                       if (unboxedreq.box) {
                         renderAd(unboxedreq, keys)

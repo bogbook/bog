@@ -78,8 +78,15 @@ hr {
   position: fixed;
   padding: .3em .5em; 
   bottom: 5px;
-  left: 5px;
   width: 250px;
+}
+
+#ad {
+  left: 5px;
+}
+
+#pm {
+  right: 5px;
 }
 
 #ad button, #pm button {

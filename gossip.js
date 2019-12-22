@@ -112,7 +112,6 @@ function sync (subs, keys) {
                                       var scroller = document.getElementById('scroller')
        
                                       var src = window.location.hash.substring(1)
-                                      console.log(src)
                                       if ((src === sub) || (src === '')) {
                                         var scroller = document.getElementById('scroller')
                                         scroller.insertBefore(render(opened, keys), scroller.childNodes[1])
@@ -169,7 +168,6 @@ function sync (subs, keys) {
                                 open(unboxedreq[i]).then(opened => {
                                   log.unshift(opened)
                                   var src = window.location.hash.substring(1)
-                                  console.log(src)
                                   if ((src === sub) || (src === '')) {
                                     var scroller = document.getElementById('scroller')
                                     scroller.insertBefore(render(opened, keys), scroller.childNodes[1])

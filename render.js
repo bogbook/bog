@@ -9,9 +9,6 @@ function renderAd (ad, keys) {
         adspot.parentNode.removeChild(adspot)
       }
 
-      if (pmspot) {
-        pmspot.parentNode.removeChild(pmspot)
-      }
 
       var adspace = h('span')
 
@@ -23,63 +20,68 @@ function renderAd (ad, keys) {
 
       if (ad.box) {
         unbox(ad.box, ad.author, keys).then(unboxed => {
-          var msg = JSON.parse(nacl.util.encodeUTF8(unboxed))
-          quickName(ad.author).then(gotName => {
-            beacon = h('div', {id: 'pm'}, [
-              h('span', {classList: 'right'}, [h('pre', [human(new Date(msg.timestamp))])]),
-              h('p', {innerHTML: marked(msg.content)}),
-              h('button', {classList: 'right',
-                onclick: function () {
-                  pmspot = document.getElementById('pm')
-                  pmspot.parentNode.removeChild(pmspot)
-                  if (msg.content.substring((msg.content.length - 6), msg.content.length) === 'Heard.') {
-                    localforage.setItem(ad.hash, true).then(success => {
-                      //console.log('heard: ' + ad.hash)
-                    })
+          if (unboxed) {
+            var msg = JSON.parse(nacl.util.encodeUTF8(unboxed))
+            if (pmspot) {
+              pmspot.parentNode.removeChild(pmspot)
+            }
+            quickName(ad.author).then(gotName => {
+              beacon = h('div', {id: 'pm'}, [
+                h('span', {classList: 'right'}, [h('pre', [human(new Date(msg.timestamp))])]),
+                h('p', {innerHTML: marked(msg.content)}),
+                h('button', {classList: 'right',
+                  onclick: function () {
+                    pmspot = document.getElementById('pm')
+                    pmspot.parentNode.removeChild(pmspot)
+                    if (msg.content.substring((msg.content.length - 6), msg.content.length) === 'Heard.') {
+                      localforage.setItem(ad.hash, true).then(success => {
+                        //console.log('heard: ' + ad.hash)
+                      })
 
-                  } else {
-                    var split = ad.pub.split('~')
-                    var serverurl = split[0]
-                    var serverpub = split[1]
-                    var ws = new WebSocket(serverurl)
+                    } else {
+                      var split = ad.pub.split('~')
+                      var serverurl = split[0]
+                      var serverpub = split[1]
+                      var ws = new WebSocket(serverurl)
 
-                    var tobox = {
-                      author: keys.publicKey,
-                      timestamp: Date.now(),
-                      content: '>' + msg.content + '\n\nHeard.'
-                    }
-
-                    box(JSON.stringify(tobox), ad.author, keys).then(boxedmsg => {
-                      var msg = {
-                        type: 'beacon',
+                      var tobox = {
                         author: keys.publicKey,
-                        box: boxedmsg
+                        timestamp: Date.now(),
+                        content: '>' + msg.content + '\n\nHeard.'
                       }
-                      ws.onopen = function () {
-                        box(JSON.stringify(msg), serverpub, keys).then(boxed => {
-                          var obj = {
-                            requester: keys.publicKey,
-                            box: boxed
-                          }
-                          ws.send(JSON.stringify(obj))
-                          localforage.setItem(ad.hash, true).then(success => {
-                            //console.log('heard: ' + ad.hash)
+
+                      box(JSON.stringify(tobox), ad.author, keys).then(boxedmsg => {
+                        var msg = {
+                          type: 'beacon',
+                          author: keys.publicKey,
+                          box: boxedmsg
+                        }
+                        ws.onopen = function () {
+                          box(JSON.stringify(msg), serverpub, keys).then(boxed => {
+                            var obj = {
+                              requester: keys.publicKey,
+                              box: boxed
+                            }
+                            ws.send(JSON.stringify(obj))
+                            localforage.setItem(ad.hash, true).then(success => {
+                              //console.log('heard: ' + ad.hash)
+                            })
                           })
-                        })
-                      }
-                    })
+                        }
+                      })
+                    }
                   }
-                }
-              }, ['Heard']),
-              h('span', [
-                '—',
-                h('a', {href: '#' + ad.author}, [gotName]),
-                ' from ',
-                h('a', {href: ad.name}, [ad.name])
+                }, ['Heard']),
+                h('span', [
+                  '—',
+                  h('a', {href: '#' + ad.author}, [gotName]),
+                  ' from ',
+                  h('a', {href: ad.name}, [ad.name])
+                ])
               ])
-            ])
-            screen.append(beacon)
-          })      
+              screen.append(beacon)
+            })
+          } 
         })
       }
 

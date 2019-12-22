@@ -182,24 +182,26 @@ function render (msg, keys, preview) {
     message.appendChild(contents)
 
     get(msg.edited).then(previous => {
-      fragment = document.createDocumentFragment()
-      var diff = JsDiff.diffWords(previous.text, msg.text)
-      diff.forEach(function (part) {
-        if (part.added === true) {
-          color = 'blue'
-        } else if (part.removed === true) {
-          color = 'gray'
-        } else {color = '#333'}
-        var span = h('span')
-        span.style.color = color
-        if (part.removed === true) {
-          span.appendChild(h('del', document.createTextNode(part.value)))
-        } else {
-          span.appendChild(document.createTextNode(part.value))
-        }
-        fragment.appendChild(span)
-      })
-      contents.appendChild(h('code', [fragment]))
+      if (previous) {
+        fragment = document.createDocumentFragment()
+        var diff = JsDiff.diffWords(previous.text, msg.text)
+        diff.forEach(function (part) {
+          if (part.added === true) {
+            color = 'blue'
+          } else if (part.removed === true) {
+            color = 'gray'
+          } else {color = '#333'}
+          var span = h('span')
+          span.style.color = color
+          if (part.removed === true) {
+            span.appendChild(h('del', document.createTextNode(part.value)))
+          } else {
+            span.appendChild(document.createTextNode(part.value))
+          }
+          fragment.appendChild(span)
+        })
+        contents.appendChild(h('code', [fragment]))
+      }
     })
   }
 

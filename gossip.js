@@ -110,7 +110,13 @@ function sync (subs, keys) {
                                     open(unboxedreq[i]).then(opened => {
                                       log.unshift(opened)
                                       var scroller = document.getElementById('scroller')
-                                      scroller.insertBefore(render(opened, keys), scroller.childNodes[1])
+       
+                                      var src = window.location.hash.substring(1)
+                                      console.log(src)
+                                      if ((src === sub) || (src === '')) {
+                                        var scroller = document.getElementById('scroller')
+                                        scroller.insertBefore(render(opened, keys), scroller.childNodes[1])
+                                      }
                                       if (unboxedreq.length + lastmsg.seq === opened.seq) {
                                         log.sort((a, b) => a.timestamp - b.timestamp)
                                         var reversed = log.reverse()
@@ -162,8 +168,12 @@ function sync (subs, keys) {
                               for (var i = unboxedreq.length -1; i >= 0; --i) {
                                 open(unboxedreq[i]).then(opened => {
                                   log.unshift(opened)
-                                  var scroller = document.getElementById('scroller')
-                                  scroller.insertBefore(render(opened, keys), scroller.childNodes[1])
+                                  var src = window.location.hash.substring(1)
+                                  console.log(src)
+                                  if ((src === sub) || (src === '')) {
+                                    var scroller = document.getElementById('scroller')
+                                    scroller.insertBefore(render(opened, keys), scroller.childNodes[1])
+                                  }
                                   if (opened.seq === unboxedreq.length) {
                                     log.sort((a, b) => a.timestamp - b.timestamp)
                                     var reversed = log.reverse() 

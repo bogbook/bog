@@ -104,9 +104,9 @@ function getImage (id, keys, classList) {
   }
 
   localforage.getItem('image:' + id).then(cache => {
-    if (cache) {
-      return image.src = cache
-    } else {
+    //if (cache) {
+    //  return image.src = cache
+    //} else {
       bog().then(log => {
         if (log) {
           for (var i = 0; i < log.length; i++) {
@@ -124,7 +124,7 @@ function getImage (id, keys, classList) {
           }
         }
       })
-    }
+    //}
   })
   return image
 }

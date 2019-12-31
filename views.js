@@ -15,7 +15,7 @@ function profilePage (src, keys) {
 
   var subs = [src]
 
-  var interval = 50
+  var interval = 500
   timer = function() {
     if (src === window.location.hash.substring(1)) {
       if (interval < 10000) { interval = interval + 50 }

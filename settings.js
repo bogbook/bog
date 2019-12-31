@@ -75,7 +75,7 @@ function settingsPage (keys) {
         h('button', {
           onclick: function () {
             var newServers = servers.filter(item => item !== pub)
-            localforage.setItem('securepubs', newServers).then(function () { location.reload() })
+            localforage.setItem('pubs', newServers).then(function () { location.reload() })
           }
         }, ['Remove'])
       ]))

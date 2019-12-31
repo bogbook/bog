@@ -76,7 +76,7 @@ async function unbox (boxed, sender, keys) {
   var nonceMsg = nacl.util.decodeBase64(boxed)
   var nonce = nonceMsg.slice(0, nacl.box.nonceLength)
   var msg = nonceMsg.slice(nacl.box.nonceLength, nonceMsg.length)
-  var message = nacl.box.open(msg, nonce, ed2curve.convertPublicKey(nacl.util.decodeBase64(sender.substring(1))), ed2curve.convertSecretKey(nacl.util.decodeBase64(keys.privateKey)))
+  var message = nacl.util.encodeUTF8(nacl.box.open(msg, nonce, ed2curve.convertPublicKey(nacl.util.decodeBase64(sender.substring(1))), ed2curve.convertSecretKey(nacl.util.decodeBase64(keys.privateKey))))
   return message
 }
 

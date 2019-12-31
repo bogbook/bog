@@ -84,5 +84,29 @@ function beaconsPage (keys) {
   ]))
 
   scroller.appendChild(ads)
+
+  localforage.getItem('beacons').then(beacons => {
+    beacons.forEach(beacon => {
+      var message = h('div', {classList: 'message'})
+
+      if (beacon.signature) {
+        open(beacon).then(opened => {
+          quickName(beacon.author).then(gotName => {
+            message.appendChild(h('p', {innerHTML: marked(opened)}))
+            message.appendChild(h('span', [
+                '—',
+                h('a', {href: '#' + beacon.author}, [gotName]),
+                ' from ',
+                h('a', {href: beacon.name}, [beacon.name])
+              ])
+            )
+          })
+        })
+      }
+        
+      scroller.appendChild(message)
+      console.log(beacon)
+    })  
+  })
 }
 

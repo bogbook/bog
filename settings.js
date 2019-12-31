@@ -52,18 +52,18 @@ function settingsPage (keys) {
 
   var pubs = h('div', {classList: 'message'})
  
-  pubs.appendChild(h('p', {innerHTML: marked('These are your bogbook pubs. Bogbook will gossip with these pubs to publish your messages and check for new messages from your subscriptions. You should have at least one Bogbook pub in order to gossip your messages. If you don\'t see a bogbook pub below, try clicking "Reset Pubs" or add \n```\nws://bogbook.com/~@h4e3bHDJeDWiCAkzp83HINPR4y7BLR7tI3fOVqwLQqw=\n```\n to your pubs list.')}))
+  pubs.appendChild(h('p', {innerHTML: marked('These are your bogbook pubs. Bogbook will gossip with these pubs to publish your messages and check for new messages from your subscriptions. You should have at least one Bogbook pub in order to gossip your messages. If you don\'t see a bogbook pub below, try clicking "Reset Pubs" or add \n```\nws://bogbook.com\n```\n to your pubs list.')}))
 
   var add = h('input', {placeholder: 'Add a pub'})
 
-  localforage.getItem('securepubs').then(function (servers) {
+  localforage.getItem('pubs').then(function (servers) {
     pubs.appendChild(h('div', [
       add,
       h('button', {
         onclick: function () {
           if (add.value) {
             servers.push(add.value)
-            localforage.setItem('securepubs', servers).then(function () { location.reload() })
+            localforage.setItem('pubs', servers).then(function () { location.reload() })
           }
         }
       }, ['Add a pub'])

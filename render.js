@@ -21,7 +21,7 @@ function renderAd (ad, keys) {
       if (ad.box) {
         unbox(ad.box, ad.author, keys).then(unboxed => {
           if (unboxed) {
-            var msg = JSON.parse(nacl.util.encodeUTF8(unboxed))
+            var msg = JSON.parse(unboxed)
             if (pmspot) {
               pmspot.parentNode.removeChild(pmspot)
             }
@@ -65,6 +65,12 @@ function renderAd (ad, keys) {
                             ws.send(JSON.stringify(obj))
                             localforage.setItem(ad.hash, true).then(success => {
                               //console.log('heard: ' + ad.hash)
+                              localforage.getItem('beacons').then(beacons => {
+                                if (!beacons) { beacons = [] }
+                                beacons.unshift(ad)
+                                localforage.setItem('beacons', beacons)
+                              })
+
                             })
                           })
                         }
@@ -100,8 +106,6 @@ function renderAd (ad, keys) {
                   var serverpub = split[1]
                   var ws = new WebSocket(serverurl)
 
-
-
                   var tobox = {
                     author: keys.publicKey,
                     timestamp: Date.now(),
@@ -122,6 +126,11 @@ function renderAd (ad, keys) {
                         }
                         ws.send(JSON.stringify(obj))
                         localforage.setItem(ad.hash, true).then(success => {console.log('heard: ' + ad.hash)})
+                        localforage.getItem('beacons').then(beacons => {
+                          if (!beacons) { beacons = [] }
+                          beacons.unshift(ad)
+                          localforage.setItem('beacons', beacons)
+                        })
                       })
                     }
                   })

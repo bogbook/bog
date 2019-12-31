@@ -15,10 +15,10 @@ function profilePage (src, keys) {
 
   var subs = [src]
 
-  var interval = 500
+  var interval = 50
   timer = function() {
     if (src === window.location.hash.substring(1)) {
-      if (interval < 10000) { interval = interval + 100 }
+      if (interval < 10000) { interval = interval + 50 }
       sync(subs, keys)
       setTimeout(timer, interval)
     }
@@ -121,6 +121,7 @@ function searchPage (src, keys) {
 }
 
 function publicPage (keys) {
+
   localforage.getItem('subscriptions').then(function (subs) {
     var interval = 1000
     timer = function() {
@@ -133,9 +134,8 @@ function publicPage (keys) {
     if (subs) {
       timer()
     } else {
-      var subs = []
+      var subs = [keys.publickey]
       localforage.setItem('subscriptions', subs)
-      subs.push(keys.publicKey)
       timer()
     }
   })

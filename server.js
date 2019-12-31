@@ -114,11 +114,12 @@ bog.keys().then(key => {
   wserve.on('connection', function (ws) {
     ws.on('message', function (message) {
       var req = JSON.parse(message)
+      console.log(req)
       if (req.sendpub) {
         ws.send(key.publicKey)
       } else { 
         bog.unbox(req.box, req.requester, key).then(unboxed => {
-          var unboxedreq = JSON.parse(nacl.util.encodeUTF8(unboxed))
+          var unboxedreq = JSON.parse(unboxed)
           //console.log(unboxedreq)
           if (unboxedreq.type == 'beacon') {
             if (unboxedreq.box) {
@@ -169,7 +170,7 @@ bog.keys().then(key => {
                                   hash: obj.hash,
                                   name: config.fullurl,
                                   pub: 'ws://' + config.url + ':' + config.wsport + '/~' + key.publicKey,
-                                  content: obj.signature,
+                                  signature: obj.signature,
                                   views: obj.views
                                 }
                               }

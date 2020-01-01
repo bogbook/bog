@@ -114,7 +114,6 @@ bog.keys().then(key => {
   wserve.on('connection', function (ws) {
     ws.on('message', function (message) {
       var req = JSON.parse(message)
-      console.log(req)
       if (req.sendpub) {
         ws.send(key.publicKey)
       } else { 
@@ -221,7 +220,7 @@ bog.keys().then(key => {
                     })
                   }
                   if (unboxedreq.seq < msg.seq) {
-                    var endrange = feed.length - unboxedreq.seq - 25
+                    var endrange = feed.length - unboxedreq.seq - Math.floor(Math.random() * 50 + 1)
                     if (endrange < 0) {
                       endrange = feed.length - unboxedreq.seq - 1
                     }

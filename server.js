@@ -158,7 +158,7 @@ bog.keys().then(key => {
                     if (config.ads) {
                       if (Math.floor(Math.random() * 6) == 2) {
                         fs.readdir(addir, function (err, adfiles) {
-                          if (adfiles[0]) {
+                          if (adfiles) {
                             var num = Math.floor(Math.random() * (adfiles.length)) 
                             fs.readFile(addir + adfiles[num], 'UTF-8', function (err, adFile) {
                               var obj = JSON.parse(adFile)

@@ -6,6 +6,9 @@ var bogdir = path + 'bogs/'
 var addir = path + 'ads/'
 var confpath = path + 'config.json'
 
+if (!fs.existsSync(homedir + '/.bogbook/')) {fs.mkdirSync(homedir + '/.bogbook/')}
+if (!fs.existsSync(bogdir)){fs.mkdirSync(bogdir)}
+
 if (fs.existsSync(confpath)) {
   console.log('loading config from ' + confpath)
   var config = require(confpath)
@@ -22,9 +25,6 @@ if (fs.existsSync(confpath)) {
 }
 
 console.log(config)
-
-if (!fs.existsSync(homedir + '/.bogbook/')) {fs.mkdirSync(homedir + '/.bogbook/')}
-if (!fs.existsSync(bogdir)){fs.mkdirSync(bogdir)}
 
 if (process.argv[2] === 'verbose') {
   var VERBOSE = true

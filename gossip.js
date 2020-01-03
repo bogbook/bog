@@ -1,11 +1,5 @@
 function processreq (req, pubkey, connection, keys) {
-  console.log(req) 
-  if (req.box || req.signature) {
-    renderAd(req, keys)
-  }
-
   if (req.seq === 0 || req.seq) {
-    console.log('feed sync')
     bog(req.author).then(feed => {
       if (feed) {
         open(feed[0]).then(msg => {
@@ -38,7 +32,7 @@ function processreq (req, pubkey, connection, keys) {
             })
           }
         })
-      } else { console.log('we dont have it')}
+      }
     })
   }
 
@@ -157,7 +151,7 @@ function sync (feeds, keys) {
   var pubs
   localforage.getItem('pubs').then(pubs => {
     if (!pubs) {
-      pubs = ['ws://' + location.hostname + ':8080']
+      pubs = ['ws://' + location.hostname + ':8080', 'ws://bogbook.com']
       localforage.setItem('pubs', pubs)
     }
     pubs.forEach(function (pub, index) {

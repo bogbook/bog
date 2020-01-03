@@ -10,8 +10,6 @@ function route (keys) {
 
   if (src === 'settings') {
     settingsPage(keys)
-  } else if (src === 'beacons') {
-    beaconsPage(keys)
   } else if (src[0] === '@') {
     profilePage(src, keys)
   } else if (src[0] === '?') {
@@ -30,7 +28,6 @@ keys().then(key => {
     h('div', {classList: 'internal'}, [
       h('li', [h('a', {href: '#'}, ['Home'])]),
       h('li', [h('a', {href: '#' + key.publicKey}, [getName(key.publicKey, keys)])]),
-      h('li', [h('a', {href: '#beacons'}, ['Beacons'])]),
       h('li', {classList: 'right'}, [h('a', {href: '#settings'}, ['Settings'])]),
       h('form', { classList: 'search', 
         onsubmit: function (e) {

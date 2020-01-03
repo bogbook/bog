@@ -16,7 +16,6 @@ if (fs.existsSync(confpath)) {
     port: '8089',
     wsport: '8080',
     url: 'localhost',
-    ads: true,
     author: '@Q++V5BbvWIg8B+TqtC9ZKFhetruuw+nOgxEqfjlOZI0='
   }
   config.fullurl = 'http://' + config.url + ':' + config.port + '/' 
@@ -32,7 +31,6 @@ if (process.argv[2] === 'verbose') {
 }
 
 console.log('Verbose output is ' + VERBOSE + ' run with `node server verbose` to see all output')
-console.log('Advertisements are ' + config.ads)
 
 // log messages
 
@@ -77,12 +75,6 @@ function printClientShorter (msg, req, baserange, endrange) {
 function printFeedIdentical (msg, req) {
   if (VERBOSE) { 
     console.log(msg.author + '\'s feed sent from ' + req.requester + ' is identical')
-  }
-}
-
-function printSendAd (msg, req) {
-  if (VERBOSE) {
-    console.log('sent ad ' + msg.content + ' to ' + req.requester)  
   }
 }
 

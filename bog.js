@@ -94,6 +94,18 @@ async function get (key) {
   }
 }
 
+async function getTitle (key) {
+  var log = await localforage.getItem('log')
+  if (log != null) {
+    for (var i = log.length - 1; i >= 0; --i) {
+      if (log[i].key === key) {
+        return log[i].text.substring(0, 15) + '…'
+      }
+    }
+  }
+}
+
+
 // bog.getImage
 
 function getImage (id, keys, classList) {

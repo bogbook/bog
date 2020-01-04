@@ -138,14 +138,26 @@ function render (msg, keys, preview) {
   }
 
   if (msg.type == 'post') {
-    message.appendChild(getHeader(msg, keys))
+    var mini = h('span', [' '])
+
+    message.appendChild(getHeader(msg, keys, mini))
+
+    console.log(getTitle(msg.reply))
 
     if (msg.reply) {
-      message.firstChild.appendChild(h('span', [
-        're: ',
-        h('a', {href: '#' + msg.reply}, [msg.reply.substring(0, 10) + '...'])
-      ]))
+      getTitle(msg.reply).then(title => {
+        if (!title) {
+          title = msg.reply.substring(0, 15) + '…'
+        }
+        mini.appendChild(h('span', [
+          '↳ ',
+          h('a', {href: '#' + msg.reply}, [title])
+        ]))
+
+      })
     }
+
+
     message.appendChild(h('div',{id: 'content:' + msg.key, innerHTML: marked(msg.text)}))
     var buttons = h('div')
     if (!preview) {

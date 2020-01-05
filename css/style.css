@@ -180,7 +180,7 @@ textarea {
   z-index: 1000;
   margin: 0;
   padding-top: .33em;
-  padding-bottom: .27em;
+  padding-bottom: .4em;
   left: 0; right: 0;
   top: 0;
 }
@@ -236,7 +236,7 @@ form.search {
 }
 
 .profileAvatar { width: 75px; vertical-align: top; border-radius: 5px; object-fit: cover; margin-right: .25em; margin-bottom: .25em;}
-.avatar { width: 25px; height: 25px; vertical-align: middle; object-fit: cover; border-radius: 5px; margin-right: .2em; }
+.avatar { width: 25px; height: 25px; vertical-align: middle; object-fit: cover; border-radius: 5px; margin-right: .5em; }
 
 .image { width: 75px; height: 75px; object-fit: cover; margin-right: .2em; border-radius: 5px; cursor: pointer;}
 

@@ -107,12 +107,28 @@ function profilePage (src, keys) {
 function searchPage (src, keys) {
   var search = src.substring(1).replace("%20"," ").toUpperCase()
 
+
+  async function addPosts (posts, keys) {
+    posts.forEach(function (msg) {
+      if (msg.text) {
+        if (msg.text.toUpperCase().includes(search)) {
+          scroller.appendChild(render(msg, keys))
+        }
+      }
+    })
+  }
   bog().then(log => {
+    var index = 0
     if (log) {
-      log.forEach(function (msg) {
-        if (msg.text) {
-          if (msg.text.toUpperCase().includes(search)) {
-            scroller.appendChild(render(msg, keys))
+      var posts = log.slice(index, index + 25)
+      addPosts(posts, keys).then(done => {
+        index = index + 25
+        window.onscroll = function(ev) {
+          if (((window.innerHeight + window.scrollY) >= document.body.scrollHeight) && (window.location.hash.substring(1) === src)) {
+            posts = log.slice(index, index + 25)
+            index = index + 25
+            addPosts(posts, keys)
+            console.log("Bottom of page")
           }
         }
       })

@@ -26,8 +26,14 @@ keys().then(key => {
 
   var navbar = h('div', {classList: 'navbar'}, [
     h('div', {classList: 'internal'}, [
-      h('li', [h('a', {href: '#'}, ['Home'])]),
-      h('li', [h('a', {href: '#' + key.publicKey}, [getName(key.publicKey, keys)])]),
+      h('li', [h('a', {href: '#' + key.publicKey}, 
+        [
+          getImage(key.publicKey, keys),
+          getName(key.publicKey, keys)
+        ])
+      ]),
+      h('li', [h('a', {href: '#'}, ['All'])]),
+      h('li', [h('a', {href: '#?' + key.publicKey}, ['Mentions'])]),
       h('li', {classList: 'right'}, [h('a', {href: '#settings'}, ['Settings'])]),
       h('form', { classList: 'search', 
         onsubmit: function (e) {

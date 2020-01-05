@@ -38,7 +38,7 @@ hr {
 
 #screen {
   position: absolute;
-  top: 35px; 
+  top: 40px; 
   right: 0; 
   left: 0; 
   bottom: 0;
@@ -179,8 +179,8 @@ textarea {
   position: fixed;
   z-index: 1000;
   margin: 0;
-  padding-top: .33em;
-  padding-bottom: .4em;
+  padding-top: .4em;
+  padding-bottom: .3em;
   left: 0; right: 0;
   top: 0;
 }

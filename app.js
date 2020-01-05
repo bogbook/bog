@@ -29,6 +29,10 @@ keys().then(key => {
       h('li', [h('a', {href: '#' + key.publicKey}, 
         [
           getImage(key.publicKey, keys),
+        ])
+      ]),
+      h('li', [h('a', {href: '#' + key.publicKey}, 
+        [
           getName(key.publicKey, keys)
         ])
       ]),

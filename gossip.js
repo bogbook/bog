@@ -1,11 +1,15 @@
 function processreq (req, pubkey, connection, keys) {
+  console.log('processreq')
   if (req.seq === 0 || req.seq) {
     bog(req.author).then(feed => {
       if (feed) {
+        console.log('opening first message')
         open(feed[0]).then(msg => {
+          console.log(msg)
           if (req.seq > msg.seq) {
             var reqdiff = JSON.stringify({author: req.author, seq: msg.seq})
             box(reqdiff, pubkey, keys).then(boxed => {
+              console.log(boxed)
               connection.send(JSON.stringify({
                 requester: keys.publicKey,
                 box: boxed
@@ -25,6 +29,7 @@ function processreq (req, pubkey, connection, keys) {
                 baserange)
               )
             box(diff, pubkey, keys).then(boxed => {
+              console.log(boxed)
               connection.send(JSON.stringify({
                 requester: keys.publicKey,
                 box: boxed
@@ -42,9 +47,7 @@ function processreq (req, pubkey, connection, keys) {
         if (!feed) {
           localforage.setItem(msg.author, req)
           localforage.getItem('log').then(log => {
-            if (!log) {
-              var log = []
-            }
+            if (!log) { var log = [] }
             for (var i = req.length -1; i >= 0; --i) {
               open(req[i]).then(opened => {
                 log.unshift(opened)
@@ -54,36 +57,30 @@ function processreq (req, pubkey, connection, keys) {
                   scroller.insertBefore(render(opened, keys), scroller.childNodes[1])
                 }
                 if (opened.seq === req.length) {
-                  log.sort((a, b) => a.timestamp - b.timestamp)
-                  var reversed = log.reverse()
-                  localforage.setItem('log', reversed)
+                  localforage.setItem('log', log)
                 }
               })
             }
           })
-        } if (feed) {
+        } 
+        if (feed) {
           open(feed[0]).then(lastmsg => {
+            console.log(lastmsg)
             if (req.length + lastmsg.seq === msg.seq) {
               var newlog = req.concat(feed)
               localforage.setItem(msg.author, newlog)
               localforage.getItem('log').then(log => {
-                if (!log) {
-                  var log = []
-                }
+                if (!log) { var log = [] }
                 for (var i = req.length -1; i >= 0; --i) {
                   open(req[i]).then(opened => {
                     log.unshift(opened)
-                    var scroller = document.getElementById('scroller')
-
                     var src = window.location.hash.substring(1)
                     if ((src === msg.author) || (src === '')) {
                       var scroller = document.getElementById('scroller')
                       scroller.insertBefore(render(opened, keys), scroller.childNodes[1])
                     }
                     if (req.length + lastmsg.seq === opened.seq) {
-                      log.sort((a, b) => a.timestamp - b.timestamp)
-                      var reversed = log.reverse()
-                      localforage.setItem('log', reversed)
+                      localforage.setItem('log', log)
                     }
                   })
                 }
@@ -111,12 +108,18 @@ function getpubkey (connection, keys) {
 }
 
 function getfeed (feed, pubkey, connection, keys) {
+  console.log('getfeed')
   bog(feed).then(log => {
     var logseq = 0
     connection.onopen = () => {
       if (log) {
+        console.log('onopen')
+        console.log(log[0])
+        // for some reason this does not open below
         open(log[0]).then(msg => {
-          box(JSON.stringify(msg), pubkey, keys).then(boxed => {
+          var string = JSON.stringify(msg)
+          box(string, pubkey, keys).then(boxed => {
+            console.log(boxed)
             connection.send(JSON.stringify({
               requester: keys.publicKey,
               box: boxed
@@ -125,6 +128,7 @@ function getfeed (feed, pubkey, connection, keys) {
           logseq = msg.seq
         })
       } else {
+        console.log('else')
         var msg = {
           author: feed, 
           seq: logseq
@@ -138,6 +142,7 @@ function getfeed (feed, pubkey, connection, keys) {
       }
     }
     connection.onmessage = (m) => {
+      console.log('onmessage')
       var req = JSON.parse(m.data)
       unbox(req.box, req.requester, keys).then(unboxed => {
         var unboxedreq = JSON.parse(unboxed)
@@ -163,7 +168,10 @@ function sync (feeds, keys) {
             getpubkey(connection, keys)
           }
           if (pubkey) {
+            console.log(pubkey)
+            console.log(feeds)
             feeds.forEach(feed => {
+              console.log('getting ' + feed)
               getfeed(feed, pubkey, connection, keys)
             })
           }

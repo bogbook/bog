@@ -138,7 +138,13 @@ function searchPage (src, keys) {
 
 function publicPage (keys) {
 
-  localforage.getItem('subscriptions').then(function (subs) {
+  localforage.getItem('log').then(log => {
+    log.sort((a, b) => a.timestamp - b.timestamp)
+    var reversed = log.reverse()
+    localforage.setItem('log', reversed)
+  })
+
+  localforage.getItem('subscriptions').then(subs => {
     var interval = 1000
     timer = function() {
       if ('' === window.location.hash.substring(1)) {
@@ -148,9 +154,17 @@ function publicPage (keys) {
       }
     }
     if (subs) {
+      // the next two lines just fix a bug where the first sub was being set to null. Delete this code after March 2020.
+      subs.forEach(sub => {
+        if (sub == null) {
+          var subs = [keys.publicKey]
+          localforage.setItem('subscriptions', subs)
+        }
+      })
       timer()
     } else {
-      var subs = [keys.publickey]
+      var subs = [keys.publicKey]
+      console.log(subs)
       localforage.setItem('subscriptions', subs)
       timer()
     }

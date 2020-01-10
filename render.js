@@ -142,8 +142,6 @@ function render (msg, keys, preview) {
 
     message.appendChild(getHeader(msg, keys, mini))
 
-    console.log(getTitle(msg.reply))
-
     if (msg.reply) {
       getTitle(msg.reply).then(title => {
         if (!title) {

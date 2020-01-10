@@ -1,15 +1,11 @@
 function processreq (req, pubkey, connection, keys) {
-  console.log('processreq')
   if (req.seq === 0 || req.seq) {
     bog(req.author).then(feed => {
       if (feed) {
-        console.log('opening first message')
         open(feed[0]).then(msg => {
-          console.log(msg)
           if (req.seq > msg.seq) {
             var reqdiff = JSON.stringify({author: req.author, seq: msg.seq})
             box(reqdiff, pubkey, keys).then(boxed => {
-              console.log(boxed)
               connection.send(JSON.stringify({
                 requester: keys.publicKey,
                 box: boxed
@@ -29,7 +25,6 @@ function processreq (req, pubkey, connection, keys) {
                 baserange)
               )
             box(diff, pubkey, keys).then(boxed => {
-              console.log(boxed)
               connection.send(JSON.stringify({
                 requester: keys.publicKey,
                 box: boxed
@@ -65,7 +60,6 @@ function processreq (req, pubkey, connection, keys) {
         } 
         if (feed) {
           open(feed[0]).then(lastmsg => {
-            console.log(lastmsg)
             if (req.length + lastmsg.seq === msg.seq) {
               var newlog = req.concat(feed)
               localforage.setItem(msg.author, newlog)
@@ -94,7 +88,6 @@ function processreq (req, pubkey, connection, keys) {
 }
 
 function getpubkey (connection, keys) {
-  console.log('asking for pubkey')
   connection.onopen = () => {
     connection.send(JSON.stringify({
       requester: keys.publicKey, sendpub: true
@@ -102,24 +95,18 @@ function getpubkey (connection, keys) {
   }
 
   connection.onmessage = (m) => {
-    console.log(m)
     localforage.setItem(m.origin, m.data)
   }
 }
 
 function getfeed (feed, pubkey, connection, keys) {
-  console.log('getfeed')
   bog(feed).then(log => {
     var logseq = 0
     connection.onopen = () => {
       if (log) {
-        console.log('onopen')
-        console.log(log[0])
-        // for some reason this does not open below
         open(log[0]).then(msg => {
           var string = JSON.stringify(msg)
           box(string, pubkey, keys).then(boxed => {
-            console.log(boxed)
             connection.send(JSON.stringify({
               requester: keys.publicKey,
               box: boxed
@@ -128,7 +115,6 @@ function getfeed (feed, pubkey, connection, keys) {
           logseq = msg.seq
         })
       } else {
-        console.log('else')
         var msg = {
           author: feed, 
           seq: logseq
@@ -142,7 +128,6 @@ function getfeed (feed, pubkey, connection, keys) {
       }
     }
     connection.onmessage = (m) => {
-      console.log('onmessage')
       var req = JSON.parse(m.data)
       unbox(req.box, req.requester, keys).then(unboxed => {
         var unboxedreq = JSON.parse(unboxed)
@@ -161,17 +146,13 @@ function sync (feeds, keys) {
     }
     pubs.forEach(function (pub, index) {
       setTimeout(function () {
-        console.log(pub)
         var connection = new WebSocket(pub)
         localforage.getItem(pub).then(pubkey => {
           if (!pubkey) {
             getpubkey(connection, keys)
           }
           if (pubkey) {
-            console.log(pubkey)
-            console.log(feeds)
             feeds.forEach(feed => {
-              console.log('getting ' + feed)
               getfeed(feed, pubkey, connection, keys)
             })
           }

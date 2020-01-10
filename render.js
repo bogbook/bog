@@ -183,10 +183,11 @@ function render (msg, keys, preview) {
 
       message.appendChild(buttons)
     }
-  } else if (msg.type == 'name') {
+  } if (msg.type == 'name') {
     var mini = h('span', [' identified ', h('a', {href: '#' + msg.named }, [msg.named.substring(0, 10) + '...']), ' as ' + msg.name])
     message.appendChild(getHeader(msg, keys, mini))
-  } else if (msg.type == 'image') {
+
+  } if (msg.type == 'image') {
     var mini = h('span', [
       ' added an image to ', 
       h('a', { href: '#' + msg.imaged }, [msg.imaged.substring(0, 10) + '...']), 
@@ -194,7 +195,18 @@ function render (msg, keys, preview) {
       h('img', {src: msg.image, classList: 'avatar'})
     ])
     message.appendChild(getHeader(msg, keys, mini))
+
+  } if (msg.type == 'background') {
+    var mini = h('span', [
+      ' added a background to ', 
+      h('a', { href: '#' + msg.backgrounded }, [msg.backgrounded.substring(0, 10) + '...']), 
+      ' ', 
+      h('img', {src: msg.background, classList: 'avatar'})
+    ])
+    message.appendChild(getHeader(msg, keys, mini))
   } 
+
+
 
   messageDiv.appendChild(message)
   return messageDiv

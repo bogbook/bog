@@ -49,7 +49,7 @@ function processreq (req, pubkey, connection, keys) {
                 var src = window.location.hash.substring(1)
                 if ((src === msg.author) || (src === '')) {
                   var scroller = document.getElementById('scroller')
-                  scroller.insertBefore(render(opened, keys), scroller.childNodes[1])
+                  scroller.insertBefore(render(opened, keys), scroller.childNodes[2])
                 }
                 if (opened.seq === req.length) {
                   localforage.setItem('log', log)
@@ -71,7 +71,7 @@ function processreq (req, pubkey, connection, keys) {
                     var src = window.location.hash.substring(1)
                     if ((src === msg.author) || (src === '')) {
                       var scroller = document.getElementById('scroller')
-                      scroller.insertBefore(render(opened, keys), scroller.childNodes[1])
+                      scroller.insertBefore(render(opened, keys), scroller.childNodes[2])
                     }
                     if (req.length + lastmsg.seq === opened.seq) {
                       localforage.setItem('log', log)

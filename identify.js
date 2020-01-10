@@ -8,6 +8,72 @@ function identify (src, profile, keys) {
 
   var photoURL = {}
 
+  // this could be a hell of a lot dry-er
+
+  // also we need to get rid of UI glitches when you hit the cancel button (it should return to the same state it started in)
+
+  var newBackground = h('span', [
+    h('input', {id: 'input', type: 'file', 
+      onclick: function () {
+        var canvas = document.getElementById("canvas")
+        var ctx = canvas.getContext("2d")
+        
+        var maxW
+        var maxH
+        
+        var input = document.getElementById('input')
+        input.addEventListener('change', handleFiles)
+        
+        function handleFiles(e) {
+          var img = new Image
+          img.onload = function() {
+            var iw = img.width
+            var ih = img.height
+
+            maxW = 800
+            maxH = 800
+            
+            var scale = Math.min((maxW/iw), (maxH/ih))
+            var iwScaled = iw*scale
+            var ihScaled = ih*scale
+            canvas.width = iwScaled
+            canvas.height = ihScaled
+            ctx.drawImage(img, 0, 0, iwScaled, ihScaled)
+            photoURL.value = canvas.toDataURL('image/jpeg', 0.7)
+          }
+          img.src = URL.createObjectURL(e.target.files[0])
+        } 
+      }
+    }),
+    h('canvas', {id: 'canvas', width: '0', height: '0'}),
+    h('button', {
+      onclick: function () {
+        identifyDiv.appendChild(identifyButtons)
+        newBackground.parentNode.removeChild(newBackground)
+      }
+    }, ['Cancel']),
+    h('button', {
+      onclick: function () {
+        if (photoURL.value) {
+          content = {
+            type: 'background',
+            backgrounded: src,
+            background: photoURL.value
+          }
+          localforage.removeItem('image:' + src)
+          publish(content, keys).then(post => {
+            open(post).then(msg => {
+              nameInput.value = ''
+              scroller.insertBefore(render(msg, keys), scroller.childNodes[1])
+            })
+          })
+          newBackground.parentNode.removeChild(newBackground)
+          identifyDiv.appendChild(identifyButton)
+        }
+      }
+    }, ['Publish'])
+  ])
+
   var newPhoto = h('span', [
     h('input', {id: 'input', type: 'file', 
       onclick: function () {
@@ -47,7 +113,6 @@ function identify (src, profile, keys) {
             canvas.width = iwScaled
             canvas.height = ihScaled
             ctx.drawImage(img, 0, 0, iwScaled, ihScaled)
-            console.log(canvas.toDataURL('image/jpeg', 0.9))
             photoURL.value = canvas.toDataURL('image/jpeg', 0.9)
           }
           img.src = URL.createObjectURL(e.target.files[0])
@@ -69,7 +134,6 @@ function identify (src, profile, keys) {
             imaged: src,
             image: photoURL.value
           }
-          console.log(content)
           localforage.removeItem('image:' + src)
           publish(content, keys).then(post => {
             open(post).then(msg => {
@@ -83,6 +147,9 @@ function identify (src, profile, keys) {
       }
     }, ['Publish'])
   ])
+
+
+
 
   var nameInput = h('input', {placeholder: 'New name'})
 
@@ -125,7 +192,12 @@ function identify (src, profile, keys) {
         identifyButtons.parentNode.removeChild(identifyButtons)
       }
     }, ['New name']))
-
+    identifyButtons.appendChild(h('button', {
+      onclick: function () {
+        identifyDiv.appendChild(newBackground)
+        identifyButtons.parentNode.removeChild(identifyButtons)
+      }
+    }, ['New background']))
   }
   //}, ['Identify ' + src.substring(0, 10) + '... with a new name']),
   identifyButtons.appendChild(h('button', {

@@ -59,10 +59,15 @@ hr {
 .message, .profile {
   border: 1px solid #ddd;
   background: white;
-  margin-top: .5em;
+  margin-bottom: .5em;
   padding: .3em .5em;
+}
+
+.message {
   border-radius: 5px;
 }
+
+.banner { height: 275px; }
 
 #scroller:last-child { margin-bottom: 10em; }
 

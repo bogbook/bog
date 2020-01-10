@@ -9,7 +9,24 @@ function profilePage (src, keys) {
   msg.author = src
 
   var profile = h('div', {classList: 'profile'})
+  var banner = h('div', {classList: 'banner'})
 
+  function getBg (src, profile) {
+    bog().then(log => {
+      if (log) {
+        for (var i = 0; i < log.length; i++) {
+          if ((log[i].backgrounded === src) && (log[i].author === src)) {
+            // if you've identified someone as something else show that something else
+            return banner.style.background = 'fixed top/680px no-repeat url(' + log[i].background + ')'
+          }
+        }
+      }
+    })
+  }
+
+  getBg(src, profile)
+
+  scroller.appendChild(banner)
   scroller.appendChild(profile)
   //scroller.appendChild(h('div'))
 
@@ -27,12 +44,15 @@ function profilePage (src, keys) {
 
   profile.appendChild(h('a', {href: '#' + src}, [
     getImage(src, keys, 'profileAvatar'),
-    getName(src, keys)
+    getName(src, keys),
+    h('br'),
+    h('br')
   ]))
 
   profile.appendChild(h('br'))
 
   quickName(src).then(name => {
+    profile.appendChild(identify(src, profile, keys, name))
     var mentionsButton = h('button', {
       onclick: function () {
         location.href = '#?' + src
@@ -76,7 +96,6 @@ function profilePage (src, keys) {
     }, ['Delete ' + name + '\'s feed']))
   })
 
-  profile.appendChild(identify(src, profile, keys))
 
   async function addPosts (posts, keys) {
     posts.forEach(function (msg) {
@@ -196,4 +215,5 @@ function publicPage (keys) {
     }
   })
 }
+
 

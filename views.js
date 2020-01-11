@@ -8,6 +8,7 @@ function profilePage (src, keys) {
   var msg = {}
   msg.author = src
 
+  var profileDiv = h('div')
   var profile = h('div', {classList: 'profile'})
   var banner = h('div', {classList: 'banner'})
 
@@ -16,7 +17,8 @@ function profilePage (src, keys) {
       if (log) {
         for (var i = 0; i < log.length; i++) {
           if ((log[i].backgrounded === src) && (log[i].author === src)) {
-            // if you've identified someone as something else show that something else
+            // if you've identified someone as something else show that something else  
+            banner.style.height = '300px'
             return banner.style.background = 'fixed top/680px no-repeat url(' + log[i].background + ')'
           }
         }
@@ -26,9 +28,9 @@ function profilePage (src, keys) {
 
   getBg(src, profile)
 
-  scroller.appendChild(banner)
-  scroller.appendChild(profile)
-  //scroller.appendChild(h('div'))
+  profileDiv.appendChild(banner)
+  profileDiv.appendChild(profile)
+  scroller.appendChild(profileDiv)
 
   var subs = [src]
 
@@ -45,8 +47,6 @@ function profilePage (src, keys) {
   profile.appendChild(h('a', {href: '#' + src}, [
     getImage(src, keys, 'profileAvatar'),
     getName(src, keys),
-    h('br'),
-    h('br')
   ]))
 
   profile.appendChild(h('br'))

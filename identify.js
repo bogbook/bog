@@ -1,4 +1,4 @@
-function identify (src, profile, keys) {
+function identify (src, profile, keys, name) {
 
   var identifyDiv = h('div')
 
@@ -213,7 +213,6 @@ function identify (src, profile, keys) {
       identifyButtons.parentNode.removeChild(identifyButtons)
     }
   }, ['Cancel']))
-
   if (src[0] == '@') {
     var identifyButton = h('button', {
       onclick: function () {
@@ -221,7 +220,7 @@ function identify (src, profile, keys) {
         profile.appendChild(identifyButtons)
         identifyButton.parentNode.removeChild(identifyButton)
       }
-    }, ['Identify ' + src.substring(0, 10) + '...'])
+    }, ['Identify ' + name])
   } else {
     var identifyButton = h('button', {
       onclick: function () {
@@ -231,6 +230,7 @@ function identify (src, profile, keys) {
       }
     }, ['Add to ' + src.substring(0, 10) + '...'])
   }
+ 
   return identifyButton
 }
 

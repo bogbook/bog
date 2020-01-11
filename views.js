@@ -221,7 +221,7 @@ function publicPage (keys) {
           }, 1000 * index)
         }, 2500)
 
-        if (sub == null) {
+        if ((sub == null) || (sub == undefined)) {
           var subs = [keys.publicKey]
           localforage.setItem('subscriptions', subs)
         }

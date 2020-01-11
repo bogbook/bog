@@ -63,7 +63,7 @@ function settingsPage (keys) {
         onclick: function () {
           if (add.value) {
             servers.push(add.value)
-            localforage.setItem('pubs', servers).then(function () { location.reload() })
+            localforage.setItem('pubs', servers).then(function () { location.hash = '' })
           }
         }
       }, ['Add a pub'])
@@ -75,7 +75,7 @@ function settingsPage (keys) {
         h('button', {
           onclick: function () {
             var newServers = servers.filter(item => item !== pub)
-            localforage.setItem('pubs', newServers).then(function () { location.reload() })
+            localforage.setItem('pubs', newServers).then(function () { location.hash = '' })
           }
         }, ['Remove'])
       ]))

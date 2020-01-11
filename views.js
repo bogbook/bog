@@ -19,20 +19,26 @@ function getLoc (src) {
   return loc
 }
 
-
 function profilePage (src, keys) {
 
-  var interval = 500
+  var timer = setInterval(function () {
+    if (window.location.hash.substring(1) != src) {
+      clearInterval(timer)
+      console.log('stop syncing')
+    }
+    sync([src], keys)
+    console.log('syncing ' + src)
+  }, 2500)
 
-  timer = function() {
+  /*timer = function() {
     if (src === window.location.hash.substring(1)) {
-      if (interval < 10000) { interval = interval + 50 }
+      //if (interval < 10000) { interval = interval + 50 }
       sync([src], keys)
       setTimeout(timer, interval)
     }
   }
 
-  timer()
+  timer()*/
 
   var msg = {}
   msg.author = src
@@ -69,7 +75,6 @@ function profilePage (src, keys) {
       }
     })
   }
-
 
   getBg(src, profile)
 
@@ -115,14 +120,14 @@ function profilePage (src, keys) {
           profile.appendChild(h('button', {
             onclick: function () {
               subs = subs.filter(a => a !== src)
-              localforage.setItem('subscriptions', subs).then(function () { location.reload() })
+              localforage.setItem('subscriptions', subs).then(function () { location.hash = '' })
             }
           }, ['Unsubscribe from ' + name]))
         } else {
           profile.appendChild(h('button', {
             onclick: function () {
               subs.push(src)
-              localforage.setItem('subscriptions', subs).then(function () { location.reload() })
+              localforage.setItem('subscriptions', subs).then(function () { location.hash = '' })
             }
           }, ['Subscribe to ' + name]))
         }
@@ -164,7 +169,6 @@ function profilePage (src, keys) {
 function searchPage (src, keys) {
   var search = src.substring(1).replace("%20"," ").toUpperCase()
 
-
   async function addPosts (posts, keys) {
     posts.forEach(function (msg) {
       if (msg.text) {
@@ -202,28 +206,30 @@ function publicPage (keys) {
   })
 
   localforage.getItem('subscriptions').then(subs => {
-    var interval = 1000
-    timer = function() {
-      if ('' === window.location.hash.substring(1)) {
-        if (interval < 10000) { interval = interval + 1000 }
-        sync(subs, keys)
-        setTimeout(timer, interval)
-      }
-    }
     if (subs) {
       // the next two lines just fix a bug where the first sub was being set to null. Delete this code after March 2020.
-      subs.forEach(sub => {
+      
+      subs.forEach(function (sub, index) {
+        var timer = setInterval(function () {
+          setTimeout(function () {
+            if (window.location.hash.substring(1) != '') {
+              clearInterval(timer)
+              console.log('stop syncing')
+            }
+            sync([sub], keys)
+            console.log('syncing ' + sub)
+          }, 1000 * index)
+        }, 2500)
+
         if (sub == null) {
           var subs = [keys.publicKey]
           localforage.setItem('subscriptions', subs)
         }
       })
-      timer()
     } else {
       var subs = [keys.publicKey]
       console.log(subs)
       localforage.setItem('subscriptions', subs)
-      timer()
     }
   })
 
@@ -253,5 +259,3 @@ function publicPage (keys) {
     }
   })
 }
-
-

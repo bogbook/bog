@@ -105,8 +105,10 @@ bog.keys().then(key => {
   wserve.on('connection', function (ws) {
     ws.on('message', function (message) {
       var req = JSON.parse(message)
+      console.log(req)
       if (req.sendpub) {
         ws.send(key.publicKey)
+        ws.close()
       } else { 
         bog.unbox(req.box, req.requester, key).then(unboxed => {
           var unboxedreq = JSON.parse(unboxed)
@@ -119,7 +121,8 @@ bog.keys().then(key => {
                 bog.open(feed[0]).then(msg => {
                   if (unboxedreq.seq === msg.seq) { 
                     printFeedIdentical(msg, req)
-                  } 
+                    ws.close()
+                  }  
                   if (unboxedreq.seq > msg.seq) {
                     printClientLonger(msg, req)
                     var reqdiff = JSON.stringify({author: unboxedreq.author, seq: msg.seq})
@@ -129,6 +132,7 @@ bog.keys().then(key => {
                         box: boxed
                       }
                       ws.send(JSON.stringify(obj))
+                      ws.close()
                     })
                   }
                   if (unboxedreq.seq < msg.seq) {
@@ -163,6 +167,7 @@ bog.keys().then(key => {
                     box: boxed  
                   }
                   ws.send(JSON.stringify(obj))
+                  ws.close()
                 })
               }
             })
@@ -182,6 +187,7 @@ bog.keys().then(key => {
                         printUpdateFeed(msg, req)
                       })
                     }
+                    ws.close()
                   })
                 })
               } 

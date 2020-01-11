@@ -133,7 +133,6 @@ bog.keys().then(key => {
                   }
                   if (unboxedreq.seq < msg.seq) {
                     var endrange = feed.length - unboxedreq.seq - Math.floor(Math.random() * 50 + 1)
-                    console.log(endrange)
                     if (endrange < 0) {
                       endrange = 0
                     }

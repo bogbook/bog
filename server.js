@@ -105,7 +105,6 @@ bog.keys().then(key => {
   wserve.on('connection', function (ws) {
     ws.on('message', function (message) {
       var req = JSON.parse(message)
-      console.log(req)
       if (req.sendpub) {
         ws.send(key.publicKey)
         ws.close()

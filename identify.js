@@ -3,7 +3,10 @@ function identify (src, profile, keys, name) {
   var identifyDiv = h('div')
 
   if ((src[0] == '@') && (src != keys.publicKey)) {
-    identifyDiv.appendChild(h('p', ['Please note: ' + src + ' is not you.']))
+    identifyDiv.appendChild(h('p', [
+      'Please note: ' + src.substring(0, 10) + '... is not you. You are: ',
+        h('a', {href: '#' + keys.publicKey}, [keys.publicKey.substring(0, 10) + '...'])
+      ]))
   }
 
   var photoURL = {}
@@ -148,8 +151,67 @@ function identify (src, profile, keys, name) {
     }, ['Publish'])
   ])
 
+  var descInput = h('textarea', {placeholder: 'New description'})
 
+  var newDescription = h('div', [
+    descInput,
+    h('button', {
+      onclick: function () {
+        if (descInput.value) {
+          content = {
+            type: 'description',
+            descripted: src,
+            description: descInput.value
+          }
+          publish(content, keys).then(post => {
+            open(post).then(msg => {
+              descInput.value = ''
+              scroller.insertBefore(render(msg, keys), scroller.childNodes[1])
+            })
+          })
+          newDescription.parentNode.removeChild(newDescription)
+          identifyDiv.appendChild(identifyButton)
+        }
+      }
+    }, ['Publish']),
+    h('button', {
+      onclick: function () {
+        identifyDiv.appendChild(identifyButtons)
+        newDescription.parentNode.removeChild(newDescription)
+      }
+    }, ['Cancel'])
+  ])
 
+  var locInput = h('input', {placeholder: 'New location'})
+
+  var newLocation = h('div', [
+    locInput,
+    h('button', {
+      onclick: function () {
+        if (locInput.value) {
+          content = {
+            type: 'location',
+            located: src,
+            loc: locInput.value
+          }
+          publish(content, keys).then(post => {
+            open(post).then(msg => {
+              locationInput.value = ''
+              scroller.insertBefore(render(msg, keys), scroller.childNodes[1])
+            })
+          })
+          newLocation.parentNode.removeChild(newLocation)
+          identifyDiv.appendChild(identifyButton)
+        }
+      }
+    }, ['Publish']),
+    h('button', {
+      onclick: function () {
+        identifyDiv.appendChild(identifyButtons)
+        newLocation.parentNode.removeChild(newLocation)
+      }
+    }, ['Cancel'])
+  ])
 
   var nameInput = h('input', {placeholder: 'New name'})
 
@@ -198,6 +260,13 @@ function identify (src, profile, keys, name) {
         identifyButtons.parentNode.removeChild(identifyButtons)
       }
     }, ['New background']))
+    identifyButtons.appendChild(h('button', {
+      onclick: function () {
+        identifyDiv.appendChild(newDescription)
+        identifyButtons.parentNode.removeChild(identifyButtons)
+      }
+    }, ['New description']))
+
   }
   //}, ['Identify ' + src.substring(0, 10) + '... with a new name']),
   identifyButtons.appendChild(h('button', {
@@ -206,6 +275,15 @@ function identify (src, profile, keys, name) {
       identifyButtons.parentNode.removeChild(identifyButtons)
     }
   }, ['New image']))
+
+  identifyButtons.appendChild(h('button', {
+    onclick: function () {
+      identifyDiv.appendChild(newLocation)
+      identifyButtons.parentNode.removeChild(identifyButtons)
+    }
+  }, ['New location']))
+
+
   //}, ['Identify ' + src.substring(0, 10) + '... with a new photo']),
   identifyButtons.appendChild(h('button', {
     onclick: function () {
@@ -213,7 +291,7 @@ function identify (src, profile, keys, name) {
       identifyButtons.parentNode.removeChild(identifyButtons)
     }
   }, ['Cancel']))
-  if (src[0] == '@') {
+  /*if (src[0] == '@') {
     var identifyButton = h('button', {
       onclick: function () {
         profile.appendChild(identifyDiv) 
@@ -221,15 +299,16 @@ function identify (src, profile, keys, name) {
         identifyButton.parentNode.removeChild(identifyButton)
       }
     }, ['Identify ' + name])
-  } else {
+  } else { */
     var identifyButton = h('button', {
       onclick: function () {
         profile.appendChild(identifyDiv) 
         profile.appendChild(identifyButtons)
         identifyButton.parentNode.removeChild(identifyButton)
       }
-    }, ['Add to ' + src.substring(0, 10) + '...'])
-  }
+    //}, ['Add to ' + src.substring(0, 10) + '...'])
+    }, ['+'])
+  //}
  
   return identifyButton
 }

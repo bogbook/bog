@@ -4,13 +4,57 @@ function threadPage (src, keys) {
   })
 }
 
+function getLoc (src) {
+  var loc = h('span')
+  bog().then(log => {
+    if (log) {
+      for (var i = 0; i < log.length; i++) {
+        if (((log[i].located === src) && (log[i].author === src)) || ((log[i].located === src.key) && (log[i].author === src.author))) {
+          // if you've identified someone as something else show that something else
+          return loc.textContent = log[i].loc
+        }
+      }
+    }
+  })
+  return loc
+}
+
+
 function profilePage (src, keys) {
+
+  var interval = 500
+
+  timer = function() {
+    if (src === window.location.hash.substring(1)) {
+      if (interval < 10000) { interval = interval + 50 }
+      sync([src], keys)
+      setTimeout(timer, interval)
+    }
+  }
+
+  timer()
+
   var msg = {}
   msg.author = src
 
   var profileDiv = h('div')
   var profile = h('div', {classList: 'profile'})
   var banner = h('div', {classList: 'banner'})
+
+  function getDesc (src) {
+    var desc = h('span')
+    bog().then(log => {
+      if (log) {
+        for (var i = 0; i < log.length; i++) {
+          if ((log[i].descripted === src) && (log[i].author === src)) {
+            // if you've identified someone as something else show that something else
+            return desc.innerHTML = marked(log[i].description)
+          }
+        }
+      }
+    })
+    return desc
+  }
 
   function getBg (src, profile) {
     bog().then(log => {
@@ -26,33 +70,23 @@ function profilePage (src, keys) {
     })
   }
 
+
   getBg(src, profile)
 
   profileDiv.appendChild(banner)
   profileDiv.appendChild(profile)
   scroller.appendChild(profileDiv)
 
-  var subs = [src]
-
-  var interval = 2500
-  timer = function() {
-    if (src === window.location.hash.substring(1)) {
-      if (interval < 10000) { interval = interval + 50 }
-      sync(subs, keys)
-      setTimeout(timer, interval)
-    }
-  }
-  timer()
-
-  profile.appendChild(h('a', {href: '#' + src}, [
-    getImage(src, keys, 'profileAvatar'),
-    getName(src, keys),
+  profile.appendChild(h('span', {classList: 'right'}, [getLoc(src)]))
+  profile.appendChild(h('div', [
+    h('a', {href: '#' + src}, [
+      getImage(src, keys, 'profileAvatar'),
+      getName(src, keys)
+    ]),
+    profile.appendChild(getDesc(src))
   ]))
 
-  profile.appendChild(h('br'))
-
   quickName(src).then(name => {
-    profile.appendChild(identify(src, profile, keys, name))
     var mentionsButton = h('button', {
       onclick: function () {
         location.href = '#?' + src
@@ -66,6 +100,15 @@ function profilePage (src, keys) {
     }, ['Reply to ' + name])
     profile.appendChild(respond)
 
+    profile.appendChild(h('button', {
+      onclick: function () {
+        localforage.removeItem(src).then(function () {
+          var home = true
+          regenerate(home)
+        })
+      }
+    }, ['Delete ' + name + '\'s feed']))
+ 
     if (src != keys.publicKey) {
       localforage.getItem('subscriptions').then(function (subs) {
         if (subs.includes(src)) {
@@ -83,17 +126,12 @@ function profilePage (src, keys) {
             }
           }, ['Subscribe to ' + name]))
         }
+        profile.appendChild(identify(src, profile, keys))
       })
+    } else {
+      profile.appendChild(identify(src, profile, keys))
     }
-
-    profile.appendChild(h('button', {
-      onclick: function () {
-        localforage.removeItem(src).then(function () {
-          var home = true
-          regenerate(home)
-        })
-      }
-    }, ['Delete ' + name + '\'s feed']))
+   //profile.appendChild(identify(src, profile, keys, name))
   })
 
 

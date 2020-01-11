@@ -15,6 +15,8 @@ function getHeader (post, keys, mini) {
 
   var head = h('span', [
     h('p', {classList: 'right'}, [
+      getLoc(post),
+      ' ',
       h('a', {href: '#' + post.key}, [
         human(new Date(post.timestamp)),
       ]),
@@ -204,9 +206,25 @@ function render (msg, keys, preview) {
       h('img', {src: msg.background, classList: 'avatar'})
     ])
     message.appendChild(getHeader(msg, keys, mini))
-  } 
 
+  } if (msg.type == 'description') {
+    var mini = h('span', [
+      ' added a description to ',
+      h('a', { href: '#' + msg.descripted }, [msg.descripted.substring(0, 10) + '...']),
+      ' ',
+      h('div', {innerHTML: marked(msg.description)})
+    ])
+    message.appendChild(getHeader(msg, keys, mini))
 
+  } if (msg.type == 'location') {
+    var mini = h('span', [
+      ' added a location to ',
+      h('a', { href: '#' + msg.located }, [msg.located.substring(0, 10) + '...']),
+    ': ',
+    msg.loc
+    ])
+    message.appendChild(getHeader(msg, keys, mini))
+  }
 
   messageDiv.appendChild(message)
   return messageDiv

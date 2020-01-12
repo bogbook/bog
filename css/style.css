@@ -61,11 +61,11 @@ hr {
 .message, .profile {
   border: 1px solid #ddd;
   background: white;
-  margin-bottom: .5em;
   padding: .3em .5em;
 }
 
 .message {
+  margin-top: .5em;
   border-radius: 5px;
 }
 

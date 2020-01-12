@@ -7,7 +7,7 @@ function settingsPage (keys) {
 
   var keyDiv = h('div', {classList: 'message'})
 
-  keyDiv.appendChild(h('p', {innerHTML: marked('### Your keypair \n\n This is your ed25519 public/private keypair. It was generated using [TweetNaCl.js](https://tweetnacl.js.org/#/). \n\n Bogbook does not use logins and passwords, instead you are able to post by signing messages with your keypair. \n\n Because Bogbook uses keypairs for identities, as long as your private key is safe no one can post to your feed (or delete your posts) without your permission. \n\n**Save your key** in a safe place so that you can continue to use the same identity.')}))
+  keyDiv.appendChild(h('p', {innerHTML: marked('### Your keypair \n\n This is your [ed25519](https://ed25519.cr.yp.to/) keypair. It was generated using [TweetNaCl.js](https://tweetnacl.js.org/#/). \n\n Bogbook does not use logins and passwords, instead you are able to post by signing messages with your keypair. \n\n Because Bogbook uses keypairs for identities, keep your keypair safe so no one can post to your feed (or delete your posts) without your permission. \n\n**Save your key** in a safe place so that you can continue to use the same identity.')}))
 
   keyDiv.appendChild(h('pre', {style: 'width: 80%'}, [h('code', [JSON.stringify(keys)])]))
 

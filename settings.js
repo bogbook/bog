@@ -1,11 +1,13 @@
 function settingsPage (keys) {
   var welcome = h('div', {classList: 'message'})
 
-  welcome.appendChild(h('p', {innerHTML: marked('This is [Bogbook](http://bogbook.com), a distributed social network built using secure-gossiped blockchain logging (blogging), but we call them "bogs".\n\n You can view the code at [git.sr.ht/~ev/bogbook](https://git.sr.ht/~ev/bogbook) or clone it directly from our server:\n```\ngit clone http://git.bogbook.com/bogbook.git\n```\n Please communicate errors, bugs, and pull-requests to [@ev](http://bogbook.com/#@Q++V5BbvWIg8B+TqtC9ZKFhetruuw+nOgxEqfjlOZI0=) using Bogbook or via email: [ev@evbogue.com](mailto:ev@evbogue.com)')}))
+  welcome.appendChild(h('p', {innerHTML: marked('### About Bogbook \n\n[Bogbook](http://bogbook.com) is a distributed social network built using secure-gossiped blockchain logging (blogging), but we call them "bogs".\n\n With bogbook you can create your own secure social network that is easily replicated between browsers via bogbook pubs.\n\n To try bogbook, type a message into the [compose box](/) on the bogbook instance you are using, then press preview and publish.\n\n You can view the bogbook code at [git.sr.ht/~ev/bogbook](https://git.sr.ht/~ev/bogbook) or clone it directly from our server:\n```\ngit clone http://git.bogbook.com/bogbook.git\n```\n Please communicate errors, bugs, and pull-requests to [@ev](http://bogbook.com/#@Q++V5BbvWIg8B+TqtC9ZKFhetruuw+nOgxEqfjlOZI0=) using Bogbook or via email: [ev@evbogue.com](mailto:ev@evbogue.com)\n\n Here\'s a video of Bogbook in the early days:')}))
+
+  welcome.appendChild(h('div', {innerHTML: '<video width="100%" controls><source src="http://evbogue.com/e-bogbook-explanation.webm" type="video/webm"></video>'}))
 
   var keyDiv = h('div', {classList: 'message'})
 
-  keyDiv.appendChild(h('p', {innerHTML: marked('This is your ed25519 public/private keypair. It was generated using [TweetNaCl.js](https://tweetnacl.js.org/#/). Your public key is your identity when using Bogbook, save your key in a safe place so that you can continue to use the same identity.')}))
+  keyDiv.appendChild(h('p', {innerHTML: marked('### Your keypair \n\n This is your ed25519 public/private keypair. It was generated using [TweetNaCl.js](https://tweetnacl.js.org/#/). \n\n Bogbook does not use logins and passwords, instead you are able to post by signing messages with your keypair. \n\n Because Bogbook uses keypairs for identities, as long as your private key is safe no one can post to your feed (or delete your posts) without your permission. \n\n**Save your key** in a safe place so that you can continue to use the same identity.')}))
 
   keyDiv.appendChild(h('pre', {style: 'width: 80%'}, [h('code', [JSON.stringify(keys)])]))
 
@@ -30,7 +32,7 @@ function settingsPage (keys) {
 
   var everything = h('div', {classList: 'message'})
 
-  everything.appendChild(h('p', {innerHTML: marked('Sometimes you may want to delete all of your bogbook data in the browser. When you click this button, Bogbook will erase everything that you\'ve stored in the browser. NOTE: This will not delete Bogbook posts that you have already gossiped with others. WARNING: This will delete your Bogbook keypair as well as all data stored in the browser. If you want to continue to use the same key, make sure you\'ve backed up your keypair!')}))
+  everything.appendChild(h('p', {innerHTML: marked('### Delete everything \n\n Sometimes you may want to delete all of your bogbook data in the browser. When you click this button, Bogbook will erase everything that you\'ve stored in the browser.\n\n **NOTE**: This will not delete Bogbook posts that you have already gossiped with others.\n\n **WARNING**: This will delete your Bogbook keypair as well as all data stored in the browser. If you want to continue to use the same key, make sure you\'ve backed up your keypair!')}))
 
   everything.appendChild(h('button', {
     onclick: function () {
@@ -52,7 +54,7 @@ function settingsPage (keys) {
 
   var pubs = h('div', {classList: 'message'})
  
-  pubs.appendChild(h('p', {innerHTML: marked('These are your bogbook pubs. Bogbook will gossip with these pubs to publish your messages and check for new messages from your subscriptions. You should have at least one Bogbook pub in order to gossip your messages. If you don\'t see a bogbook pub below, try clicking "Reset Pubs" or add \n```\nws://bogbook.com\n```\n to your pubs list.')}))
+  pubs.appendChild(h('p', {innerHTML: marked('### Bogbook Pubs \n\n These are your bogbook pubs. Bogbook will gossip with these pubs to publish your messages and check for new messages from your subscriptions. You should have at least one Bogbook pub in order to gossip your messages. If you don\'t see a bogbook pub below, try clicking "Reset Pubs" or add \n```\nws://bogbook.com\n```\n to your pubs list.')}))
 
   var add = h('input', {placeholder: 'Add a pub'})
 
@@ -91,10 +93,10 @@ function settingsPage (keys) {
     }
   }, ['Reset pubs']))
 
-  scroller.appendChild(welcome)
   scroller.appendChild(keyDiv)
   scroller.appendChild(pubs)
   scroller.appendChild(everything)
+  scroller.appendChild(welcome)
   //scroller.appendChild(regenerate)
 }
 

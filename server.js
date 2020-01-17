@@ -131,7 +131,6 @@ bog.keys().then(key => {
                         box: boxed
                       }
                       ws.send(JSON.stringify(obj))
-                      ws.close()
                     })
                   }
                   if (unboxedreq.seq < msg.seq) {
@@ -141,11 +140,23 @@ bog.keys().then(key => {
                     }
                     var baserange = feed.length - unboxedreq.seq
                     printClientShorter(msg, req, baserange, endrange)
+                    var latest = JSON.stringify({
+                      latest: true,
+                      feed: feed.slice(0, 15)
+                    })
+                    bog.box(latest, req.requester, key).then(boxed => {
+                      var obj = {
+                        requester: key.publicKey,
+                        box: boxed
+                      }
+                      ws.send(JSON.stringify(obj))
+                    })
                     var diff = JSON.stringify(
                       feed.slice(
                         endrange, 
-                        baserange)
+                        baserange
                       )
+                    )
                     bog.box(diff, req.requester, key).then(boxed => {
                       var obj = {
                         requester: key.publicKey,
@@ -166,7 +177,6 @@ bog.keys().then(key => {
                     box: boxed  
                   }
                   ws.send(JSON.stringify(obj))
-                  ws.close()
                 })
               }
             })

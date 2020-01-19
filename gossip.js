@@ -36,6 +36,43 @@ function processreq (req, pubkey, connection, keys) {
     })
   }
 
+  if (req.latest) {
+    var latest
+    latest = document.getElementById('latest')
+    var src = window.location.hash.substring(1)
+    if ((!latest) && (src == req.latest)) {
+      latest = h('div', {id: 'latest'})
+      latest.appendChild(h('div', {classList: 'message', innerHTML: marked('**Still syncing feed**. In the meantime, here are the latest five messages...')
+      }))
+      req.feed.forEach(post => {
+        open(post).then(msg => {
+          latest.appendChild(render(msg, keys))
+        })
+      })
+      scroller.firstChild.appendChild(latest)
+
+      var timer = setInterval(function () {
+        localforage.getItem(req.latest).then(feed => {
+          open(feed[0]).then(msg => {
+            open(req.feed[0]).then(latestmsg => {
+              src = window.location.hash.substring(1)
+              if (msg.seq >= latestmsg.seq) {
+                latest.parentNode.removeChild(latest)
+                clearInterval(timer)
+                console.log('we are caught up, deleting latest div')
+              } 
+              if (src != req.latest) {
+                clearInterval(timer)
+                console.log('we navigated away')
+              }
+            })
+          })
+        })
+        console.log('checking to see if we have caught up')
+      }, 5000)
+    }
+  }
+
   if (Array.isArray(req)) {
     open(req[0]).then(msg => {
       localforage.getItem(msg.author).then(feed => {

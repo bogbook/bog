@@ -140,17 +140,21 @@ bog.keys().then(key => {
                     }
                     var baserange = feed.length - unboxedreq.seq
                     printClientShorter(msg, req, baserange, endrange)
-                    var latest = JSON.stringify({
-                      latest: true,
-                      feed: feed.slice(0, 15)
-                    })
-                    bog.box(latest, req.requester, key).then(boxed => {
-                      var obj = {
-                        requester: key.publicKey,
-                        box: boxed
-                      }
-                      ws.send(JSON.stringify(obj))
-                    })
+                    if (baserange > 50) {
+                      var latest = JSON.stringify({
+                        latest: unboxedreq.author,
+                        feed: feed.slice(0, 5)
+                      })
+                      bog.box(latest, req.requester, key).then(boxed => {
+                        var obj = {
+                          requester: key.publicKey,
+                          box: boxed
+                        }
+                        console.log('sending latest ' + unboxedreq.author)
+                        ws.send(JSON.stringify(obj))
+                      })
+                    }
+ 
                     var diff = JSON.stringify(
                       feed.slice(
                         endrange, 

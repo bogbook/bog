@@ -28,7 +28,7 @@ function profilePage (src, keys) {
     }
     sync([src], keys)
     console.log('syncing ' + src)
-  }, 2500)
+  }, 5000)
 
   /*timer = function() {
     if (src === window.location.hash.substring(1)) {

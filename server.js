@@ -86,6 +86,31 @@ var open = require('open')
 
 var app = new koa()
 
+// namespace redirect -- add namespaces to ~/.bogbook/names.json
+app.use(async function (ctx, next) {
+  if (ctx.request.url[1] != '#') {
+    var name = ctx.request.url.substring(1)
+
+    if (!fs.existsSync(path + 'names.json')) {
+      var obj = {
+        ev: '@Q++V5BbvWIg8B+TqtC9ZKFhetruuw+nOgxEqfjlOZI0=',
+        mil3s: '@531mT2x1FnQdpYJxVrG8YD9wiE767xO88kKRhi5A3Yg=',
+        g: '@WVBPY53Bl4aUIngt2TXV8nW+IGKvCTqhv88EvktOX9s='
+      }
+      fs.writeFileSync(path + 'names.json', JSON.stringify(obj), 'UTF-8')
+    }
+
+    var obj = JSON.parse(fs.readFileSync(path + 'names.json', 'UTF-8'))
+
+    for (var property in obj) {
+      if ((name === property) || (name === property + '/')) {
+        ctx.redirect('/#' + obj[property])
+      }
+    }
+  }
+  return await next()
+})
+
 app.use(serve({rootDir: '.', notFoundFile: 'index.html'}))
 
 app.listen(config.port)

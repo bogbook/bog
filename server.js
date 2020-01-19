@@ -150,7 +150,7 @@ bog.keys().then(key => {
                           requester: key.publicKey,
                           box: boxed
                         }
-                        console.log('sending latest ' + unboxedreq.author)
+                        //console.log('sending latest ' + unboxedreq.author)
                         ws.send(JSON.stringify(obj))
                       })
                     }

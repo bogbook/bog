@@ -59,16 +59,16 @@ function processreq (req, pubkey, connection, keys) {
               if (msg.seq >= latestmsg.seq) {
                 latest.parentNode.removeChild(latest)
                 clearInterval(timer)
-                console.log('we are caught up, deleting latest div')
+                //console.log('we are caught up, deleting latest div')
               } 
               if (src != req.latest) {
                 clearInterval(timer)
-                console.log('we navigated away')
+                //console.log('we navigated away')
               }
             })
           })
         })
-        console.log('checking to see if we have caught up')
+        //console.log('checking to see if we have caught up')
       }, 5000)
     }
   }

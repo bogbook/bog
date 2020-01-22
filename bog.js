@@ -115,28 +115,20 @@ function getImage (id, keys, classList) {
     var image = h('img', {classList: 'avatar'})
   }
 
-  localforage.getItem('image:' + id).then(cache => {
-    //if (cache) {
-    //  return image.src = cache
-    //} else {
-      bog().then(log => {
-        if (log) {
-          for (var i = 0; i < log.length; i++) {
-            if ((log[i].imaged === id) && (log[i].author === keys.publicKey)) {
-              // if you've identified someone as something else show that something else
-              localforage.setItem('image:' + id, log[i].image)
-              image.src = cache
-              return image.src = cache
-            } else if ((log[i].imaged === id) && (log[i].author === id)) {
-              // else if show the image they gave themselves
-              localforage.setItem('image:' + id, log[i].image)
-              image.src = cache
-              return image.src = cache
-            }
-          }
+  bog().then(log => {
+    if (log) {
+      for (var i = 0; i < log.length; i++) {
+        if ((log[i].imaged === id) && (log[i].author === keys.publicKey)) {
+          // if you've identified someone as something else show that something else
+          localforage.setItem('image:' + id, log[i].image)
+          return image.src = log[i].image
+        } else if ((log[i].imaged === id) && (log[i].author === id)) {
+          // else if show the image they gave themselves
+          localforage.setItem('image:' + id, log[i].image)
+          return image.src = log[i].image
         }
-      })
-    //}
+      }
+    }
   })
   return image
 }
@@ -148,29 +140,46 @@ function getName (id, keys) {
 
   name.textContent = id.substring(0, 10) + '...'
 
-  localforage.getItem('name:' + id).then(cache => {
+  bog().then(log => {
+    if (log) {
+      for (var i = 0; i < log.length; i++ ) {
+        if ((log[i].named === id) && (log[i].author === keys.publicKey)) {
+          // if you've identified someone as something else show that something else
+          localforage.setItem('name:' + id, log[i].name)
+          return name.textContent = '@' + log[i].name
+        } else if ((log[i].named === id) && (log[i].author === id)) {
+          // else if show the name they gave themselves
+          localforage.setItem('name:' + id, log[i].name)
+          return name.textContent = '@' + log[i].name
+        }
+        // there should probably be some sort of sybil attack resiliance here (weight avatar name based on number of times used by individuals), but this will do for now.
+      }
+    } 
+  })
+  return name
+}
+
+function getQuickImage (id, keys) {
+  var image = h('img', {classList: 'avatar'})
+
+  localforage.getItem('image:' + id).then(cache => {
     if (cache) {
-      //console.log(cache)
-      return name.textContent = '@' + cache
-    } else {
-      bog().then(log => {
-        if (log) {
-          for (var i = 0; i < log.length; i++ ) {
-            if ((log[i].named === id) && (log[i].author === keys.publicKey)) {
-              // if you've identified someone as something else show that something else
-              localforage.setItem('name:' + id, log[i].name)
-              return name.textContent = '@' + log[i].name
-            } else if ((log[i].named === id) && (log[i].author === id)) {
-              // else if show the name they gave themselves
-              localforage.setItem('name:' + id, log[i].name)
-              return name.textContent = '@' + log[i].name
-            }
-            // there should probably be some sort of sybil attack resiliance here (weight avatar name based on number of times used by individuals), but this will do for now.
-          }
-        } 
-      })
+      image.src = cache
     }
   })
+
+  return image
+}
+
+function getQuickName (id, keys) {
+  var name = h('span', [id.substring(0, 10)])
+
+  localforage.getItem('name:' + id).then(cache => {
+    if (cache) {
+      name.textContent = '@' + cache
+    } 
+  })
+
   return name
 }
 

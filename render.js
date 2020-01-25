@@ -192,9 +192,11 @@ function render (msg, keys, preview) {
   } if (msg.type == 'image') {
     var mini = h('span', [
       ' added an image to ', 
-      h('a', { href: '#' + msg.imaged }, [msg.imaged.substring(0, 10) + '...']), 
-      ' ', 
-      h('img', {src: msg.image, classList: 'avatar'})
+      h('a', { href: '#' + msg.imaged }, [
+        msg.imaged.substring(0, 10) + '...',
+        ' ', 
+        h('img', {src: msg.image, classList: 'avatar'})
+      ]) 
     ])
     message.appendChild(getHeader(msg, keys, mini))
 

@@ -150,13 +150,14 @@ function profilePage (src, keys) {
   bog().then(log => {
     var index = 0
     if (log) {
-      var posts = log.slice(index, index + 25)
+      var posts = log.slice(index, index + 33)
       addPosts(posts, keys).then(done => {
-        index = index + 25
+        index = index + 33
         window.onscroll = function(ev) {
-          if (((window.innerHeight + window.scrollY) >= document.body.scrollHeight) && (window.location.hash.substring(1) === src)) {
-            posts = log.slice(index, index + 25)
-            index = index + 25
+          console.log(document.body.scrollHeight)
+          if (((window.innerHeight + window.scrollY) >= (document.body.scrollHeight - 2500)) && (window.location.hash.substring(1) === src)) {
+            posts = log.slice(index, index + 33)
+            index = index + 33
             addPosts(posts, keys)
             console.log("Bottom of page")
           }

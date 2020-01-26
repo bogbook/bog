@@ -85,14 +85,38 @@ function render (msg, keys, preview) {
             }
           })
           
-          message.insertBefore(img, message.childNodes[message.childNodes.length - 1])
+           message.insertBefore(img, message.childNodes[message.childNodes.length - 1])
         }
       })
     }
   })
 
   var renderer = new marked.Renderer();
-  renderer.link = function(href, title, text) {
+  renderer.paragraph = function (paragraph) {
+    var array = paragraph.split(' ')
+
+    for (i = 0; i < array.length; i++) {
+      word = array[i]
+      if (word.startsWith('#')) {
+        //console.log(word + ' is a hashtag')
+        if ((word[word.length -1] === '.') || word[word.length - 1] === ',') {
+          //console.log('and it ends with a ' + word[word.length - 1])
+          var end = word[word.length - 1]
+          word = word.substring(0, word.length - 1)
+        }
+        var hashtag = "<a href='#?" + word + "'>" + word + "</a>"
+        if (end) {
+          hashtag = hashtag + end
+        }
+        //console.log(hashtag)
+        array[i] = hashtag
+      }
+    }
+
+    paragraph = array.join(' ')
+    return paragraph
+  }
+  renderer.link = function (href, title, text) {
     if ((href[0] == '@') || (href[0] == '%')) {
       href = '#' + href
     }

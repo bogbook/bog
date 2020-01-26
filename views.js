@@ -24,10 +24,10 @@ function profilePage (src, keys) {
   var timer = setInterval(function () {
     if (window.location.hash.substring(1) != src) {
       clearInterval(timer)
-      console.log('stop syncing')
+      //console.log('stop syncing')
     }
     sync([src], keys)
-    console.log('syncing ' + src)
+    //console.log('syncing ' + src)
   }, 5000)
 
   /*timer = function() {
@@ -154,12 +154,12 @@ function profilePage (src, keys) {
       addPosts(posts, keys).then(done => {
         index = index + 33
         window.onscroll = function(ev) {
-          console.log(document.body.scrollHeight)
+          //console.log(document.body.scrollHeight)
           if (((window.innerHeight + window.scrollY) >= (document.body.scrollHeight - 2500)) && (window.location.hash.substring(1) === src)) {
             posts = log.slice(index, index + 33)
             index = index + 33
             addPosts(posts, keys)
-            console.log("Bottom of page")
+            //console.log("Bottom of page")
           }
         }
       })
@@ -182,15 +182,15 @@ function searchPage (src, keys) {
   bog().then(log => {
     var index = 0
     if (log) {
-      var posts = log.slice(index, index + 25)
+      var posts = log.slice(index, index + 33)
       addPosts(posts, keys).then(done => {
-        index = index + 25
+        index = index + 33
         window.onscroll = function(ev) {
-          if (((window.innerHeight + window.scrollY) >= document.body.scrollHeight) && (window.location.hash.substring(1) === src)) {
-            posts = log.slice(index, index + 25)
-            index = index + 25
+          if (((window.innerHeight + window.scrollY) >= document.body.scrollHeight - 2500) && (window.location.hash.substring(1) === src)) {
+            posts = log.slice(index, index + 33)
+            index = index + 33
             addPosts(posts, keys)
-            console.log("Bottom of page")
+            //console.log("Bottom of page")
           }
         }
       })
@@ -215,10 +215,10 @@ function publicPage (keys) {
           setTimeout(function () {
             if (window.location.hash.substring(1) != '') {
               clearInterval(timer)
-              console.log('stop syncing')
+              //console.log('stop syncing')
             }
             sync([sub], keys)
-            console.log('syncing ' + sub)
+            //console.log('syncing ' + sub)
           }, 1000 * index)
         }, 2500)
 

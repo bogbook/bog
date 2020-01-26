@@ -93,7 +93,9 @@ function render (msg, keys, preview) {
 
   var renderer = new marked.Renderer();
   renderer.paragraph = function (paragraph) {
+    console.log(paragraph)
     var array = paragraph.split(' ')
+    console.log(array)
 
     for (i = 0; i < array.length; i++) {
       word = array[i]
@@ -113,8 +115,9 @@ function render (msg, keys, preview) {
       }
     }
 
-    paragraph = array.join(' ')
-    return paragraph
+    newgraph = array.join(' ')
+    
+    return newgraph + '<br /><br />'
   }
   renderer.link = function (href, title, text) {
     if ((href[0] == '@') || (href[0] == '%')) {

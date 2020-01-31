@@ -100,10 +100,11 @@ function render (msg, keys, preview) {
     for (i = 0; i < array.length; i++) {
       word = array[i]
       if (word.startsWith('#')) {
+        let end
         //console.log(word + ' is a hashtag')
         if ((word[word.length -1] === '.') || word[word.length - 1] === ',') {
           //console.log('and it ends with a ' + word[word.length - 1])
-          var end = word[word.length - 1]
+          end = word[word.length - 1]
           word = word.substring(0, word.length - 1)
         }
         var hashtag = "<a href='#?" + word + "'>" + word + "</a>"

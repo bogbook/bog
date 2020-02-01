@@ -93,9 +93,7 @@ function render (msg, keys, preview) {
 
   var renderer = new marked.Renderer();
   renderer.paragraph = function (paragraph) {
-    console.log(paragraph)
     var array = paragraph.split(' ')
-    console.log(array)
 
     for (i = 0; i < array.length; i++) {
       word = array[i]

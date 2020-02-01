@@ -180,9 +180,10 @@ function searchPage (src, keys) {
     })
   }
   bog().then(log => {
-    var index = 0
+    //var index = 0
     if (log) {
-      var posts = log.slice(index, index + 33)
+      addPosts(log, keys)
+      /*var posts = log.slice(index, index + 33)
       addPosts(posts, keys).then(done => {
         index = index + 33
         window.onscroll = function(ev) {
@@ -193,7 +194,7 @@ function searchPage (src, keys) {
             //console.log("Bottom of page")
           }
         }
-      })
+      })*/
     }
   })
 }

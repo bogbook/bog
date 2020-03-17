@@ -54,7 +54,7 @@ function profilePage (src, keys) {
         for (var i = 0; i < log.length; i++) {
           if ((log[i].descripted === src) && (log[i].author === src)) {
             // if you've identified someone as something else show that something else
-            return desc.innerHTML = marked(log[i].description)
+            return desc.innerHTML = ' ' + marked(log[i].description)
           }
         }
       }

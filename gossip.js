@@ -183,6 +183,7 @@ function sync (feeds, keys) {
     }
     pubs.forEach(function (pub, index) {
       setTimeout(function () {
+        console.log(pub)
         var connection = new WebSocket(pub)
         localforage.getItem(pub).then(pubkey => {
           if (!pubkey) {
@@ -190,6 +191,7 @@ function sync (feeds, keys) {
           }
           if (pubkey) {
             feeds.forEach(feed => {
+              console.log(feeds)
               getfeed(feed, pubkey, connection, keys)
             })
           }

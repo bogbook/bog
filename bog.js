@@ -193,7 +193,7 @@ async function quickName (id, keys) {
   }
 }
 
-// bog.regenerate -- regenerates main log by taking all of the feed logs, combinging them, and then sorting them
+// bog.regenerate -- regenerates main log by taking all of the feed logs, combining them, and then sorting them -- this is only run when you delete a feed these days
 
 function regenerate (home) {
   var newlog = []

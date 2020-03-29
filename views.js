@@ -10,7 +10,6 @@ function getLoc (src) {
     if (log) {
       for (var i = 0; i < log.length; i++) {
         if (((log[i].located === src) && (log[i].author === src)) || ((log[i].located === src.key) && (log[i].author === src.author))) {
-          // if you've identified someone as something else show that something else
           return loc.textContent = log[i].loc
         }
       }
@@ -24,21 +23,9 @@ function profilePage (src, keys) {
   var timer = setInterval(function () {
     if (window.location.hash.substring(1) != src) {
       clearInterval(timer)
-      //console.log('stop syncing')
     }
     sync([src], keys)
-    //console.log('syncing ' + src)
   }, 5000)
-
-  /*timer = function() {
-    if (src === window.location.hash.substring(1)) {
-      //if (interval < 10000) { interval = interval + 50 }
-      sync([src], keys)
-      setTimeout(timer, interval)
-    }
-  }
-
-  timer()*/
 
   var msg = {}
   msg.author = src
@@ -67,7 +54,6 @@ function profilePage (src, keys) {
       if (log) {
         for (var i = 0; i < log.length; i++) {
           if ((log[i].backgrounded === src) && (log[i].author === src)) {
-            // if you've identified someone as something else show that something else  
             banner.style.height = '300px'
             return banner.style.background = 'fixed top/680px no-repeat url(' + log[i].background + ')'
           }
@@ -136,9 +122,7 @@ function profilePage (src, keys) {
     } else {
       profile.appendChild(identify(src, profile, keys))
     }
-   //profile.appendChild(identify(src, profile, keys, name))
   })
-
 
   async function addPosts (posts, keys) {
     posts.forEach(function (msg) {
@@ -154,12 +138,10 @@ function profilePage (src, keys) {
       addPosts(posts, keys).then(done => {
         index = index + 33
         window.onscroll = function(ev) {
-          //console.log(document.body.scrollHeight)
           if (((window.innerHeight + window.scrollY) >= (document.body.scrollHeight - 2500)) && (window.location.hash.substring(1) === src)) {
             posts = log.slice(index, index + 33)
             index = index + 33
             addPosts(posts, keys)
-            //console.log("Bottom of page")
           }
         }
       })
@@ -180,21 +162,8 @@ function searchPage (src, keys) {
     })
   }
   bog().then(log => {
-    //var index = 0
     if (log) {
       addPosts(log, keys)
-      /*var posts = log.slice(index, index + 33)
-      addPosts(posts, keys).then(done => {
-        index = index + 33
-        window.onscroll = function(ev) {
-          if (((window.innerHeight + window.scrollY) >= document.body.scrollHeight - 2500) && (window.location.hash.substring(1) === src)) {
-            posts = log.slice(index, index + 33)
-            index = index + 33
-            addPosts(posts, keys)
-            //console.log("Bottom of page")
-          }
-        }
-      })*/
     }
   })
 }
@@ -202,34 +171,29 @@ function searchPage (src, keys) {
 function publicPage (keys) {
 
   localforage.getItem('log').then(log => {
-    log.sort((a, b) => a.timestamp - b.timestamp)
-    var reversed = log.reverse()
-    localforage.setItem('log', reversed)
+    if (log) {
+      log.sort((a, b) => a.timestamp - b.timestamp)
+      var reversed = log.reverse()
+      localforage.setItem('log', reversed)
+    }
   })
 
   localforage.getItem('subscriptions').then(subs => {
     if (subs) {
-      // the next two lines just fix a bug where the first sub was being set to null. Delete this code after March 2020.
-      
+      if (subs.length === 1) {
+        var subs = [keys.publicKey, '@Q++V5BbvWIg8B+TqtC9ZKFhetruuw+nOgxEqfjlOZI0=', '@WVBPY53Bl4aUIngt2TXV8nW+IGKvCTqhv88EvktOX9s=']
+        console.log(subs)
+        localforage.setItem('subscriptions', subs)
+      } 
       subs.forEach(function (sub, index) {
         var timer = setInterval(function () {
           setTimeout(function () {
-            if (window.location.hash.substring(1) != '') {
-              clearInterval(timer)
-              //console.log('stop syncing')
-            }
             sync([sub], keys)
-            //console.log('syncing ' + sub)
           }, 1000 * index)
         }, 2500)
-
-        if ((sub == null) || (sub == undefined)) {
-          var subs = [keys.publicKey]
-          localforage.setItem('subscriptions', subs)
-        }
       })
     } else {
-      var subs = [keys.publicKey]
+      var subs = [keys.publicKey, '@Q++V5BbvWIg8B+TqtC9ZKFhetruuw+nOgxEqfjlOZI0=', '@WVBPY53Bl4aUIngt2TXV8nW+IGKvCTqhv88EvktOX9s=']
       console.log(subs)
       localforage.setItem('subscriptions', subs)
     }

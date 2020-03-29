@@ -189,8 +189,8 @@ function publicPage (keys) {
         var timer = setInterval(function () {
           setTimeout(function () {
             sync([sub], keys)
-          }, 1000 * index)
-        }, 2500)
+          }, 5000 * index)
+        }, 5000)
       })
     } else {
       var subs = [keys.publicKey, '@Q++V5BbvWIg8B+TqtC9ZKFhetruuw+nOgxEqfjlOZI0=', '@WVBPY53Bl4aUIngt2TXV8nW+IGKvCTqhv88EvktOX9s=']

@@ -1,3 +1,47 @@
+function contacts (textarea, keys) {
+  var contacts = h('span')
+
+  var div = h('p')
+
+  var close = h('button', {
+    onclick: function () {
+      div.parentNode.removeChild(div)
+      div = h('p')
+      close.parentNode.removeChild(close)
+      contacts.appendChild(button)
+    }
+  }, ['- Contacts'])
+ 
+  var button = h('button', {
+    onclick: function () {
+      button.parentNode.removeChild(button)
+      contacts.appendChild(close)
+      contacts.appendChild(div)
+      localforage.getItem('subscriptions').then(function (subs) {
+        subs.forEach(sub => {
+          var name = getQuickName(sub, keys)
+          div.appendChild(h('div', [
+            h('a', {href: '#' + sub}, [
+              getQuickImage(sub, keys),
+              name
+            ]),
+            ' ',
+            h('button', {
+              onclick: function () {
+                textarea.value = textarea.value + ' [' + name.textContent + '](' + sub + ')'
+              }
+            }, ['Add'])
+          ]))
+        })
+      })
+    }
+  },['Contacts']) 
+
+  contacts.appendChild(button)
+
+  return contacts
+}
+
 function composer (keys, reply, gotName, edit) {
   var messageDiv = h('div')
   var message = h('div', {classList: 'message'})
@@ -80,7 +124,8 @@ function composer (keys, reply, gotName, edit) {
           })
         }
       }
-    }, ['Preview'])
+    }, ['Preview']),
+    contacts(textarea, keys)
   ])
 
   message.appendChild(publisher)

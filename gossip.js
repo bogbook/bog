@@ -1,7 +1,7 @@
 function processreq (req, pubkey, connection, keys) {
   if (req.seq === 0 || req.seq) {
-    bog(req.author).then(feed => {
-      if (feed) {
+    readBog(req.author).then(feed => {
+      if (feed[0]) {
         open(feed[0]).then(msg => {
           if (req.seq > msg.seq) {
             var reqdiff = JSON.stringify({author: req.author, seq: msg.seq})
@@ -52,7 +52,7 @@ function processreq (req, pubkey, connection, keys) {
       scroller.firstChild.appendChild(latest)
 
       var timer = setInterval(function () {
-        localforage.getItem(req.latest).then(feed => {
+        readBog(req.latest).then(feed => {
           open(feed[0]).then(msg => {
             open(req.feed[0]).then(latestmsg => {
               src = window.location.hash.substring(1)
@@ -75,11 +75,10 @@ function processreq (req, pubkey, connection, keys) {
 
   if (Array.isArray(req)) {
     open(req[0]).then(msg => {
-      localforage.getItem(msg.author).then(feed => {
-        if (!feed) {
-          localforage.setItem(msg.author, req)
-          localforage.getItem('log').then(log => {
-            if (!log) { var log = [] }
+      readBog(msg.author).then(feed => {
+        if (!feed[0]) {
+          writeBog(msg.author, req)
+          readBog('log').then(log => {
             for (var i = req.length -1; i >= 0; --i) {
               open(req[i]).then(opened => {
                 log.unshift(opened)
@@ -89,19 +88,18 @@ function processreq (req, pubkey, connection, keys) {
                   scroller.insertBefore(render(opened, keys), scroller.childNodes[1])
                 }
                 if (opened.seq === req.length) {
-                  localforage.setItem('log', log)
+                  writeBog('log', log)
                 }
               })
             }
           })
         } 
-        if (feed) {
+        if (feed[0]) {
           open(feed[0]).then(lastmsg => {
             if (req.length + lastmsg.seq === msg.seq) {
               var newlog = req.concat(feed)
-              localforage.setItem(msg.author, newlog)
-              localforage.getItem('log').then(log => {
-                if (!log) { var log = [] }
+              writeBog(msg.author, newlog)
+              readBog('log').then(log => {
                 for (var i = req.length -1; i >= 0; --i) {
                   open(req[i]).then(opened => {
                     log.unshift(opened)
@@ -111,7 +109,7 @@ function processreq (req, pubkey, connection, keys) {
                       scroller.insertBefore(render(opened, keys), scroller.childNodes[1])
                     }
                     if (req.length + lastmsg.seq === opened.seq) {
-                      localforage.setItem('log', log)
+                      writeBog('log', log)
                     }
                   })
                 }
@@ -124,23 +122,11 @@ function processreq (req, pubkey, connection, keys) {
   }
 }
 
-function getpubkey (connection, keys) {
-  connection.onopen = () => {
-    connection.send(JSON.stringify({
-      requester: keys.publicKey, sendpub: true
-    }))
-  }
-
-  connection.onmessage = (m) => {
-    localforage.setItem(m.origin, m.data)
-  }
-}
-
 function getfeed (feed, pubkey, connection, keys) {
-  bog(feed).then(log => {
+  readBog(feed).then(log => {
     var logseq = 0
     connection.onopen = () => {
-      if (log) {
+      if (log[0]) {
         open(log[0]).then(msg => {
           var string = JSON.stringify(msg)
           box(string, pubkey, keys).then(boxed => {
@@ -175,28 +161,33 @@ function getfeed (feed, pubkey, connection, keys) {
 }
 
 function sync (feeds, keys) {
-  var pubs
-  localforage.getItem('pubs').then(pubs => {
-    if (!pubs) {
-      pubs = ['ws://' + location.hostname + ':8080', 'ws://bogbook.com']
-      localforage.setItem('pubs', pubs)
+  readBog('isopubs').then(pubs => {
+    if (!pubs[0]) {
+      pubs = [
+        {ws: 'ws://' + location.hostname + ':8080'}, 
+        {ws: 'ws://bogbook.com'}
+      ]
+      writeBog('isopubs', pubs)
     }
     pubs.forEach(function (pub, index) {
       setTimeout(function () {
-        console.log(pub)
-        var connection = new WebSocket(pub)
-        localforage.getItem(pub).then(pubkey => {
-          if (!pubkey) {
-            getpubkey(connection, keys)
+        var connection = new WebSocket(pub.ws)
+        if (!pub.pubkey) {
+          connection.onopen = () => {
+            connection.send(JSON.stringify({
+              requester: keys.publicKey, sendpub: true
+            }))
           }
-          if (pubkey) {
-            feeds.forEach(feed => {
-              console.log(feeds)
-              getfeed(feed, pubkey, connection, keys)
-            })
+          connection.onmessage = (m) => {
+            pubs[index].pubkey = m.data
+            writeBog('isopubs', pubs)
           }
-        })
-      }, index * 5000)
+        } else {
+          feeds.forEach(feed => {
+            getfeed(feed, pub.pubkey, connection, keys)
+          })
+        }
+      })
     })
   })
 }

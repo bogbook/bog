@@ -38,7 +38,7 @@ function render (msg, keys, preview) {
   var messageDiv = h('div', {id: msg.key})
   var message = h('div', {classList: 'message'})
 
-  bog().then(log => {
+  readBog().then(log => {
     if (log) {
       log.reverse().forEach(function (nextPost) {
         if (nextPost.edited == msg.key) {
@@ -171,9 +171,11 @@ function render (msg, keys, preview) {
     message.appendChild(getHeader(msg, keys, mini))
 
     if (msg.reply) {
-      getTitle(msg.reply).then(title => {
-        if (!title) {
+      get(msg.reply).then(msgg => {
+        if (!msgg.text) {
           title = msg.reply.substring(0, 15) + '…'
+        } else {
+          title = msgg.text.substring(0, 15) + '…'
         }
         mini.appendChild(h('span', [
           '↳ ',

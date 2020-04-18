@@ -63,7 +63,7 @@ function identify (src, profile, keys, name) {
             backgrounded: src,
             background: photoURL.value
           }
-          localforage.removeItem('image:' + src)
+          removefeed('image:' + src)
           publish(content, keys).then(post => {
             open(post).then(msg => {
               nameInput.value = ''
@@ -137,7 +137,7 @@ function identify (src, profile, keys, name) {
             imaged: src,
             image: photoURL.value
           }
-          localforage.removeItem('image:' + src)
+          removefeed('image:' + src)
           publish(content, keys).then(post => {
             open(post).then(msg => {
               nameInput.value = ''
@@ -225,7 +225,7 @@ function identify (src, profile, keys, name) {
             named: src,
             name: nameInput.value
           }
-          localforage.removeItem('name:' + src)
+          removefeed('name:' + src)
           publish(content, keys).then(post => {
             open(post).then(msg => {
               nameInput.value = ''

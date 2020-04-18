@@ -17,7 +17,7 @@ function contacts (textarea, keys) {
       button.parentNode.removeChild(button)
       contacts.appendChild(close)
       contacts.appendChild(div)
-      localforage.getItem('subscriptions').then(function (subs) {
+      readBog('subscriptions').then(function (subs) {
         subs.forEach(sub => {
           var name = getQuickName(sub, keys)
           div.appendChild(h('div', [
@@ -79,6 +79,7 @@ function composer (keys, reply, gotName, edit) {
           }
 
           publish(content, keys, {preview: true}).then(post => {
+            console.log('rendering preview in browser')
             open(post).then(msg => {
               var preview = render(msg, keys, {preview: true})
               var cache = messageDiv.firstChild

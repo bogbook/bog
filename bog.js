@@ -89,7 +89,6 @@ async function get (key) {
 // bog.getImage
 
 function getImage (id, keys, classList) {
-  console.log('getImage')
   if (classList) {
     var image = h('img', {classList: classList})
   } else {
@@ -115,7 +114,6 @@ function getImage (id, keys, classList) {
 // bog.getName -- iterates over a feed and returns a person's name
 
 function getName (id, keys) {
-  console.log('getName')
   var name = h('span')
 
   name.textContent = id.substring(0, 10) + '...'
@@ -138,32 +136,27 @@ function getName (id, keys) {
 }
 
 function getQuickImage (id, keys) {
-  console.log('getQuickImage')
   var image = h('img', {classList: 'avatar'})
   pfs.readFile(bogdir + 'image:' + id, 'utf8').then(cache => {
-    if (cache) {
-      image.src = cache
-    }
-  })
+    image.src = cache
+  }).catch(error => {})
 
   return image
 }
 
 function getQuickName (id, keys) {
-  console.log('getQuickName')
   var name = h('span', [id.substring(0, 10)])
 
   pfs.readFile(bogdir + 'name:' + id, 'utf8').then(cache => {
     if (cache) {
       name.textContent = '@' + cache
     } 
-  })
+  }).catch(error => {})
 
   return name
 }
 
 async function quickName (id, keys) {
-  console.log('quickname')
   try { 
     var cache = await pfs.readFile(bogdir + 'name:' + id, 'utf8') 
     return cache

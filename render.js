@@ -172,7 +172,7 @@ function render (msg, keys, preview) {
 
     if (msg.reply) {
       get(msg.reply).then(msgg => {
-        if (!msgg.text) {
+        if (!msgg) {
           title = msg.reply.substring(0, 15) + '…'
         } else {
           title = msgg.text.substring(0, 15) + '…'

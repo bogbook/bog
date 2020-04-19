@@ -62,7 +62,7 @@ function settingsPage (keys) {
       h('button', {
         onclick: function () {
           if (add.value) {
-            servers.push(add.value)
+            servers.push({ws: add.value})
             writeBog('isopubs', servers).then(function () { location.hash = '' })
           }
         }
@@ -71,10 +71,12 @@ function settingsPage (keys) {
 
     servers.forEach(function (pub) {
       pubs.appendChild(h('p', [
-        pub,
+        pub.ws,
         h('button', {
           onclick: function () {
-            var newServers = servers.filter(item => item !== pub)
+            console.log(servers)
+            var newServers = servers.filter(item => item.ws !== pub.ws)
+            console.log(newServers)
             writeBog('isopubs', newServers).then(function () { location.hash = '' })
           }
         }, ['Remove'])

@@ -6,7 +6,6 @@ if ((typeof process !== 'undefined') && (process.release.name === 'node')) {
   var nacl = require('tweetnacl')
       nacl.util = require('tweetnacl-util')
   var ed2curve = require('ed2curve')
-  //var homedir = require('os').homedir()
   var bogdir = require('os').homedir() + '/.bogbook/'
 } else {
   // We are in the browser
@@ -14,6 +13,12 @@ if ((typeof process !== 'undefined') && (process.release.name === 'node')) {
   var pfs = fs.promises
   var bogdir = '/'
 }
+
+pfs.readdir(bogdir + 'bogs/').then(result => {
+  console.log(result)
+}).catch(error => {
+  pfs.mkdir(bogdir + 'bogs/')
+})
 
 // bog.open -- opens a signature and returns content if you pass a signature and a public key
 // EX:  open(msg).then(content => { console.log(content) })
@@ -159,17 +164,27 @@ function getQuickName (id, keys) {
 async function quickName (id, keys) {
   try { 
     var cache = await pfs.readFile(bogdir + 'name:' + id, 'utf8') 
-    return cache
+    return '@' + cache
   } catch {
     return id.substring(0, 10)
   }
 }
 
 async function removefeed (src) {
-  await pfs.unlink(bogdir + src)
+  if (src[0] == '@') {
+    await pfs.unlink(bogdir + 'bogs/' + src)
+  } else {
+    await pfs.unlink(bogdir + src)
+  }
 }
 
 async function removeall () {
+  var bogs = await(pfs.readdir(bogdir + 'bogs/'))
+
+  for (i = 0; i < bogs.length; i++) {
+    await pfs.unlink(bogdir + 'bogs/' + bogs[i])
+  }
+
   var array = await(pfs.readdir(bogdir))
   for (i = 0; i < array.length; i++) {
     await pfs.unlink(bogdir + array[i])
@@ -182,7 +197,7 @@ async function regenerate () {
   var newlog = []
   var openedlog = []
 
-  var array = await(pfs.readdir(bogdir))
+  var array = await(pfs.readdir(bogdir + 'bogs/'))
 
   for (i = 0; i < array.length; i++) {
     var name = array[i]
@@ -220,16 +235,28 @@ async function regenerate () {
 
 async function readBog (feed) {
   if (!feed) { var feed = 'log' }
-  try {
-    var log = JSON.parse(await pfs.readFile(bogdir + feed, 'utf8'))
-  } catch {
-    var log = [] 
+  if (feed[0] == '@') {
+    try {
+      var log = JSON.parse(await pfs.readFile(bogdir + 'bogs/' + feed, 'utf8'))
+    } catch {
+      var log = [] 
+    }
+  } else {
+    try {
+      var log = JSON.parse(await pfs.readFile(bogdir + feed, 'utf8'))
+    } catch {
+      var log = [] 
+    }
   }
   return log
 }
 
 async function writeBog (feed, log) {
-  await pfs.writeFile(bogdir + feed, JSON.stringify(log), 'utf8')
+  if (feed[0] == '@') { 
+    await pfs.writeFile(bogdir + 'bogs/'+ feed, JSON.stringify(log), 'utf8')
+  } else {
+    await pfs.writeFile(bogdir + feed, JSON.stringify(log), 'utf8')
+  }
 }
 
 // bog.publish -- publishes a new bog post and updates the feeds

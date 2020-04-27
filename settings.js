@@ -36,7 +36,10 @@ function settingsPage (keys) {
 
   everything.appendChild(h('button', {
     onclick: function () {
-      removeall().then(function () {location.reload()})
+      removeall().then(function () {
+        location.hash = ''
+        location.reload()
+      })
     }
   }, ['Delete Everything']))
 
@@ -46,7 +49,10 @@ function settingsPage (keys) {
 
   regenerate.appendChild(h('button', {
     onclick: function () {
-      regenerate()
+      regenerate().then(function () {
+        location.hash = ''
+	location.reload()
+      })
     }
   }, ['Regenerate']))
 

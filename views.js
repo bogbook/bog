@@ -94,7 +94,10 @@ function profilePage (src, keys) {
     profile.appendChild(h('button', {
       onclick: function () {
         removefeed(src).then(function () {
-          regenerate()
+          regenerate().then(function () {
+            location.hash = ''
+            location.reload()
+          })
         })
       }
     }, ['Delete ' + name + '\'s feed']))

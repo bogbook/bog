@@ -211,6 +211,7 @@ async function regenerate () {
   }
 
   newlog.forEach(function (msg) {
+    console.log(msg)
     var pubkey = nacl.util.decodeBase64(msg.author.substring(1))
     var sig = nacl.util.decodeBase64(msg.signature)
     var opened = JSON.parse(nacl.util.encodeUTF8(nacl.sign.open(sig, pubkey)))
@@ -222,11 +223,8 @@ async function regenerate () {
   openedlog.sort((a, b) => a.timestamp - b.timestamp)
 
   var reversed = openedlog.reverse()
-  console.log('REGENERATE')
   await writeBog('log', reversed)
-
-  location.hash = ''
-  location.reload()
+  return
 }
 
 // readBog (feed) -- returns a specific feed if a parameter is passed
@@ -301,6 +299,9 @@ if ((typeof process !== 'undefined') && (process.release.name === 'node')) {
     keys,
     open,
     box,
-    unbox
+    unbox,
+    regenerate,
+    readBog,
+    writeBog
   }
 }

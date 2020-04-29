@@ -7,6 +7,7 @@ if ((typeof process !== 'undefined') && (process.release.name === 'node')) {
       nacl.util = require('tweetnacl-util')
   var ed2curve = require('ed2curve')
   var bogdir = require('os').homedir() + '/.bogbook/'
+
 } else {
   // We are in the browser
   var fs = new LightningFS('bogbook')
@@ -15,7 +16,7 @@ if ((typeof process !== 'undefined') && (process.release.name === 'node')) {
 }
 
 pfs.readdir(bogdir + 'bogs/').then(result => {
-  console.log(result)
+  //console.log(result)
 }).catch(error => {
   pfs.mkdir(bogdir + 'bogs/')
 })
@@ -82,16 +83,19 @@ async function unbox (boxed, sender, keys) {
 // EX: get('%x5T7KZ5haR2F59ynUuCggwEdFXlLHEtFoBQIyKYppZYerq9oMoIqH76YzXQpw2DnYiM0ugEjePXv61g3E4l/Gw==').then(msg => { console.log(msg)})
 
 async function get (key) {
-  var log = await readBog()
+  //var log = await readBog()
 
-  for (var i = log.length - 1; i >= 0; --i) {
-    if (log[i].key === key) {
-      return log[i]
+  for (var i = masterlog.length - 1; i >= 0; --i) {
+    if (masterlog[i].key === key) {
+      return masterlog[i]
     }
   }
 }
 
 // bog.getImage
+
+var nameCache = []
+var imageCache = []
 
 function getImage (id, keys, classList) {
   if (classList) {
@@ -100,19 +104,22 @@ function getImage (id, keys, classList) {
     var image = h('img', {classList: 'avatar'})
   }
 
-  readBog().then(log => {
-    for (var i = 0; i < log.length; i++) {
-      if ((log[i].imaged === id) && (log[i].author === keys.publicKey)) {
+  if (imageCache.find(x => x.id === id)) {
+    var foundObj = imageCache.find(x => x.id === id)
+    return image.src = foundObj.image
+  } else {
+    for (var i = 0; i < masterlog.length; i++) {
+      if ((masterlog[i].imaged === id) && (masterlog[i].author === keys.publicKey)) {
         // if you've identified someone as something else show that something else
-        pfs.writeFile(bogdir + 'image:' + id, log[i].image, 'utf8')
-        return image.src = log[i].image
-      } else if ((log[i].imaged === id) && (log[i].author === id)) {
+        imageCache.push({id: id, image: masterlog[i].image})
+        return image.src = masterlog[i].image
+      } else if ((masterlog[i].imaged === id) && (masterlog[i].author === id)) {
         // else if show the image they gave themselves
-        pfs.writeFile(bogdir + 'image:' + id, log[i].image, 'utf8')
-        return image.src = log[i].image
+        imageCache.push({id: id, image: masterlog[i].image})
+        return image.src = masterlog[i].image
       }
     }
-  })
+  }
   return image
 }
 
@@ -123,48 +130,30 @@ function getName (id, keys) {
 
   name.textContent = id.substring(0, 10) + '...'
 
-  readBog().then(log => {
-    for (var i = 0; i < log.length; i++ ) {
-      if ((log[i].named === id) && (log[i].author === keys.publicKey)) {
+  if (nameCache.find(x => x.id === id)) {
+    var foundObj = nameCache.find(x => x.id === id)
+    return name.textContent = '@' + foundObj.name
+  } else {
+    for (var i = 0; i < masterlog.length; i++ ) {
+      if ((masterlog[i].named === id) && (masterlog[i].author === keys.publicKey)) {
         // if you've identified someone as something else show that something else
-        pfs.writeFile(bogdir + 'name:' + id, log[i].name, 'utf8')
-        return name.textContent = '@' + log[i].name
-      } else if ((log[i].named === id) && (log[i].author === id)) {
+        nameCache.push({id: id, name: masterlog[i].name})
+        return name.textContent = '@' + masterlog[i].name
+      } else if ((masterlog[i].named === id) && (masterlog[i].author === id)) {
         // else if show the name they gave themselves
-        pfs.writeFile(bogdir + 'name:' + id, log[i].name, 'utf8')
-        return name.textContent = '@' + log[i].name
+        nameCache.push({id: id, name: masterlog[i].name})
+        return name.textContent = '@' + masterlog[i].name
       }
       // there should probably be some sort of sybil attack resiliance here (weight avatar name based on number of times used by individuals), but this will do for now.
     }
-  })
-  return name
-}
-
-function getQuickImage (id, keys) {
-  var image = h('img', {classList: 'avatar'})
-  pfs.readFile(bogdir + 'image:' + id, 'utf8').then(cache => {
-    image.src = cache
-  }).catch(error => {})
-
-  return image
-}
-
-function getQuickName (id, keys) {
-  var name = h('span', [id.substring(0, 10)])
-
-  pfs.readFile(bogdir + 'name:' + id, 'utf8').then(cache => {
-    if (cache) {
-      name.textContent = '@' + cache
-    } 
-  }).catch(error => {})
-
+  }
   return name
 }
 
 async function quickName (id, keys) {
   try { 
-    var cache = await pfs.readFile(bogdir + 'name:' + id, 'utf8') 
-    return '@' + cache
+    var foundObj = nameCache.find(x => x.id === id) 
+    return '@' + foundObj.name
   } catch {
     return id.substring(0, 10)
   }

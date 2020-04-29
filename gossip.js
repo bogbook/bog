@@ -1,9 +1,6 @@
+
+
 function getfeed (feed, pub, keys) {
-  readBog(feed).then(log => {
-
-    console.log(log)
-  })
-
   box(feed, pub.pubkey, keys).then(boxed => {
     var es = new EventSource(keys.publicKey + boxed) 
     es.addEventListener('message', (e) => {

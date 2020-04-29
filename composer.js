@@ -19,10 +19,10 @@ function contacts (textarea, keys) {
       contacts.appendChild(div)
       readBog('subscriptions').then(function (subs) {
         subs.forEach(sub => {
-          var name = getQuickName(sub, keys)
+          var name = getName(sub, keys)
           div.appendChild(h('div', [
             h('a', {href: '#' + sub}, [
-              getQuickImage(sub, keys),
+              getImage(sub, keys),
               name
             ]),
             ' ',

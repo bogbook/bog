@@ -6,6 +6,12 @@ var PORT = 8089
 
 var app = express()
 
+var masterlog = []
+
+bog.readBog().then(log => {
+  masterlog = log
+})
+
 bog.keys().then(keys => {
   app.use(express.static('./'))
   app.use(function (req, res, next) {
@@ -21,9 +27,6 @@ bog.keys().then(keys => {
       var pubkey = req.url.substring(1, 46)
       var boxed = req.url.substring(46)
       bog.unbox(boxed, pubkey, keys).then(unboxed => {
-        bog.readBog(unboxed).then(log => {
-          console.log(log)
-        })
         console.log(unboxed)
       })
       res.write(Date.now() + '\ndata:' + 'got it\n\n' )

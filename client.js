@@ -7,24 +7,43 @@ import {
 
 import news from './news.js'
 
-const server = 'ws://127.0.0.1:8080'
+const servers = [
+  'ws://127.0.0.1:8080',
+  'ws://evbogue.com:8081'
+]
 
-try {
-  const ws = await connectWebSocket(server)
-  console.log('connected to ' + server)
+let keypair
 
-  while (true) {
-    const keypair = await news.keys()
-    console.log(keypair.substring(44))
-    await ws.send(keypair.substring(0, 44))
+async function genkeys () {
+  setInterval(function () {
+    news.keys().then(key => {
+      keypair = key
+    })
+  }, 2)
+} 
+
+async function connect (server) {
+  try {
+    const ws = await connectWebSocket(server)
+    console.log('connected to ' + server)
+
+    while (true) {
+      console.log(keypair.substring(44))
+      await ws.send(keypair.substring(0, 44))
+    }
+
+    if (!ws.isClosed) {
+      await ws.close(1000).catch(console.error)
+    }
+  
+  } catch (err) {
+    console.error('unable to connect: ' + err)
   }
-
-  if (!ws.isClosed) {
-    await ws.close(1000).catch(console.error)
-  }
-
-} catch (err) {
-  console.error('unable to connect: ' + err)
 }
 
-Deno.exit(0)
+servers.forEach(server => {
+  connect(server)
+})
+
+genkeys()
+

@@ -6,7 +6,7 @@ function threadPage (src, keys) {
 
 function getLoc (src) {
   var loc = h('span')
-  readBog().then(log => {
+  bog().then(log => {
     if (log) {
       for (var i = 0; i < log.length; i++) {
         if (((log[i].located === src) && (log[i].author === src)) || ((log[i].located === src.key) && (log[i].author === src.author))) {
@@ -36,7 +36,7 @@ function profilePage (src, keys) {
 
   function getDesc (src) {
     var desc = h('span')
-    readBog().then(log => {
+    bog().then(log => {
       if (log) {
         for (var i = 0; i < log.length; i++) {
           if ((log[i].descripted === src) && (log[i].author === src)) {
@@ -50,7 +50,7 @@ function profilePage (src, keys) {
   }
 
   function getBg (src, profile) {
-    readBog().then(log => {
+    bog().then(log => {
       if (log) {
         for (var i = 0; i < log.length; i++) {
           if ((log[i].backgrounded === src) && (log[i].author === src)) {
@@ -93,29 +93,27 @@ function profilePage (src, keys) {
 
     profile.appendChild(h('button', {
       onclick: function () {
-        removefeed(src).then(function () {
-          regenerate().then(function () {
-            location.hash = ''
-            location.reload()
-          })
+        localforage.removeItem(src).then(function () {
+          var home = true
+          regenerate(home)
         })
       }
     }, ['Delete ' + name + '\'s feed']))
  
     if (src != keys.publicKey) {
-      readBog('subscriptions').then(function (subs) {
+      localforage.getItem('subscriptions').then(function (subs) {
         if (subs.includes(src)) {
           profile.appendChild(h('button', {
             onclick: function () {
               subs = subs.filter(a => a !== src)
-              writeBog('subscriptions', subs).then(function () { location.hash = '' })
+              localforage.setItem('subscriptions', subs).then(function () { location.hash = '' })
             }
           }, ['Unsubscribe from ' + name]))
         } else {
           profile.appendChild(h('button', {
             onclick: function () {
               subs.push(src)
-              writeBog('subscriptions', subs).then(function () { location.hash = '' })
+              localforage.setItem('subscriptions', subs).then(function () { location.hash = '' })
             }
           }, ['Subscribe to ' + name]))
         }
@@ -133,7 +131,7 @@ function profilePage (src, keys) {
       }
     })
   }
-  readBog().then(log => {
+  bog().then(log => {
     var index = 0
     if (log) {
       var posts = log.slice(index, index + 33)
@@ -163,7 +161,7 @@ function searchPage (src, keys) {
       }
     })
   }
-  readBog().then(log => {
+  bog().then(log => {
     if (log) {
       addPosts(log, keys)
     }
@@ -172,20 +170,20 @@ function searchPage (src, keys) {
 
 function publicPage (keys) {
 
-  readBog('log').then(log => {
+  localforage.getItem('log').then(log => {
     if (log) {
       log.sort((a, b) => a.timestamp - b.timestamp)
       var reversed = log.reverse()
-      writeBog('log', reversed)
+      localforage.setItem('log', reversed)
     }
   })
 
-  readBog('subscriptions').then(subs => {
+  localforage.getItem('subscriptions').then(subs => {
     if (subs) {
-      if (!subs[1]) {
+      if (subs.length === 1) {
         var subs = [keys.publicKey, '@Q++V5BbvWIg8B+TqtC9ZKFhetruuw+nOgxEqfjlOZI0=', '@WVBPY53Bl4aUIngt2TXV8nW+IGKvCTqhv88EvktOX9s=']
         console.log(subs)
-        writeBog('subscriptions', subs)
+        localforage.setItem('subscriptions', subs)
       } 
       subs.forEach(function (sub, index) {
         var timer = setInterval(function () {
@@ -197,7 +195,7 @@ function publicPage (keys) {
     } else {
       var subs = [keys.publicKey, '@Q++V5BbvWIg8B+TqtC9ZKFhetruuw+nOgxEqfjlOZI0=', '@WVBPY53Bl4aUIngt2TXV8nW+IGKvCTqhv88EvktOX9s=']
       console.log(subs)
-      writeBog('subscriptions', subs)
+      localforage.setItem('subscriptions', subs)
     }
   })
 
@@ -209,7 +207,7 @@ function publicPage (keys) {
     })
   }
 
-  readBog().then(log => {
+  bog().then(log => {
     var index = 0
     if (log) {
       var posts = log.slice(index, index + 25)

@@ -13,7 +13,7 @@ function settingsPage (keys) {
 
   keyDiv.appendChild(h('button', {
     onclick: function () {
-     removefeed('keypair').then(function () {
+     localforage.removeItem('id', function () {
        location.hash = ''
        location.reload()
      })
@@ -25,7 +25,7 @@ function settingsPage (keys) {
   keyDiv.appendChild(h('button', {
     onclick: function () {
       if (textarea.value) {
-        pfs.writeFile('keypair', JSON.parse(textarea.value), 'utf8').then(function () { location.reload() })
+        localforage.setItem('id', JSON.parse(textarea.value)).then(function () { location.reload() })
       }
     }
   }, ['Import Key']))
@@ -36,25 +36,21 @@ function settingsPage (keys) {
 
   everything.appendChild(h('button', {
     onclick: function () {
-      removeall().then(function () {
-        location.hash = ''
-        location.reload()
-      })
+      localforage.clear().then(function () {location.reload()})
     }
   }, ['Delete Everything']))
 
+  /* we probably don't need this anymore
   var regenerate = h('div', {classList: 'message'})
 
   regenerate.appendChild(h('p', {innerHTML: marked('The regenerate button will create a new bogbook log in your browser from all of the feeds that you\'ve collected in your browser. While it is rare, you may use this button to troubleshoot if Bogbook is throwing strange database errors in your console.')}))
 
   regenerate.appendChild(h('button', {
     onclick: function () {
-      regenerate().then(function () {
-        location.hash = ''
-	location.reload()
-      })
+      regenerate()
     }
-  }, ['Regenerate']))
+  }, ['Regenerate']))*/
+
 
   var pubs = h('div', {classList: 'message'})
  
@@ -62,14 +58,14 @@ function settingsPage (keys) {
 
   var add = h('input', {placeholder: 'Add a pub'})
 
-  readBog('isopubs').then(function (servers) {
+  localforage.getItem('pubs').then(function (servers) {
     pubs.appendChild(h('div', [
       add,
       h('button', {
         onclick: function () {
           if (add.value) {
-            servers.push({ws: add.value})
-            writeBog('isopubs', servers).then(function () { location.hash = '' })
+            servers.push(add.value)
+            localforage.setItem('pubs', servers).then(function () { location.hash = '' })
           }
         }
       }, ['Add a pub'])
@@ -77,13 +73,11 @@ function settingsPage (keys) {
 
     servers.forEach(function (pub) {
       pubs.appendChild(h('p', [
-        pub.ws,
+        pub,
         h('button', {
           onclick: function () {
-            console.log(servers)
-            var newServers = servers.filter(item => item.ws !== pub.ws)
-            console.log(newServers)
-            writeBog('isopubs', newServers).then(function () { location.hash = '' })
+            var newServers = servers.filter(item => item !== pub)
+            localforage.setItem('pubs', newServers).then(function () { location.hash = '' })
           }
         }, ['Remove'])
       ]))
@@ -92,7 +86,7 @@ function settingsPage (keys) {
 
   pubs.appendChild(h('button', {
     onclick: function () {
-      removefeed('isopubs').then(function () {
+      localforage.removeItem('securepubs').then(function () {
         location.hash = ''
         location.reload()
       })
@@ -103,6 +97,6 @@ function settingsPage (keys) {
   scroller.appendChild(pubs)
   scroller.appendChild(everything)
   scroller.appendChild(welcome)
-  scroller.appendChild(regenerate)
+  //scroller.appendChild(regenerate)
 }
 

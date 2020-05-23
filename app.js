@@ -1,13 +1,6 @@
 var screen = h('div', {id: 'screen'})
 document.body.appendChild(screen)
 
-var masterlog = []
-
-readBog().then(log => {
-  masterlog = log
-})
-
-
 function route (keys) {
   src = window.location.hash.substring(1)
 

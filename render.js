@@ -25,8 +25,8 @@ function getHeader (post, keys, mini) {
     ]),
     h('p', [
       h('a', {href: '#' + post.author}, [
-        getImage(post.author, keys),
-        getName(post.author, keys)
+        getQuickImage(post.author, keys),
+        getQuickName(post.author, keys)
       ]),
       mini 
     ])
@@ -38,7 +38,7 @@ function render (msg, keys, preview) {
   var messageDiv = h('div', {id: msg.key})
   var message = h('div', {classList: 'message'})
 
-  readBog().then(log => {
+  bog().then(log => {
     if (log) {
       log.reverse().forEach(function (nextPost) {
         if (nextPost.edited == msg.key) {
@@ -171,11 +171,9 @@ function render (msg, keys, preview) {
     message.appendChild(getHeader(msg, keys, mini))
 
     if (msg.reply) {
-      get(msg.reply).then(msgg => {
-        if (!msgg) {
+      getTitle(msg.reply).then(title => {
+        if (!title) {
           title = msg.reply.substring(0, 15) + '…'
-        } else {
-          title = msgg.text.substring(0, 15) + '…'
         }
         mini.appendChild(h('span', [
           '↳ ',

@@ -5,7 +5,7 @@ import {
   isWebSocketPingEvent,
 } from "https://deno.land/std@0.52.0/ws/mod.ts"
 
-const port = '8080'
+const port = '8081'
 
 console.log('http://localhost:' + port)
 

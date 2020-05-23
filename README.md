@@ -18,9 +18,16 @@ The aim of bogbook is to be a public gossiped news and photo sharing network whe
 
 ### keypairs
 
-keypairs are ed25519 keypairs, exactly like in bogbook v1, where  
+keypairs are ed25519 keypairs, exactly like in bogbook v1, where we use a JSON object containing:
 
-signed messages:
+```
+  publickey: <ed25519 public key>,
+  privatekey: <ed25519 private key> 
+```  
+
+There can be no '/' characters in the public key, so we'll throw those out on generation.
+
+### signed messages
 
 ```
 {
@@ -32,7 +39,7 @@ signed messages:
 }
 ```
 
-## message spec
+### opened messages
 
 when opened, they will contain:
 
@@ -59,7 +66,7 @@ I don't know if I still want banners, because the image focus is on square image
 
 NOTE: Unlike bogbook and others, we will not have a reply field or a recp field. We can easily search text to discover if it contains publickeys and/or sha2 hashes of messages that may be contained in our log. These can simply be included in the composer field, as in how it worked in news.
 
-## gossip/replication
+### gossip/replication
 
 servers and clients all have ed25519 keypairs.
 

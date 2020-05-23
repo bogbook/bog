@@ -8,6 +8,8 @@ However, some of the ideas from news are very good, so I want to bring them into
 
 In the meantime, just email me [ev@evbogue.com](mailto:ev@evbogue.com) if you want to talk.
 
+Or join #bogbook on irc.freenode.net to talk to me in a chat format. 
+
 ---
 
 ## log spec

@@ -25,8 +25,8 @@ function getHeader (post, keys, mini) {
     ]),
     h('p', [
       h('a', {href: '#' + post.author}, [
-        getQuickImage(post.author, keys),
-        getQuickName(post.author, keys)
+        getImage(post.author, keys),
+        getName(post.author, keys)
       ]),
       mini 
     ])

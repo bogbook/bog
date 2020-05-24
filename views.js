@@ -170,25 +170,29 @@ function searchPage (src, keys) {
 
 function publicPage (keys) {
 
-  localforage.getItem('log').then(log => {
+  /*localforage.getItem('log').then(log => {
     if (log) {
       log.sort((a, b) => a.timestamp - b.timestamp)
       var reversed = log.reverse()
       localforage.setItem('log', reversed)
     }
-  })
+  })*/
 
   localforage.getItem('subscriptions').then(subs => {
     if (subs) {
       if (subs.length === 1) {
         var subs = [keys.publicKey, '@Q++V5BbvWIg8B+TqtC9ZKFhetruuw+nOgxEqfjlOZI0=', '@WVBPY53Bl4aUIngt2TXV8nW+IGKvCTqhv88EvktOX9s=']
-        console.log(subs)
         localforage.setItem('subscriptions', subs)
       } 
       subs.forEach(function (sub, index) {
         var timer = setInterval(function () {
+          console.log('sync')
           setTimeout(function () {
             sync([sub], keys)
+            if (window.location.hash.substring(1) != '') {
+              console.log('stop syncing ')
+              clearInterval(timer)
+            }
           }, 5000 * index)
         }, 5000)
       })

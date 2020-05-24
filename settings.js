@@ -30,6 +30,22 @@ function settingsPage (keys) {
     }
   }, ['Import Key']))
 
+  var sort = h('div', {classList: 'message'})
+
+  sort.appendChild(h('p', {innerHTML: marked('### Sort everything \n\n This button will sort your log in chronological order. It may take a little time, and is a little CPU intensive. When the sort is finished your page will reload, please don\'t do anything else while sort is finishing.')}))
+  
+  sort.appendChild(h('button', {
+    onclick: function () {
+      localforage.getItem('log').then(log => {
+        if (log) {
+          log.sort((a, b) => a.timestamp - b.timestamp)
+          var reversed = log.reverse()
+          localforage.setItem('log', reversed).then(function () {location.href = ''})
+        }
+      })
+    }
+  }, ['Sort']))
+
   var everything = h('div', {classList: 'message'})
 
   everything.appendChild(h('p', {innerHTML: marked('### Delete everything \n\n Sometimes you may want to delete all of your bogbook data in the browser. When you click this button, Bogbook will erase everything that you\'ve stored in the browser.\n\n **NOTE**: This will not delete Bogbook posts that you have already gossiped with others.\n\n **WARNING**: This will delete your Bogbook keypair as well as all data stored in the browser. If you want to continue to use the same key, make sure you\'ve backed up your keypair!')}))
@@ -40,7 +56,6 @@ function settingsPage (keys) {
     }
   }, ['Delete Everything']))
 
-  /* we probably don't need this anymore
   var regenerate = h('div', {classList: 'message'})
 
   regenerate.appendChild(h('p', {innerHTML: marked('The regenerate button will create a new bogbook log in your browser from all of the feeds that you\'ve collected in your browser. While it is rare, you may use this button to troubleshoot if Bogbook is throwing strange database errors in your console.')}))
@@ -49,8 +64,7 @@ function settingsPage (keys) {
     onclick: function () {
       regenerate()
     }
-  }, ['Regenerate']))*/
-
+  }, ['Regenerate']))
 
   var pubs = h('div', {classList: 'message'})
  
@@ -95,8 +109,10 @@ function settingsPage (keys) {
 
   scroller.appendChild(keyDiv)
   scroller.appendChild(pubs)
+  scroller.appendChild(sort)
   scroller.appendChild(everything)
+  scroller.appendChild(regenerate)
   scroller.appendChild(welcome)
-  //scroller.appendChild(regenerate)
+  
 }
 

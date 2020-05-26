@@ -16,10 +16,11 @@ async function process (ws) {
         var req = JSON.parse(msg)
         var response = feed[feed.length - req.seq - 1]
         console.log(feed.length)
+        console.log(req.seq)
         if (req.seq < feed.length) {
           console.log(response)
           ws.send(JSON.stringify(response))
-        }
+        } 
       } else if (isWebSocketCloseEvent(msg)) {
         const { code, reason } = msg; 
         console.log("ws:Close", code, reason)

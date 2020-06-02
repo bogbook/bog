@@ -1,3 +1,10 @@
+if ((typeof process !== 'undefined') && (process.release.name === 'node')) {
+  var nacl = require('./lib/nacl.min.js')
+  nacl.util = require('./lib/nacl-util.min.js')
+  var sha256 = require('./lib/sha256.min.js')
+}
+
+
 const bog = {}
 
 bog.generate = async function generatekey () {
@@ -51,3 +58,6 @@ bog.publish = async function (obj, keys) {
   return done
 }
 
+if ((typeof process !== 'undefined') && (process.release.name === 'node')) {
+  module.exports = bog 
+}

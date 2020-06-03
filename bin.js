@@ -5,6 +5,7 @@ var bog = require('./util')
 var appdir = homedir + '/.bogbookv2/'
 
 if (!fs.existsSync(appdir)) { fs.mkdirSync(appdir) }
+if (!fs.existsSync(appdir + 'bogs/')) { fs.mkdirSync(appdir + 'bogs/') }
 
 var PORT = 8081
 
@@ -22,6 +23,17 @@ async function readBog () {
 }
 
 readBog().then(feeds => {
+
+  setInterval(function () {
+    if (feeds) {
+      for (var key in feeds) {
+        var value = feeds[key]
+        fs.writeFileSync(appdir + 'bogs/' + key, JSON.stringify(value), 'UTF-8')
+        console.log('saving ' + key) 
+        //console.log(key, value)
+      }
+    } else {console.log('no feeds?', feeds)}
+  }, 10000)
   
   app.ws('/ws', function (ws, req) {
     ws.on('message', function (msg) {
@@ -31,7 +43,7 @@ readBog().then(feeds => {
           if (feeds[opened.author]) {
             if (feeds[opened.author][0].substring(0, 44) === opened.previous) {
               feeds[opened.author].unshift(req.msg)
-              console.log(feeds)
+              //fs.writeFileSync(appdir + 'feeds', JSON.stringify(feeds), 'UTF-8')
               var gossip = {feed: opened.author, seq: opened.seq}
               ws.send(JSON.stringify(gossip))
             }
@@ -48,13 +60,11 @@ readBog().then(feeds => {
         }
         else if (feeds[req.feed]) {
           if (req.seq < feeds[req.feed].length) {
-            console.log(feeds[req.feed].length)
             var resp = {}
             resp.msg = feeds[req.feed][feeds[req.feed].length - req.seq - 1]
             ws.send(JSON.stringify(resp))
           }
           if (req.seq > [feeds[req.feed].length]){
-            console.log(feeds[req.feed].length)
             var gossip = {feed: req.feed, seq: feeds[req.feed].length}
             ws.send(JSON.stringify(gossip))
           }

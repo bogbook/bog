@@ -42,6 +42,7 @@ readBog().then(feeds => {
   app.ws('/ws', function (ws, req) {
     ws.on('message', function (msg) {
       var req = JSON.parse(msg)
+      console.log(req)
       if (req.msg) {
         bog.open(req.msg).then(opened => {
           if (feeds[opened.author]) {

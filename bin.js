@@ -15,7 +15,17 @@ var ews = require('express-ws')(app)
 
 async function readBog () {
   try {
-    var feeds = JSON.parse(await fs.promises.readFile(appdir + 'feeds', 'utf8'))
+    var feeds = []
+    var files = await fs.promises.readdir(appdir + 'bogs/')
+    console.log(files)
+    for (const file of files) {
+      console.log(file)
+      const data = await fs.promises.readFile(appdir + 'bogs/' + file, 'UTF-8')
+      const feed = JSON.parse(data)
+      feeds[file] = feed
+      console.log(feeds)
+    }
+    //var feeds = JSON.parse(await fs.promises.readFile(appdir + 'feeds', 'utf8'))
   } catch {
     var feeds = []
   }

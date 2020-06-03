@@ -17,15 +17,11 @@ async function readBog () {
   try {
     var feeds = []
     var files = await fs.promises.readdir(appdir + 'bogs/')
-    console.log(files)
     for (const file of files) {
-      console.log(file)
       const data = await fs.promises.readFile(appdir + 'bogs/' + file, 'UTF-8')
       const feed = JSON.parse(data)
       feeds[file] = feed
-      console.log(feeds)
     }
-    //var feeds = JSON.parse(await fs.promises.readFile(appdir + 'feeds', 'utf8'))
   } catch {
     var feeds = []
   }
@@ -39,8 +35,6 @@ readBog().then(feeds => {
       for (var key in feeds) {
         var value = feeds[key]
         fs.writeFileSync(appdir + 'bogs/' + key, JSON.stringify(value), 'UTF-8')
-        console.log('saving ' + key) 
-        //console.log(key, value)
       }
     } else {console.log('no feeds?', feeds)}
   }, 10000)
@@ -53,7 +47,6 @@ readBog().then(feeds => {
           if (feeds[opened.author]) {
             if (feeds[opened.author][0].substring(0, 44) === opened.previous) {
               feeds[opened.author].unshift(req.msg)
-              //fs.writeFileSync(appdir + 'feeds', JSON.stringify(feeds), 'UTF-8')
               var gossip = {feed: opened.author, seq: opened.seq}
               ws.send(JSON.stringify(gossip))
             }

@@ -7,8 +7,14 @@ async function loadfeeds () {
   return feeds
 }
 
-async function savefeeds (feeds) {
+async function loadlog () {
+  log = await localforage.getItem('log')
+  return log
+}
+
+async function savefeeds (feeds, log) {
   try {
+    await localforage.setItem('log', log)
     await localforage.setItem('feeds', feeds)
   } catch {
     console.log('unable to save feeds')
@@ -26,11 +32,44 @@ function dispatch(msg) {
   }
 }
 
+async function regenerate (feeds) {
+  var all = []
+  Object.keys(feeds).forEach(function(key,index) {
+    all = all.concat(feeds[key])
+    console.log(key, index)
+    if (Object.keys(feeds).length -1 === index) {
+      console.log(all)
+      var log = []
+      all.forEach((msg, index) => {
+        bog.open(msg).then(opened => {
+          document.body.appendChild(h('div', [opened]))
+          log.push(opened)
+          if (index === all.length -1) {
+            localforage.setItem('log', log)
+          }
+        })
+      })
+    }
+  })
+}
+
+async function sort (log) {
+  log.sort((a,b) => a.timestamp - b.timestamp)
+  localforage.setItem('log', log)
+}
+
 bog.keys().then(keys => {
   loadfeeds().then(feeds => {
+    loadlog().then(log => {
+
+    sort(log)
+    log.forEach(msg => {
+      document.body.insertBefore(h('div', [h('pre', [JSON.stringify(msg)])]), document.body.firstChild)
+    })
+    //regenerate(feeds)
 
     setInterval(function () {
-      savefeeds(feeds)
+      savefeeds(feeds, log)
     }, 10000)
  
     servers.forEach(server => {
@@ -80,8 +119,9 @@ bog.keys().then(keys => {
     })
     
         
+    })
  
-    /*function createpost (obj, keys) {
+    function createpost (obj, keys) {
       bog.publish(obj, keys).then(msg => {
         bog.open(msg).then(opened => {
           if (feeds[keys.substring(0, 44)]) {
@@ -91,12 +131,16 @@ bog.keys().then(keys => {
               var gossip = {feed: opened.author, seq: opened.seq}
               dispatch(JSON.stringify(gossip))
               console.log(feeds[keys.substring(0, 44)].unshift(msg))
+              log.push(opened)
+              savefeeds(feeds, log)
               document.body.insertBefore(h('div', [h('pre', [JSON.stringify(opened)])]), document.body.firstChild)
           }
           if (opened.seq === 1) {
             console.log('insert first message')
             console.log(feeds)
             feeds[keys.substring(0, 44)] = [msg]
+            log.push(opened)
+            savefeeds(feeds, log)
             document.body.appendChild(h('div', [h('pre', [JSON.stringify(opened)])]))
           }
         })
@@ -120,7 +164,7 @@ bog.keys().then(keys => {
           createpost(obj, keys)
         }
       })
-    }, 50)*/
+    }, 50)
   })
 })
 

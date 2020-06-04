@@ -42,7 +42,7 @@ async function regenerate (feeds) {
       var log = []
       all.forEach((msg, index) => {
         bog.open(msg).then(opened => {
-          document.body.appendChild(h('div', [opened]))
+          scroller.appendChild(h('div', [opened]))
           log.push(opened)
           if (index === all.length -1) {
             localforage.setItem('log', log)
@@ -59,15 +59,21 @@ async function sort (log) {
 }
 
 bog.keys().then(keys => {
+  var scroller = h('div')
+
   loadfeeds().then(feeds => {
     loadlog().then(log => {
-
+    document.body.appendChild(composer(keys))
     sort(log)
     log.forEach(msg => {
-      document.body.insertBefore(h('div', [h('pre', [JSON.stringify(msg)])]), document.body.firstChild)
+      render(msg).then(rendered => {
+        scroller.insertBefore(rendered, scroller.firstChild)
+      })
+      //document.body.insertBefore(h('div', [h('pre', [JSON.stringify(msg)])]), document.body.firstChild)
     })
     //regenerate(feeds)
 
+  document.body.appendChild(scroller)
     setInterval(function () {
       savefeeds(feeds, log)
     }, 10000)
@@ -88,7 +94,7 @@ bog.keys().then(keys => {
 
                 var gossip = {feed: opened.author, seq: opened.seq}
                 ws.send(JSON.stringify(gossip))
-                document.body.insertBefore(h('div', [h('pre', [JSON.stringify(opened)])]), document.body.firstChild)
+                scroller.insertBefore(h('div', [h('pre', [JSON.stringify(opened)])]), scroller.firstChild)
               }
             } else {
               feeds[opened.author] = [req.msg]
@@ -133,7 +139,9 @@ bog.keys().then(keys => {
               console.log(feeds[keys.substring(0, 44)].unshift(msg))
               log.push(opened)
               savefeeds(feeds, log)
-              document.body.insertBefore(h('div', [h('pre', [JSON.stringify(opened)])]), document.body.firstChild)
+              render(opened).then(rendered => {
+                scroller.insertBefore(rendered, scroller.firstChild)
+              })
           }
           if (opened.seq === 1) {
             console.log('insert first message')
@@ -141,13 +149,15 @@ bog.keys().then(keys => {
             feeds[keys.substring(0, 44)] = [msg]
             log.push(opened)
             savefeeds(feeds, log)
-            document.body.appendChild(h('div', [h('pre', [JSON.stringify(opened)])]))
+            render(opened).then(rendered => {
+              scroller.insertBefore(rendered, scroller.firstChild)
+            })
           }
         })
       })
     }
     
-    setInterval(function () {
+    /*setInterval(function () {
       bog.generate().then(content => {
         
         obj = {text: content}
@@ -164,7 +174,35 @@ bog.keys().then(keys => {
           createpost(obj, keys)
         }
       })
-    }, 50)
+    }, 50)*/
+
+    function composer () {
+      var compose = h('div')
+      var textarea = h('textarea', {placeholder: 'Write something'})
+    
+      var publish = h('button', {
+        onclick: function () {
+          obj = {text: textarea.value}
+          textarea.value = ''
+          if (feeds[keys.substring(0,44)]) {
+            bog.open(feeds[keys.substring(0,44)][0]).then(opened => {
+              obj.seq = ++opened.seq
+              obj.previous = opened.raw.substring(0,44)
+              createpost(obj, keys)
+            })
+          } else {
+            obj.seq = 1
+            obj.previous = null
+            createpost(obj, keys)
+          }
+        }
+      }, ['Publish'])
+    
+      compose.appendChild(textarea)
+      compose.appendChild(publish) 
+      return compose
+    }
+
   })
 })
 

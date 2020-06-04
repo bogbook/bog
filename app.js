@@ -61,21 +61,53 @@ async function sort (log) {
 }
 
 bog.keys().then(keys => {
-  var scroller = h('div')
+  var screen = h('screen', {id: 'screen'})
+  document.body.appendChild(screen)
 
   loadfeeds().then(feeds => {
     loadlog().then(log => {
+      function route () {
 
-      document.body.appendChild(composer(keys))
-      document.body.appendChild(scroller)
+        var src = window.location.hash.substring(1)
+        var scroller = h('div', {id: 'scroller'})
+        var screen = document.getElementById('screen')
+
+        screen.appendChild(composer(keys))
+        screen.appendChild(scroller)
+
+        if (src === '') {
+          log.forEach(msg => {
+            render(msg).then(rendered => {
+              scroller.insertBefore(rendered, scroller.firstChild)
+            })
+          })
+        }
+        if (src.length === 44) {
+          log.forEach(msg => {
+            console.log(msg)
+            if ((msg.author === src) || (msg.raw.substring(0, 44) === src)) {
+              render(msg).then(rendered => {
+                scroller.insertBefore(rendered, scroller.firstChild)
+              })
+            }
+          })
+        }
+      }
+
+      if (!window.location.hash) {
+        window.location = '#'
+      }
+
+      window.onhashchange = function () {
+        var oldscreen = document.getElementById('screen')
+        var newscreen = h('div', {id: 'screen'})
+        oldscreen.parentNode.replaceChild(newscreen, oldscreen)
+        route()
+      }
 
       sort(log)
+      route()
 
-      log.forEach(msg => {
-        render(msg).then(rendered => {
-          scroller.insertBefore(rendered, scroller.firstChild)
-        })
-      })
       //regenerate(feeds)
 
       setInterval(function () {
@@ -84,8 +116,11 @@ bog.keys().then(keys => {
  
       servers.forEach(server => {
         var ws = new WebSocket(server)
-        var id = ++serverId
-        peers.set(id, ws)
+
+        ws.onopen = () => {
+          var id = ++serverId
+          peers.set(id, ws)
+        }
 
         ws.onmessage = (msg) => {
           var req = JSON.parse(msg.data)

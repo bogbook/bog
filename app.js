@@ -1,14 +1,14 @@
 async function loadfeeds () {
   let feeds
   feeds = await localforage.getItem('feeds')
-  if (!feeds) {
-    feeds = []
-  } 
+  if (!feeds) { feeds = [] } 
   return feeds
 }
 
 async function loadlog () {
+  let log
   log = await localforage.getItem('log')
+  if (!log) { log = []}
   return log
 }
 

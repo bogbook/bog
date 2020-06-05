@@ -21,7 +21,7 @@ async function savefeeds (feeds, log) {
   }
 }
    
-const servers = ['ws://127.0.0.1:8081/ws', 'ws://evbogue.com:8081/ws']
+const servers = ['ws://localhost:8081/ws', 'ws://evbogue.com:8081/ws']
 
 const peers = new Map()
 var serverId = 0
@@ -188,6 +188,7 @@ bog.keys().then(keys => {
                 }
               } else {
                 feeds[opened.author] = [req.msg]
+                log.push(opened)
                 var gossip = {feed: opened.author, seq: opened.seq}
                 ws.send(JSON.stringify(gossip))
               }

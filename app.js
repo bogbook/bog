@@ -61,8 +61,17 @@ async function sort (log) {
 }
 
 bog.keys().then(keys => {
+
   var screen = h('screen', {id: 'screen'})
   document.body.appendChild(screen)
+
+  var navbar = h('div', [
+    h('a', {href: '#'}, ['Home']),
+    ' ',
+    h('a', {href: '#' + keys.substring(0, 44)}, [keys.substring(0, 8) + '...']),
+    ' ',
+    h('a', {href: '#settings'}, ['Settings'])
+  ])  
 
   loadfeeds().then(feeds => {
     loadlog().then(log => {
@@ -72,6 +81,8 @@ bog.keys().then(keys => {
         var scroller = h('div', {id: 'scroller'})
         var screen = document.getElementById('screen')
 
+
+        screen.appendChild(navbar)
         screen.appendChild(composer(keys))
         screen.appendChild(scroller)
 
@@ -82,7 +93,45 @@ bog.keys().then(keys => {
             })
           })
         }
+
+        if (src === 'settings') {
+          scroller.appendChild(h('p', ['This is your keypair, save it to use the same identity in the future.']))
+          scroller.appendChild(h('p', [keys]))
+          var input = h('textarea', {placeholder: 'Import your existing keypair. If you\'re importing a bogbook key, please concat (by hand) your pubkey/private keypairs before pasting below -- make sure to remove the @ sign.  It should look like the key above.'})
+          scroller.appendChild(h('div', [
+            input,
+            h('button', {
+              onclick: function () {
+                if (input.value) {
+                  localforage.setItem('keypair', input.value).then(function () {
+                    location.reload()
+                  })
+                }
+              }
+            }, ['Import Ed25519 Keypair'])
+          ]))
+        }
+
+        if (src[0] === '?') {
+          log.forEach(msg => {
+            if (msg.text && msg.text.includes(src.substring(1))) {
+              render(msg).then(rendered => {
+                scroller.insertBefore(rendered, scroller.firstChild)
+              })
+            }
+          })
+        }
+
         if (src.length === 44) {
+          if (!feeds[src]) {
+            var gossip = {feed: src, seq: 0}
+            dispatch(JSON.stringify(gossip))
+          }
+          if (feeds[src]) {
+            var gossip = {feed: src, seq: feeds[src].length}
+            dispatch(JSON.stringify(gossip))
+          }
+
           log.forEach(msg => {
             console.log(msg)
             if ((msg.author === src) || (msg.raw.substring(0, 44) === src)) {
@@ -130,10 +179,12 @@ bog.keys().then(keys => {
               if (feeds[opened.author]) {
                 if (feeds[opened.author][0].substring(0, 44) === opened.previous) {
                   feeds[opened.author].unshift(req.msg)
-
+                  log.push(opened)
                   var gossip = {feed: opened.author, seq: opened.seq}
                   ws.send(JSON.stringify(gossip))
-                  scroller.insertBefore(h('div', [h('pre', [JSON.stringify(opened)])]), scroller.firstChild)
+                  render(opened).then(rendered => {
+                    scroller.insertBefore(rendered, scroller.firstChild)
+                  })
                 }
               } else {
                 feeds[opened.author] = [req.msg]

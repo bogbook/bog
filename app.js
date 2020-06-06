@@ -21,7 +21,7 @@ async function savefeeds (feeds, log) {
   }
 }
    
-const servers = ['ws://localhost:8081/ws', 'ws://evbogue.com:8081/ws']
+const servers = ['ws://v2.bogbook.com/ws', 'ws://localhost:8081/ws', 'ws://localhost:8082/ws']
 
 const peers = new Map()
 var serverId = 0
@@ -123,17 +123,16 @@ bog.keys().then(keys => {
         }
 
         if (src.length === 44) {
-          if (!feeds[src]) {
-            var gossip = {feed: src, seq: 0}
-            dispatch(JSON.stringify(gossip))
-          }
+          var gossip = {feed: src}
           if (feeds[src]) {
-            var gossip = {feed: src, seq: feeds[src].length}
-            dispatch(JSON.stringify(gossip))
+            gossip.seq = feeds[src].length
+          } else {
+            gossip.seq = 0
           }
+          console.log('syncing ' + src)
+          dispatch(JSON.stringify(gossip))
 
           log.forEach(msg => {
-            console.log(msg)
             if ((msg.author === src) || (msg.raw.substring(0, 44) === src)) {
               render(msg).then(rendered => {
                 scroller.insertBefore(rendered, scroller.firstChild)
@@ -195,7 +194,7 @@ bog.keys().then(keys => {
             })
           }
           else if (req.seq || (req.seq === 0)) {
-            if (!feeds[req.feed]) {
+            if ((!feeds[req.feed]) && (req.seq != 0)) { 
               console.log('we do not have it')
               ws.send(JSON.stringify({feed: req.feed, seq: 0}))
             }
@@ -206,7 +205,7 @@ bog.keys().then(keys => {
                 resp.msg = feeds[req.feed][feeds[req.feed].length - req.seq - 1]
                 ws.send(JSON.stringify(resp))
               }
-              else if (req.seq > [feeds[req.feed].length]){
+              else if (req.seq > feeds[req.feed].length){
                 var gossip = {feed: req.feed, seq: feeds[req.feed].length}
                 ws.send(JSON.stringify(gossip))
               }

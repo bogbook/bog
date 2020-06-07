@@ -1,0 +1,22 @@
+{
+  "name": "bogbook",
+  "version": "2.0.0",
+  "description": "### by Everett Bogue",
+  "main": "bin.js",
+  "directories": {
+    "lib": "lib"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@git.sr.ht:~ev/v2"
+  },
+  "author": "Ev Bogue <ev@evbogue.com>",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.17.1",
+    "express-ws": "^4.0.0"
+  }
+}

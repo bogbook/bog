@@ -264,28 +264,96 @@ bog.keys().then(keys => {
       }, 50)*/
 
       function composer () {
+        var photoURL = {}
+
+        var input = h('input', {id: 'input', type: 'file',
+            onclick: function () {
+              var canvas = document.getElementById("canvas")
+              var ctx = canvas.getContext("2d")
+              var input = document.getElementById('input')
+
+              input.addEventListener('change', handleFile)
+
+              function handleFile (e) {
+                var img = new Image
+                img.onload = function() {
+                  canvas.width = 680 
+                  canvas.height = 680
+                  var scale = Math.max(canvas.width / img.width, canvas.height / img.height)
+                  var x = (canvas.width / 2) - (img.width / 2) * scale;
+                  var y = (canvas.height / 2) - (img.height / 2) * scale;
+                  ctx.drawImage(img, x, y, img.width * scale, img.height * scale);
+                  photoURL.value = canvas.toDataURL('image/jpeg', 0.8)
+                }
+
+                img.src = URL.createObjectURL(e.target.files[0])
+                input.value = ''
+              }
+            }
+          })
+
+        var newPhoto = h('span', [
+          input,
+          h('canvas', {id: 'canvas', width: '0', height: '0'})
+        ])
+
+        var filterList = [
+          {name: '#nofilter', filter: null},
+          {name: 'Thoreau', filter: 'thoreau'},
+          {name: 'Melville', filter: 'melville'},
+          {name: 'Hoover', filter: 'hoover'}
+        ]
+
+        var filter
+
+        var filters = h('select')
+
+        filterList.forEach(f => {
+          filters.appendChild(h('option', {onclick: function () {
+            var canvas = document.getElementById("canvas")
+            canvas.classList = f.filter
+            filter = f.filter
+          }}, [f.name]))
+        })
+
         var compose = h('div')
         var textarea = h('textarea', {placeholder: 'Write something'})
       
         var publish = h('button', {
           onclick: function () {
-            obj = {text: textarea.value}
-            textarea.value = ''
-            if (feeds[keys.substring(0,44)]) {
-              bog.open(feeds[keys.substring(0,44)][0]).then(opened => {
-                obj.seq = ++opened.seq
-                obj.previous = opened.raw.substring(0,44)
+            if (textarea.value || photoURL.value) {
+              var obj = {}
+              if (textarea.value) {
+                obj.text = textarea.value
+                textarea.value = ''
+              }
+              if (photoURL.value) {
+                obj.image = photoURL.value
+                photoURL.value = ''
+                canvas.width = 0
+                canvas.height = 0
+              }
+              if (filter) {
+                obj.filter = filter
+              }
+              if (feeds[keys.substring(0,44)]) {
+                bog.open(feeds[keys.substring(0,44)][0]).then(opened => {
+                  obj.seq = ++opened.seq
+                  obj.previous = opened.raw.substring(0,44)
+                  createpost(obj, keys)
+                })
+              } else {
+                obj.seq = 1
+                obj.previous = null
                 createpost(obj, keys)
-              })
-            } else {
-              obj.seq = 1
-              obj.previous = null
-              createpost(obj, keys)
+              }
             }
           }
         }, ['Publish'])
       
         compose.appendChild(textarea)
+        compose.appendChild(newPhoto)
+        compose.appendChild(filters)
         compose.appendChild(publish) 
         return compose
       }

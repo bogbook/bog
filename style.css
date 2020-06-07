@@ -16,3 +16,33 @@ body {
 a {color: cyan;}
 
 textarea {width: 100%;}
+
+.thoreau {
+  filter: brightness(1.1) hue-rotate(-10deg) sepia(0.3) saturate(1.6);
+}
+
+.thoreau::after {
+    background: #0044cc;
+    mix-blend-mode: screen;
+    opacity: .3;
+}
+
+.melville {
+  filter: brightness(1.2) hue-rotate(-10deg) sepia(0.3) saturate(2);
+}
+
+.melville::after {
+  background: #0044cc;
+  mix-blend-mode: screen;
+  opacity: .3;
+}
+
+.pkdick {
+  filter: sepia(0.3) brightness(1.2);
+  background: radial-gradient(circle, #e6e7e0 40%, rgba(43, 42, 161, 0.6) 110%);
+}
+
+.hoover {
+  filter: sepia(0.3) contrast(1.1) brightness(1.1) grayscale(0.8);
+}
+

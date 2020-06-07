@@ -7,7 +7,7 @@ var appdir = homedir + '/.bogbookv2/'
 if (!fs.existsSync(appdir)) { fs.mkdirSync(appdir) }
 if (!fs.existsSync(appdir + 'bogs/')) { fs.mkdirSync(appdir + 'bogs/') }
 
-var PORT = 8081
+var PORT = 8082
 
 var express = require('express')
 var app = express()

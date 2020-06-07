@@ -17,6 +17,12 @@ async function render (msg) {
     message.appendChild(h('div', [msg.text]))
   }
 
+  if (msg.image) {
+    var image = h('img', {src: msg.image})
+    if (msg.filter) { image.classList = msg.filter}
+    message.appendChild(image)
+  }
+
   return message
 }
 

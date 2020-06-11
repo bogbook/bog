@@ -81,8 +81,20 @@ bog.keys().then(keys => {
         var scroller = h('div', {id: 'scroller'})
         var screen = document.getElementById('screen')
 
+	var searchInput = h('input')
+	var search = h('div', [
+          searchInput,
+          h('button', {
+            onclick: function () {
+              if (searchInput.value) {
+                location.hash = '?' + searchInput.value
+	      }
+	    }
+	  }, ['Search'])
+	])
 
         screen.appendChild(navbar)
+	screen.appendChild(search)
         screen.appendChild(composer(keys))
         screen.appendChild(scroller)
 

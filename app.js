@@ -125,8 +125,9 @@ bog.keys().then(keys => {
         }
 
         if (src[0] === '?') {
+          var search = src.substring(1).replace("%20"," ").toUpperCase()
           log.forEach(msg => {
-            if (msg.text && msg.text.includes(src.substring(1))) {
+            if (msg.text && msg.text.toUpperCase().includes(search)) {
               render(msg).then(rendered => {
                 scroller.insertBefore(rendered, scroller.firstChild)
               })

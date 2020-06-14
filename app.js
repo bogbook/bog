@@ -241,22 +241,33 @@ bog.keys().then(keys => {
         }
 
         if (src.length === 44) {
-          var gossip = {feed: src}
-          if (feeds[src]) {
-            gossip.seq = feeds[src].length
-          } else {
-            gossip.seq = 0
-          }
-          console.log('syncing ' + src)
-          dispatch(JSON.stringify(gossip))
-
+          var shouldSync = true
           log.forEach(msg => {
-            if ((msg.author === src) || (msg.raw.substring(0, 44) === src)) {
+            if (msg.author === src) {
               render(msg).then(rendered => {
                 scroller.insertBefore(rendered, scroller.firstChild)
               })
+            } 
+            if (msg.raw.substring(0, 44) === src) {
+              render(msg).then(rendered => {
+                scroller.insertBefore(rendered, scroller.firstChild)
+              })
+              shouldSync = false
+              console.log('we have the post, turn off gossip')
             }
           })
+          setTimeout(function () {
+            if (shouldSync) {
+              var gossip = {feed: src}
+              if (feeds[src]) {
+                gossip.seq = feeds[src].length
+              } else {
+                gossip.seq = 0
+              }
+              console.log('syncing ' + src)
+              dispatch(JSON.stringify(gossip))
+            }
+          }, 500)
         }
       }
 

@@ -81,7 +81,7 @@ bog.keys().then(keys => {
         var scroller = h('div', {id: 'scroller'})
         var screen = document.getElementById('screen')
 
-	var searchInput = h('input')
+	var searchInput = h('input', {placeholder: '#bogbook'})
 	var search = h('div', [
           searchInput,
           h('button', {
@@ -125,7 +125,9 @@ bog.keys().then(keys => {
         }
 
         if (src[0] === '?') {
-          var search = src.substring(1).replace("%20"," ").toUpperCase()
+          var search = src.substring(1).replace(/%20/g, ' ').toUpperCase()
+            
+          console.log(search)
           log.forEach(msg => {
             if (msg.text && msg.text.toUpperCase().includes(search)) {
               render(msg).then(rendered => {
@@ -330,7 +332,7 @@ bog.keys().then(keys => {
         })
 
         var compose = h('div')
-        var textarea = h('textarea', {placeholder: 'Write something'})
+        var textarea = h('textarea', {placeholder: 'What are you doing right now?'})
       
         var publish = h('button', {
           onclick: function () {

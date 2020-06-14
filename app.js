@@ -65,40 +65,127 @@ bog.keys().then(keys => {
   var screen = h('screen', {id: 'screen'})
   document.body.appendChild(screen)
 
-  var navbar = h('div', [
-    h('a', {href: '#'}, ['Home']),
-    ' ',
-    h('a', {href: '#' + keys.substring(0, 44)}, [keys.substring(0, 8) + '...']),
-    ' ',
-    h('a', {href: '#settings'}, ['Settings'])
-  ])  
-
   loadfeeds().then(feeds => {
     loadlog().then(log => {
+
+      var searchInput = h('input', {placeholder: '#bogbook'})
+      var search = h('div', [
+        searchInput,
+        h('button', {
+          onclick: function () {
+            if (searchInput.value) {
+              location.hash = '?' + searchInput.value
+            }
+          }
+        }, ['Search'])
+      ])
+
+      var navbar = h('div', {classList: 'navbar'} ,[
+        h('a', {href: '#'}, ['Home']),
+        ' ',
+        h('a', {href: '#' + keys.substring(0, 44)}, [keys.substring(0, 8) + '...']),
+        ' ',
+        h('a', {href: '#settings'}, ['Settings']),
+        h('a', {classList: 'right', href: 'http://git.sr.ht/~ev/v2'}, ['Git']),
+        h('span', {classList: 'right'}, [search])
+        
+      ])
+
+      async function render (msg) {
+        var renderer = new marked.Renderer()
+        renderer.paragraph = function (paragraph) {
+          var array = paragraph.split(' ')
+
+          for (i = 0; i < array.length; i++) {
+            word = array[i]
+            if (word.startsWith('#')) {
+              let end
+              if ((word[word.length -1] === '.') || (word[word.length - 1] === ',') || (word[word.length -1] === ':')) {
+                //console.log('and it ends with a ' + word[word.length - 1])
+                end = word[word.length - 1]
+                word = word.substring(0, word.length - 1)
+              }
+              var hashtag = "<a href='#?" + word + "'>" + word + "</a>"
+              if (end) {
+                hashtag = hashtag + end
+              }
+              //console.log(hashtag)
+              array[i] = hashtag
+            }
+          }
+
+          newgraph = array.join(' ')
+
+          return newgraph + '<br /><br />'
+        }
+        renderer.link = function (href, title, text) {
+          if ((href[0] == '@') || (href.length == 44)) {
+            href = '#' + href
+          }
+          var link = marked.Renderer.prototype.link.call(this, href, title, text);
+          return link
+        }
+
+        marked.setOptions({
+          renderer: renderer
+        })
+        var message = h('div', {classList: 'message'})
+      
+        message.appendChild(h('span', {classList: 'right'}, [
+          h('a', {href: '#' + msg.raw.substring(0, 44)}, [
+            human(new Date(msg.timestamp))
+          ])
+        ]))
+      
+        message.appendChild(h('span', [
+          h('a', {href: '#' + msg.author}, [
+            msg.author.substring(0, 10)
+          ])
+        ]))
+      
+        if (msg.text) {
+          message.appendChild(h('div', {classList: 'content', innerHTML: marked(msg.text)}))
+        }
+      
+        if (msg.image) {
+          var image = h('img', {src: msg.image})
+          if (msg.filter) { image.classList = msg.filter}
+          message.appendChild(image)
+        }
+
+        var reply = composer(keys, msg)
+        var cancel = h('button', {
+          onclick: function () {
+            reply.parentNode.removeChild(reply)
+            cancel.parentNode.removeChild(cancel)
+          }
+        }, ['Cancel'])
+
+        message.appendChild(h('button', {
+          onclick: function () {
+            message.appendChild(reply)
+            message.appendChild(cancel)
+          }
+        }, ['Reply']))
+      
+        return message
+      }
+
+
+
       function route () {
 
         var src = window.location.hash.substring(1)
         var scroller = h('div', {id: 'scroller'})
         var screen = document.getElementById('screen')
 
-	var searchInput = h('input', {placeholder: '#bogbook'})
-	var search = h('div', [
-          searchInput,
-          h('button', {
-            onclick: function () {
-              if (searchInput.value) {
-                location.hash = '?' + searchInput.value
-	      }
-	    }
-	  }, ['Search'])
-	])
-
         screen.appendChild(navbar)
-	screen.appendChild(search)
-        screen.appendChild(composer(keys))
+	//screen.appendChild(search)
+        //screen.appendChild(composer(keys))
         screen.appendChild(scroller)
 
         if (src === '') {
+          screen.insertBefore(composer(keys), screen.childNodes[1])
           log.forEach(msg => {
             render(msg).then(rendered => {
               scroller.insertBefore(rendered, scroller.firstChild)
@@ -278,7 +365,7 @@ bog.keys().then(keys => {
         })
       }, 50)*/
 
-      function composer () {
+      function composer (keys, msg) {
         var photoURL = {}
 
         var input = h('input', {id: 'input', type: 'file',
@@ -332,8 +419,11 @@ bog.keys().then(keys => {
         })
 
         var compose = h('div')
-        var textarea = h('textarea', {placeholder: 'What are you doing right now?'})
-      
+        if (msg) {
+          var textarea = h('textarea', ['re:' + msg.raw.substring(0, 44)])
+        } else {
+          var textarea = h('textarea', {placeholder: 'What are you doing right now?'})
+        }
         var publish = h('button', {
           onclick: function () {
             if (textarea.value || photoURL.value) {

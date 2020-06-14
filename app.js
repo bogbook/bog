@@ -396,11 +396,18 @@ bog.keys().then(keys => {
       function composer (keys, msg) {
         var photoURL = {}
 
-        var input = h('input', {id: 'input', type: 'file',
+        if (msg) {
+          var canvasID = msg.raw.substring(0, 44)
+        } else {
+          var canvasID = "composer"
+        }
+
+        var input = h('input', {id: 'input' + canvasID, type: 'file',
           onclick: function () {
-            var canvas = document.getElementById("canvas")
+            var canvas = document.getElementById("canvas" + canvasID)
+            console.log(canvas)
             var ctx = canvas.getContext("2d")
-            var input = document.getElementById('input')
+            var input = document.getElementById('input' + canvasID)
 
             input.addEventListener('change', handleFile)
 
@@ -422,9 +429,11 @@ bog.keys().then(keys => {
           }
         })
 
+        var canvasEl = h('canvas', {id: "canvas" + canvasID, width: '0', height: '0'})
+
         var newPhoto = h('span', [
           input,
-          h('canvas', {id: 'canvas', width: '0', height: '0'})
+          canvasEl
         ])
 
         var filterList = [
@@ -436,14 +445,15 @@ bog.keys().then(keys => {
 
         var filter
 
-        var filters = h('select')
+        var filters = h('span')
 
         filterList.forEach(f => {
-          filters.appendChild(h('option', {onclick: function () {
-            var canvas = document.getElementById("canvas")
-            canvas.classList = f.filter
+          filters.appendChild(h('a', {onclick: function () {
+            console.log('FILTER')
+            canvasEl.classList = f.filter
             filter = f.filter
           }}, [f.name]))
+          filters.appendChild(h('span', [' ']))
         })
         
         if (msg) {
@@ -470,8 +480,8 @@ bog.keys().then(keys => {
               if (photoURL.value) {
                 obj.image = photoURL.value
                 photoURL.value = ''
-                canvas.width = 0
-                canvas.height = 0
+                canvasEl.width = 0
+                canvasEl.height = 0
               }
               if (filter) {
                 obj.filter = filter

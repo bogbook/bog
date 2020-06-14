@@ -63,6 +63,8 @@ br {
   margin-bottom: .5em;
 }
 
+img, canvas { max-width: 100%; border-radius: 5px;}
+
 .right {float: right; margin-left: .5em;}
 
 a {color: cyan; text-decoration: none;}

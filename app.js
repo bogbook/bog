@@ -129,7 +129,12 @@ bog.keys().then(keys => {
         marked.setOptions({
           renderer: renderer
         })
+
+        var messageDiv = h('div', {id: msg.raw.substring(0, 44)})
+
         var message = h('div', {classList: 'message'})
+
+        messageDiv.appendChild(message)
       
         message.appendChild(h('span', {classList: 'right'}, [
           h('a', {href: '#' + msg.raw.substring(0, 44)}, [
@@ -163,15 +168,28 @@ bog.keys().then(keys => {
 
         message.appendChild(h('button', {
           onclick: function () {
-            message.appendChild(reply)
-            message.appendChild(cancel)
+            messageDiv.appendChild(reply)
+            reply.appendChild(cancel)
           }
         }, ['Reply']))
+
+
+        log.forEach(reply => {
+          if (reply.text && reply.text.includes(msg.raw.substring(0, 44))) {
+            setTimeout(function () {
+              var messageExists = (document.getElementById(reply.raw.substring(0, 44)) !== null)
+              console.log(messageExists)
+              if (!messageExists) {
+                render(reply).then(rendered => {
+                  messageDiv.appendChild(h('div', {classList: 'reply'}, [rendered]))
+                })
+              }
+            }, 50)
+          }
+        })
       
-        return message
+        return messageDiv
       }
-
-
 
       function route () {
 
@@ -180,8 +198,6 @@ bog.keys().then(keys => {
         var screen = document.getElementById('screen')
 
         screen.appendChild(navbar)
-	//screen.appendChild(search)
-        //screen.appendChild(composer(keys))
         screen.appendChild(scroller)
 
         if (src === '') {
@@ -295,6 +311,7 @@ bog.keys().then(keys => {
               }
             })
           }
+
           else if (req.seq || (req.seq === 0)) {
             if ((!feeds[req.feed]) && (req.seq != 0)) { 
               console.log('we do not have it')
@@ -316,7 +333,7 @@ bog.keys().then(keys => {
         }
       })
     
-      function createpost (obj, keys) {
+      function createpost (obj, keys, previous) {
         bog.publish(obj, keys).then(msg => {
           bog.open(msg).then(opened => {
             if (feeds[keys.substring(0, 44)]) {
@@ -369,30 +386,30 @@ bog.keys().then(keys => {
         var photoURL = {}
 
         var input = h('input', {id: 'input', type: 'file',
-            onclick: function () {
-              var canvas = document.getElementById("canvas")
-              var ctx = canvas.getContext("2d")
-              var input = document.getElementById('input')
+          onclick: function () {
+            var canvas = document.getElementById("canvas")
+            var ctx = canvas.getContext("2d")
+            var input = document.getElementById('input')
 
-              input.addEventListener('change', handleFile)
+            input.addEventListener('change', handleFile)
 
-              function handleFile (e) {
-                var img = new Image
-                img.onload = function() {
-                  canvas.width = 680 
-                  canvas.height = 680
-                  var scale = Math.max(canvas.width / img.width, canvas.height / img.height)
-                  var x = (canvas.width / 2) - (img.width / 2) * scale;
-                  var y = (canvas.height / 2) - (img.height / 2) * scale;
-                  ctx.drawImage(img, x, y, img.width * scale, img.height * scale);
-                  photoURL.value = canvas.toDataURL('image/jpeg', 0.8)
-                }
-
-                img.src = URL.createObjectURL(e.target.files[0])
-                input.value = ''
+            function handleFile (e) {
+              var img = new Image
+              img.onload = function() {
+                canvas.width = 680 
+                canvas.height = 680
+                var scale = Math.max(canvas.width / img.width, canvas.height / img.height)
+                var x = (canvas.width / 2) - (img.width / 2) * scale;
+                var y = (canvas.height / 2) - (img.height / 2) * scale;
+                ctx.drawImage(img, x, y, img.width * scale, img.height * scale);
+                photoURL.value = canvas.toDataURL('image/jpeg', 0.8)
               }
+
+              img.src = URL.createObjectURL(e.target.files[0])
+              input.value = ''
             }
-          })
+          }
+        })
 
         var newPhoto = h('span', [
           input,
@@ -417,13 +434,20 @@ bog.keys().then(keys => {
             filter = f.filter
           }}, [f.name]))
         })
-
-        var compose = h('div')
+        
         if (msg) {
-          var textarea = h('textarea', ['re:' + msg.raw.substring(0, 44)])
+          var compose = h('div', {classList: 'message reply'})
         } else {
-          var textarea = h('textarea', {placeholder: 'What are you doing right now?'})
+          var compose = h('div', {classList: 'message'})
         }
+
+        var textarea = h('textarea', {placeholder: 'What are you doing right now?'})
+
+        if (msg) {
+          var replyContent = 're: ['+ msg.author.substring(0,8) +'...](' +msg.author +') [' + msg.raw.substring(0, 8) + '...](' + msg.raw.substring(0, 44) + ')\n\n'
+          textarea.value = replyContent
+        }
+
         var publish = h('button', {
           onclick: function () {
             if (textarea.value || photoURL.value) {
@@ -445,12 +469,23 @@ bog.keys().then(keys => {
                 bog.open(feeds[keys.substring(0,44)][0]).then(opened => {
                   obj.seq = ++opened.seq
                   obj.previous = opened.raw.substring(0,44)
-                  createpost(obj, keys)
+                  if (msg) {
+                    createpost(obj, keys, msg)
+                  } else {
+                    createpost(obj, keys)
+                  }
                 })
               } else {
                 obj.seq = 1
                 obj.previous = null
-                createpost(obj, keys)
+                if (msg) {
+                  createpost(obj, keys, msg)
+                } else {
+                  createpost(obj, keys)
+                }
+              }
+              if (msg) {
+                compose.parentNode.removeChild(compose)
               }
             }
           }
@@ -462,7 +497,6 @@ bog.keys().then(keys => {
         compose.appendChild(publish) 
         return compose
       }
-
     })
   })
 })

@@ -1,7 +1,7 @@
 body {
   background: #222; 
-  color: #f5f5f5; 
-  font-family: monospace; 
+  color: #f5f5f5;
+  font-family: 'Source Sans Pro'; 
   width: 680px; 
   margin-left: auto; 
   margin-right: auto;
@@ -9,6 +9,35 @@ body {
   word-wrap: break-word;
   word-break: break-word;
   line-height: 1.25em;
+}
+
+
+p {
+  margin-top: .5ex;
+  margin-bottom: 1ex;
+  font-size: 1em;
+}
+
+blockquote {
+  border-left: 2px solid #ccc;
+  padding-left: .5em;
+}
+
+h1, h2, h3, h4, h5, h6 { margin-top: 5px;}
+
+h1 { font-size: 1.4em; }
+h2 { font-size: 1.3em; }
+h3 { font-size: 1.25em; }
+h4 { font-size: 1.2em; }
+h5 { font-size: 1.15em; }
+h6 { font-size: 1.1em; }
+
+hr {
+  border: solid #ddd;
+  clear: both;
+  border-width: 1px 0 0;
+  height: 0;
+  margin-bottom: .9em;
 }
 
 br {
@@ -20,6 +49,10 @@ br {
   margin-top: .5em;
   padding: .5em;
   border-radius: 5px;
+}
+
+.reply {
+  margin-left: 1em;
 }
 
 .content {
@@ -35,6 +68,8 @@ br {
 a {color: cyan;}
 
 textarea, input {
+  font-family: 'Source Sans Pro';
+  font-size: 1em;
   color: #f5f5f5;
   background: #333;
   border: none;
@@ -44,7 +79,7 @@ textarea, input {
 textarea {
   width: 100%; 
   margin-bottom: .5em;
-  height: 50px;
+  height: 100px;
 }
 
 .thoreau {

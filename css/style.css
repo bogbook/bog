@@ -65,7 +65,9 @@ br {
 
 .right {float: right; margin-left: .5em;}
 
-a {color: cyan;}
+a {color: cyan; text-decoration: none;}
+
+a:hover {text-decoration: underline; }
 
 textarea, input {
   font-family: 'Source Sans Pro';

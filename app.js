@@ -68,6 +68,14 @@ bog.keys().then(keys => {
   loadfeeds().then(feeds => {
     loadlog().then(log => {
 
+      setInterval(function () {
+        Object.keys(feeds).forEach(function(key,index) {
+          var gossip = {feed: key}
+          gossip.seq = feeds[key].length
+          dispatch(JSON.stringify(gossip))
+        })
+      }, 10000)
+
       var searchInput = h('input', {placeholder: '#bogbook'})
       var search = h('div', [
         searchInput,

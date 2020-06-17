@@ -473,7 +473,7 @@ bog.keys().then(keys => {
         var textarea = h('textarea', {placeholder: 'What are you doing right now?'})
 
         if (msg) {
-          var replyContent = 're: ['+ msg.author.substring(0,8) +'...](' +msg.author +') [' + msg.raw.substring(0, 8) + '...](' + msg.raw.substring(0, 44) + ')\n\n'
+          var replyContent = '['+ msg.author.substring(0,7) + '](' +msg.author +') ↳ [' + msg.raw.substring(0, 7) + '](' + msg.raw.substring(0, 44) + ')\n\n'
           textarea.value = replyContent
         }
 

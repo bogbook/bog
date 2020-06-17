@@ -4,6 +4,8 @@ var homedir = require('os').homedir()
 var bog = require('./util')
 var appdir = homedir + '/.bogbookv2/'
 
+var url = 'http://localhost:8081/#'
+
 if (!fs.existsSync(appdir)) { fs.mkdirSync(appdir) }
 if (!fs.existsSync(appdir + 'bogs/')) { fs.mkdirSync(appdir + 'bogs/') }
 
@@ -42,12 +44,13 @@ readBog().then(feeds => {
   app.ws('/ws', function (ws, req) {
     ws.on('message', function (msg) {
       var req = JSON.parse(msg)
-      console.log(req)
+      //console.log(req)
       if (req.msg) {
         bog.open(req.msg).then(opened => {
           if (feeds[opened.author]) {
             if (feeds[opened.author][0].substring(0, 44) === opened.previous) {
               feeds[opened.author].unshift(req.msg)
+              console.log('new post from: '+ url + opened.author)
               var gossip = {feed: opened.author, seq: opened.seq}
               ws.send(JSON.stringify(gossip))
             }

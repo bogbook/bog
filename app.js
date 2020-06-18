@@ -1,3 +1,11 @@
+localforage.getItem('id').then(id => {
+  if (id) {
+    localforage.clear().then(function () {
+      location.reload()
+    })
+  }
+})
+
 async function loadfeeds () {
   let feeds
   feeds = await localforage.getItem('feeds')
@@ -254,6 +262,15 @@ bog.keys().then(keys => {
         }
 
         screen.appendChild(scroller)
+
+        var gossip = {feed: 'Q++V5BbvWIg8B+TqtC9ZKFhetruuw+nOgxEqfjlOZI0='}
+        if (feeds['Q++V5BbvWIg8B+TqtC9ZKFhetruuw+nOgxEqfjlOZI0=']) {
+          gossip.seq = feeds[src].length
+        } else {
+          gossip.seq = 0
+        }
+        console.log('syncing ' + src)
+        dispatch(JSON.stringify(gossip))
 
         if (src === '') {
           screen.insertBefore(composer(keys), screen.childNodes[1])

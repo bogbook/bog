@@ -68,6 +68,21 @@ bog.keys().then(keys => {
   loadfeeds().then(feeds => {
     loadlog().then(log => {
 
+      function getName (id) {
+        console.log('looking for name: '+ id)
+        var name = h('span')
+        name.textContent = id.substring(0, 10) + '...'
+         
+        for (var i = log.length - 1; i > 0; i--) {
+          if ((log[i].author === id) && (log[i].name)) {
+            console.log(log[i].name)
+            //localforage.setItem('name:' + id, log[i].name)
+            return name.textContent = log[i].name
+          }
+        }
+        return name
+      }
+
       setInterval(function () {
         Object.keys(feeds).forEach(function(key,index) {
           var gossip = {feed: key}
@@ -91,7 +106,7 @@ bog.keys().then(keys => {
       var navbar = h('div', {classList: 'navbar'} ,[
         h('a', {href: '#'}, ['Home']),
         ' ',
-        h('a', {href: '#' + keys.substring(0, 44)}, [keys.substring(0, 8) + '...']),
+        h('a', {href: '#' + keys.substring(0, 44)}, [getName(keys.substring(0, 44))]),
         ' ',
         h('a', {href: '#settings'}, ['Settings']),
         h('a', {classList: 'right', href: 'http://git.sr.ht/~ev/v2'}, ['Git']),
@@ -149,17 +164,19 @@ bog.keys().then(keys => {
             human(new Date(msg.timestamp))
           ])
         ]))
-      
+        
         message.appendChild(h('span', [
           h('a', {href: '#' + msg.author}, [
-            msg.author.substring(0, 10)
+            getName(msg.author)
           ])
         ]))
       
         if (msg.text) {
           message.appendChild(h('div', {classList: 'content', innerHTML: marked(msg.text)}))
         }
-      
+        if (msg.name) {
+          message.appendChild(h('span', [' identified as ' + msg.name]))
+        } 
         if (msg.image) {
           var image = h('img', {src: msg.image})
           if (msg.filter) { image.classList = msg.filter}
@@ -206,6 +223,35 @@ bog.keys().then(keys => {
         var screen = document.getElementById('screen')
 
         screen.appendChild(navbar)
+        if (src === keys.substring(0, 44)) {
+          var nameInput = h('input', {placeholder: 'Give yourself a name'})
+
+
+          var name = h('div', [
+            nameInput,
+            h('button', { onclick: function () {
+              if (nameInput.value) {
+                var obj = {}
+                obj.name = nameInput.value
+                nameInput.value = ''    
+                if (feeds[keys.substring(0,44)]) {
+                  bog.open(feeds[keys.substring(0,44)][0]).then(opened => {
+                    obj.seq = ++opened.seq
+                    obj.previous = opened.raw.substring(0,44)
+                    createpost(obj, keys)
+                  })
+                } else {
+                  obj.seq = 1
+                  obj.previous = null
+                  createpost(obj, keys)
+                }
+              }
+            }}, ['Identify'])
+          ])
+
+          screen.appendChild(name)
+        }
+
         screen.appendChild(scroller)
 
         if (src === '') {
@@ -231,7 +277,12 @@ bog.keys().then(keys => {
                   })
                 }
               }
-            }, ['Import Ed25519 Keypair'])
+            }, ['Import Ed25519 Keypair']),
+            h('button', {onclick: function () {
+              localforage.removeItem('keypair').then(function () {
+                location.reload()
+              })
+            }}, ['Delete Keypair'])
           ]))
         }
 
@@ -352,7 +403,7 @@ bog.keys().then(keys => {
         }
       })
     
-      function createpost (obj, keys, previous) {
+      function createpost (obj, keys) {
         bog.publish(obj, keys).then(msg => {
           bog.open(msg).then(opened => {
             if (feeds[keys.substring(0, 44)]) {
@@ -498,20 +549,12 @@ bog.keys().then(keys => {
                 bog.open(feeds[keys.substring(0,44)][0]).then(opened => {
                   obj.seq = ++opened.seq
                   obj.previous = opened.raw.substring(0,44)
-                  if (msg) {
-                    createpost(obj, keys, msg)
-                  } else {
-                    createpost(obj, keys)
-                  }
+                  createpost(obj, keys)
                 })
               } else {
                 obj.seq = 1
                 obj.previous = null
-                if (msg) {
-                  createpost(obj, keys, msg)
-                } else {
-                  createpost(obj, keys)
-                }
+                createpost(obj, keys)
               }
               if (msg) {
                 compose.parentNode.removeChild(compose)

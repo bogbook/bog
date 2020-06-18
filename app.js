@@ -76,6 +76,15 @@ bog.keys().then(keys => {
   loadfeeds().then(feeds => {
     loadlog().then(log => {
 
+      if (!log[0]) {
+        setTimeout(function () {
+          console.log('gossiping with ev, since there is nothing else')
+          var gossip = {feed: 'Q++V5BbvWIg8B+TqtC9ZKFhetruuw+nOgxEqfjlOZI0='}
+          gossip.seq = 0
+          dispatch(JSON.stringify(gossip))
+        }, 500)
+      }
+
       function getName (id) {
         console.log('looking for name: '+ id)
         var name = h('span')

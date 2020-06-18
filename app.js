@@ -72,12 +72,13 @@ bog.keys().then(keys => {
         console.log('looking for name: '+ id)
         var name = h('span')
         name.textContent = id.substring(0, 10) + '...'
-         
-        for (var i = log.length - 1; i > 0; i--) {
-          if ((log[i].author === id) && (log[i].name)) {
-            console.log(log[i].name)
-            //localforage.setItem('name:' + id, log[i].name)
-            return name.textContent = log[i].name
+        if (log) { 
+          for (var i = log.length - 1; i > 0; i--) {
+            if ((log[i].author === id) && (log[i].name)) {
+              console.log(log[i].name)
+              //localforage.setItem('name:' + id, log[i].name)
+              return name.textContent = log[i].name
+            }
           }
         }
         return name
@@ -301,20 +302,22 @@ bog.keys().then(keys => {
 
         if (src.length === 44) {
           var shouldSync = true
-          log.forEach(msg => {
-            if (msg.author === src) {
-              render(msg).then(rendered => {
-                scroller.insertBefore(rendered, scroller.firstChild)
-              })
-            } 
-            if (msg.raw.substring(0, 44) === src) {
-              render(msg).then(rendered => {
-                scroller.insertBefore(rendered, scroller.firstChild)
-              })
-              shouldSync = false
-              console.log('we have the post, turn off gossip')
-            }
-          })
+          if (log) {
+            log.forEach(msg => {
+              if (msg.author === src) {
+                render(msg).then(rendered => {
+                  scroller.insertBefore(rendered, scroller.firstChild)
+                })
+              } 
+              if (msg.raw.substring(0, 44) === src) {
+                render(msg).then(rendered => {
+                  scroller.insertBefore(rendered, scroller.firstChild)
+                })
+                shouldSync = false
+                console.log('we have the post, turn off gossip')
+              }
+            })
+          }
           setTimeout(function () {
             if (shouldSync) {
               var gossip = {feed: src}

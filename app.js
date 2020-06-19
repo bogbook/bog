@@ -208,14 +208,14 @@ bog.keys().then(keys => {
             cancel.parentNode.removeChild(cancel)
           }
         }, ['Cancel'])
-
-        message.appendChild(h('button', {
-          onclick: function () {
-            messageDiv.appendChild(reply)
-            reply.appendChild(cancel)
-          }
-        }, ['Reply']))
-
+        if (!msg.name) {
+          message.appendChild(h('button', {
+            onclick: function () {
+              messageDiv.appendChild(reply)
+              reply.appendChild(cancel)
+            }
+          }, ['Reply']))
+        }
 
         log.forEach(reply => {
           if (reply.text && reply.text.includes(msg.raw.substring(0, 44))) {

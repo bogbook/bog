@@ -2,6 +2,8 @@
 
 ### by Everett Bogue
 
+Try it: http://bogbook.com/
+
 So after working on [bogbook](https://git.sr.ht/~ev/bogbook) [git.sr.ht] for a year, and [news](https://git.sr.ht/~ev/news) [git.sr.ht] for a few weeks, I realized that append-only logs are a great way to distribute data and treating messages as seperate makes it really challenging to distribute data.
 
 However, some of the ideas from news are very good, so I want to bring them into bogbook. But that'll mean I'll need to throw out how it worked before, and start over from scratch. If you want to read the code it is [here](https://git.sr.ht/~ev/gossip).

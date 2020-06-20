@@ -18,51 +18,43 @@ The aim of bogbook is to be a public gossiped news and photo sharing network whe
 
 ### keypairs
 
-keypairs are ed25519 keypairs, exactly like in bogbook v1, where we use a JSON object containing:
+keypairs are ed25519 keypairs, encoded in base64, concatenating the public key to private key
 
 ```
-  publickey: <ed25519 public key>,
-  privatekey: <ed25519 private key> 
+<publickey><privatekey>
 ```  
 
-There can be no '/' characters in the public key, so we'll throw those out on generation.
+There can be no '/' characters in the public key, because file systems do not like slashes, so we will throw them out when generating new keypairs. If there is a '/' in an imported keypair, we should error out on import.
 
 ### signed messages
 
+signed messages exist on a single line, and consist of a hash of the signature, the public key of an author, and the signature
+
 ```
-{
-  hash: %<sha2 hash of signature>,
-  author: @<ed25519 public key>,
-  seq: <sequence number>,
-  signature: <ed25519 signature>,
-  previous: %<sha2 hash from previous message (seq - 1)>
-}
+<sha2hash><ed25519 public key><ed25519 signature>
 ```
 
 ### opened messages
 
-when opened, they will contain:
+when opened, it could look this way:
 
 ```
 {
   text: <text>,
-  image: <680x680px Base64 encoded image>,
-  filter: <css filters for images>,
-  edit: <sha2 hash>,
-  avatar: <pubkey>,
-  timestamp: <Date.now()>
+  seq: <sequence number>,
+  author: <ed25519 public key>,
+  timestamp: <Date.now()>,
+  raw: <unopened message>
 }
 ```
 
 `timestamp` is not optional, because we need it to sort the log. 
 
+`seq` is not optional, because we need it to sync the log.
+
 Everything else is optional, but we should have at least `text` or an `image`. The reason we crop images to 680x680 pixels is we want the image size to be managable for replication.
 
 if there's an edit field pointing at a post, then we replace the post with the edit.
-
-if there is an avatar field, then we use the text for a name or the image for a photo.
-
-I don't know if I still want banners, because the image focus is on square images with css filters. 
 
 NOTE: Unlike bogbook and others, we will not have a reply field or a recp field. We can easily search text to discover if it contains publickeys and/or sha2 hashes of messages that may be contained in our log. These can simply be included in the composer field, as in how it worked in news.
 
@@ -78,26 +70,12 @@ gossip requests can contain either:
 
 ```
 {
-  author: <ed25519 public key>,
+  feed: <ed25519 public key>,
   sequence: <latest sequence number we possess> 
 } 
 ```
 
 the response to this message will be to send one message every time the server sends us a sequence number. If we have a higher sequence number than the requester we respond with the next message in our sequence. If the server has a lower sequence number, then we respond with a gossip message sharing our latest sequence number, so that the client can instead respond to us with a replication message.
-
-sometimes a gossip message will simply contain a hash, this means we are only requesting one message out of sequence order.
-
-```
-{
-  hash: <sha2hash>
-}
-```
-
-If just this message is replicated if we have it, it is not intended to be saved anywhere. We treat it as a permalink, and then the client can ask the recipient if they want to replicate an entire log. We might send a person's avatar name and image with the hash response. 
-
-
-
-
 
 ---
 

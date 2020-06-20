@@ -86,7 +86,6 @@ bog.keys().then(keys => {
       }
 
       function getName (id) {
-        console.log('looking for name: '+ id)
         var name = h('span')
         name.textContent = id.substring(0, 10) + '...'
         if (log) { 
@@ -99,6 +98,22 @@ bog.keys().then(keys => {
           }
         }
         return name
+      }
+
+      function getTextName (id) {
+        var name = id.substring(0, 10) + '...'
+        if (log) {
+          for (var i = log.length - 1; i > 0; i--) {
+            if ((log[i].author === id) && (log[i].name)) {
+              console.log(log[i].name)
+              //localforage.setItem('name:' + id, log[i].name)
+              name = log[i].name
+              return name
+            } else if (log[i] === 0) {
+              return name
+            }
+          }
+        }
       }
 
       setInterval(function () {
@@ -488,6 +503,11 @@ bog.keys().then(keys => {
             var ctx = canvas.getContext("2d")
             var input = document.getElementById('input' + canvasID)
 
+            console.log(canvas.parentNode)
+            if (!canvas.parentNode.childNodes[2]) {
+              canvas.parentNode.appendChild(filters)
+            }
+
             input.addEventListener('change', handleFile)
 
             function handleFile (e) {
@@ -541,11 +561,21 @@ bog.keys().then(keys => {
           var compose = h('div', {classList: 'message'})
         }
 
+        var preview = h('div')
+
         var textarea = h('textarea', {placeholder: 'What are you doing right now?'})
 
+        textarea.addEventListener('input', function (e) {
+          preview.innerHTML = marked(textarea.value)
+        })
+
         if (msg) {
-          var replyContent = '['+ msg.author.substring(0,7) + '](' +msg.author +') ↳ [' + msg.raw.substring(0, 7) + '](' + msg.raw.substring(0, 44) + ')\n\n'
-          textarea.value = replyContent
+          var thread = '↳ [' + msg.raw.substring(0, 7) + '](' + msg.raw.substring(0, 44) + ')\n\n'
+          //var replyContent = '['+ msg.author.substring(0,7) + '](' +msg.author +') ↳ [' + msg.raw.substring(0, 7) + '](' + msg.raw.substring(0, 44) + ')\n\n'
+
+          textarea.value = thread
+          var name = getTextName(msg.author)
+          textarea.value = textarea.value + '[' + name + '](' + msg.author + ') '
         }
 
         var publish = h('button', {
@@ -582,10 +612,10 @@ bog.keys().then(keys => {
             }
           }
         }, ['Publish'])
-      
+        compose.appendChild(preview)
         compose.appendChild(textarea)
         compose.appendChild(newPhoto)
-        compose.appendChild(filters)
+        //compose.appendChild(filters)
         compose.appendChild(publish) 
         return compose
       }

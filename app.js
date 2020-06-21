@@ -73,6 +73,7 @@ bog.keys().then(keys => {
   var screen = h('screen', {id: 'screen'})
   document.body.appendChild(screen)
 
+
   loadfeeds().then(feeds => {
     loadlog().then(log => {
 
@@ -91,8 +92,7 @@ bog.keys().then(keys => {
         if (log) { 
           for (var i = log.length - 1; i > 0; i--) {
             if ((log[i].author === id) && (log[i].name)) {
-              console.log(log[i].name)
-              //localforage.setItem('name:' + id, log[i].name)
+              localforage.setItem('name:' + id, log[i].name)
               return name.textContent = log[i].name
             }
           }
@@ -105,7 +105,6 @@ bog.keys().then(keys => {
         if (log) {
           for (var i = log.length - 1; i > 0; i--) {
             if ((log[i].author === id) && (log[i].name)) {
-              console.log(log[i].name)
               //localforage.setItem('name:' + id, log[i].name)
               name = log[i].name
               return name
@@ -139,7 +138,7 @@ bog.keys().then(keys => {
       var navbar = h('div', {classList: 'navbar'} ,[
         h('a', {href: '#'}, ['Home']),
         ' ',
-        h('a', {href: '#' + keys.substring(0, 44)}, [getName(keys.substring(0, 44))]),
+        h('a', {href: '#?' + keys.substring(0, 44)}, ['Mentions']),
         ' ',
         h('a', {href: '#settings'}, ['Settings']),
         h('a', {classList: 'right', href: 'http://git.sr.ht/~ev/v2'}, ['Git']),
@@ -236,7 +235,6 @@ bog.keys().then(keys => {
           if (reply.text && reply.text.includes(msg.raw.substring(0, 44))) {
             setTimeout(function () {
               var messageExists = (document.getElementById(reply.raw.substring(0, 44)) !== null)
-              console.log(messageExists)
               if (!messageExists) {
                 render(reply).then(rendered => {
                   messageDiv.appendChild(h('div', {classList: 'reply'}, [rendered]))
@@ -561,9 +559,18 @@ bog.keys().then(keys => {
           var compose = h('div', {classList: 'message'})
         }
 
+        var header = h('div', [
+          h('span', {classList: 'right'}, ['Preview']),
+          h('a', {href: '#' + keys.substring(0, 44)}, [getName(keys.substring(0, 44))])
+        ])
         var preview = h('div')
 
-        var textarea = h('textarea', {placeholder: 'What are you doing right now?'})
+        var textarea = h('textarea', {placeholder: 'Type your message here, it will preview above.'})
+
+        if (!feeds[keys.substring(0, 44)]) {
+          textarea.placeholder = 'Welcome to Bogbook.\n\nSince it appears this is your first time here, let\'s talk briefly about what you\'re getting into.\n\nBogbook is a secure news network created by syncing append-only signed feeds between web browsers and bogbook pubs.\n\nTo get started, write a message into this text area. You can use markdown, and your message will automatically preview above this textarea. When you are ready, press Publish to append a message to your feed and broadcast to connected pubs.\n\nPub operators will see the message, and boost the message to the people who follow their feeds by responding to your message.\n\nTo learn more about the protocol click on Git to visit the repo.\n\nSave your keypair, found on the Settings page, to continue using the same identity.\n\nQuestions? Problems? Send E-Mail to ev@evbogue.com.\n\n'
+          textarea.style = 'height: 450px;'
+        }
 
         textarea.addEventListener('input', function (e) {
           preview.innerHTML = marked(textarea.value)
@@ -612,6 +619,7 @@ bog.keys().then(keys => {
             }
           }
         }, ['Publish'])
+        compose.appendChild(header)
         compose.appendChild(preview)
         compose.appendChild(textarea)
         compose.appendChild(newPhoto)

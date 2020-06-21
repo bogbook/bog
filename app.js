@@ -220,9 +220,21 @@ bog.keys().then(keys => {
           message.appendChild(h('span', [' set profile photo as ', h('a', {href: '#' + msg.avatar}, [msg.avatar.substring(0, 7)])]))
         }
         if (msg.image) {
-          var image = h('img', {src: msg.image})
+          var image = h('img', {
+            src: msg.image,
+            style: 'width: 175px', 
+            onclick: function () {
+              console.log(image.classList)
+              if (image.style.width === '100%') {
+                image.style = 'width: 175px;'
+              } else {
+                image.style = 'width: 100%;'
+              }
+            }
+          })
+          var div = h('div', [image])
           if (msg.filter) { image.classList = msg.filter}
-          message.appendChild(image)
+          message.appendChild(div)
           if (msg.author === keys.substring(0, 44)) {
             makeProfile = h('button', {
               onclick: function (e) {

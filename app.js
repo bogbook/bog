@@ -121,21 +121,6 @@ bog.keys().then(keys => {
         return img 
       }
 
-      function getTextName (id) {
-        var name = id.substring(0, 10) + '...'
-        if (log) {
-          for (var i = log.length - 1; i > 0; i--) {
-            if ((log[i].author === id) && (log[i].name)) {
-              //localforage.setItem('name:' + id, log[i].name)
-              name = log[i].name
-              return name
-            } else if (log[i] === 0) {
-              return name
-            }
-          }
-        }
-      }
-
       setInterval(function () {
         Object.keys(feeds).forEach(function(key,index) {
           var gossip = {feed: key}
@@ -643,8 +628,12 @@ bog.keys().then(keys => {
           //var replyContent = '['+ msg.author.substring(0,7) + '](' +msg.author +') ↳ [' + msg.raw.substring(0, 7) + '](' + msg.raw.substring(0, 44) + ')\n\n'
 
           textarea.value = thread
-          var name = getTextName(msg.author)
-          textarea.value = textarea.value + '[' + name + '](' + msg.author + ') '
+          localforage.getItem('name:' + msg.author).then(name => {
+            if (name === null) {
+              name = msg.author.substring(0, 10) + '...'
+            }
+            textarea.value = textarea.value + '[' + name + '](' + msg.author + ') '
+          })
         }
 
         var publish = h('button', {

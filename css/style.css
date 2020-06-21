@@ -21,6 +21,12 @@ body {
   .navbar { margin-bottom: 2em;}
 }
 
+.avatar {
+  width: 25px;
+  margin-right: .5em;
+  vertical-align: middle;
+}
+
 p {
   margin-top: .5ex;
   margin-bottom: 1ex;
@@ -67,7 +73,6 @@ br {
 .content {
   margin-top: .5em;
 }
-
 
 img, canvas { max-width: 100%; border-radius: 5px;}
 

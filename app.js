@@ -100,6 +100,27 @@ bog.keys().then(keys => {
         return name
       }
 
+      function getImage (id) {
+
+        var img = h('img')
+        var avatar
+        
+        if (log) {
+          for (var i = log.length - 1; i > 0; i--) {
+            if ((log[i].author === id) && (log[i].avatar)) {
+              avatar = log[i].avatar
+              log.forEach(msg => {
+                if (msg.raw.includes(avatar)) {
+                  img.classList = 'avatar ' + msg.filter
+                  return img.src = msg.image
+                }
+              })
+            }
+          }
+        }
+        return img 
+      }
+
       function getTextName (id) {
         var name = id.substring(0, 10) + '...'
         if (log) {
@@ -199,6 +220,7 @@ bog.keys().then(keys => {
         
         message.appendChild(h('span', [
           h('a', {href: '#' + msg.author}, [
+            getImage(msg.author),
             getName(msg.author)
           ])
         ]))
@@ -208,11 +230,31 @@ bog.keys().then(keys => {
         }
         if (msg.name) {
           message.appendChild(h('span', [' identified as ' + msg.name]))
-        } 
+        }
+        if (msg.avatar) {
+          message.appendChild(h('span', [' set profile photo as ', h('a', {href: '#' + msg.avatar}, [msg.avatar.substring(0, 7)])]))
+        }
         if (msg.image) {
           var image = h('img', {src: msg.image})
           if (msg.filter) { image.classList = msg.filter}
           message.appendChild(image)
+          if (msg.author === keys.substring(0, 44)) {
+            makeProfile = h('button', {
+              onclick: function (e) {
+                e.preventDefault(),
+                makeProfile.parentNode.removeChild(makeProfile) 
+                console.log(msg.raw.substring(0, 44))
+                var obj = {avatar: msg.raw.substring(0, 44)}
+                console.log(obj)
+                bog.open(feeds[keys.substring(0,44)][0]).then(opened => {
+                  obj.seq = ++opened.seq
+                  obj.previous = opened.raw.substring(0,44)
+                  createpost(obj, keys)
+                })
+              }
+            }, ['Set as profile photo'])
+            message.appendChild(makeProfile)
+          }
         }
 
         var reply = composer(keys, msg)
@@ -222,7 +264,7 @@ bog.keys().then(keys => {
             cancel.parentNode.removeChild(cancel)
           }
         }, ['Cancel'])
-        if (!msg.name) {
+        if (!(msg.name || msg.avatar)) {
           message.appendChild(h('button', {
             onclick: function () {
               messageDiv.appendChild(reply)
@@ -561,7 +603,7 @@ bog.keys().then(keys => {
 
         var header = h('div', [
           h('span', {classList: 'right'}, ['Preview']),
-          h('a', {href: '#' + keys.substring(0, 44)}, [getName(keys.substring(0, 44))])
+          h('a', {href: '#' + keys.substring(0, 44)}, [getImage(keys.substring(0, 44)), getName(keys.substring(0, 44))])
         ])
         var preview = h('div')
 

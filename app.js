@@ -664,6 +664,10 @@ bog.keys().then(keys => {
               if (filter) {
                 obj.filter = filter
               }
+              var newpreview = h('div')
+              
+              preview.parentNode.replaceChild(newpreview, preview)
+              preview = newpreview
               if (feeds[keys.substring(0,44)]) {
                 bog.open(feeds[keys.substring(0,44)][0]).then(opened => {
                   obj.seq = ++opened.seq

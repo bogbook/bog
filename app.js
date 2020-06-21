@@ -431,6 +431,7 @@ bog.keys().then(keys => {
         ws.onopen = () => {
           var id = ++serverId
           peers.set(id, ws)
+          ws.send(JSON.stringify({connected: keys.substring(0, 44)}))
         }
 
         ws.onmessage = (msg) => {

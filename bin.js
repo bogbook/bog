@@ -76,6 +76,9 @@ readBog().then(feeds => {
             ws.send(JSON.stringify(gossip))
           }
         } 
+      } else {
+        var time = new Date().toLocaleString()
+        console.log(req.connected + ' connected at ' + time)
       }
     })
   })

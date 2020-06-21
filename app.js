@@ -329,10 +329,29 @@ bog.keys().then(keys => {
 
         if (src === '') {
           screen.insertBefore(composer(keys), screen.childNodes[1])
-          log.forEach(msg => {
-            render(msg).then(rendered => {
-              scroller.insertBefore(rendered, scroller.firstChild)
+
+          var index = 0
+
+          async function addPosts (posts) {
+            posts.forEach(msg => {
+              render(msg).then(rendered => {
+                scroller.appendChild(rendered, scroller.firstChild)
+              })
             })
+          }
+
+          var reverse = log.slice().reverse()
+          var posts = reverse.slice(index, index + 25)
+          addPosts(posts).then(done => {
+            index = index + 25
+            window.onscroll = function (ev) {
+              if (((window.innerHeight + window.scrollY) >= document.body.scrollHeight - 1000) && src === '') {
+                posts = reverse.slice(index, index + 25)
+                index = index + 25
+                addPosts(posts)
+                console.log("Bottom of page")
+              }
+            }
           })
         }
 

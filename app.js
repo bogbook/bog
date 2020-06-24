@@ -454,7 +454,10 @@ bog.keys().then(keys => {
           var req = JSON.parse(msg.data)
           console.log(req)
           if (req.welcome) {
-            var connections = ' along with ' + req.connected + ' peers.'
+            var connections = ' along with ' + (req.connected - 1) + ' peers.'
+            if (req.connected === 2) {
+              var connections = ' along with one peer.'
+            }
             if (req.connected === 1) {
               connections = ''
             }

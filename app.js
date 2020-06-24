@@ -29,7 +29,7 @@ async function savefeeds (feeds, log) {
   }
 }
    
-const servers = ['ws://v2.bogbook.com/ws', 'ws://localhost:8081/ws', 'ws://localhost:8082/ws']
+const servers = ['ws://bogbook.com/ws', 'ws://localhost:8081/ws', 'ws://gwenbell.com/ws']
 
 const peers = new Map()
 var serverId = 0
@@ -453,6 +453,12 @@ bog.keys().then(keys => {
         ws.onmessage = (msg) => {
           var req = JSON.parse(msg.data)
           console.log(req)
+          if (req.welcome) {
+            var welcome = h('div', {classList: 'message', innerHTML: 'Connected to: <a href="'+ req.url +'">' + req.url + '</a>'}, [
+              h('div', {innerHTML: marked('> ' + req.welcome)})
+            ])
+            scroller.insertBefore(welcome, scroller.firstChild)
+          }
           if (req.msg) {
             bog.open(req.msg).then(opened => {
               if (feeds[opened.author]) {

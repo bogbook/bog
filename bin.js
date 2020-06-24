@@ -76,7 +76,9 @@ readBog().then(feeds => {
             ws.send(JSON.stringify(gossip))
           }
         } 
-      } else {
+      } else if (req.connected) {
+        var resp = {url: url, welcome: 'Hey, thanks for trying Bogbook! - [ev](Q++V5BbvWIg8B+TqtC9ZKFhetruuw+nOgxEqfjlOZI0=)'}
+        ws.send(JSON.stringify(resp))
         var time = new Date().toLocaleString()
         console.log(req.connected + ' connected at ' + time)
       }

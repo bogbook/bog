@@ -454,13 +454,12 @@ bog.keys().then(keys => {
           var req = JSON.parse(msg.data)
           console.log(req)
           if (req.welcome) {
+            var connections = ' along with ' + req.connected + ' peers.'
             if (req.connected === 1) {
-              var connections = 'You are the only connection right now.'
-            } else {
-              var connections = 'There are ' + req.connected + ' connections right now.'
+              connections = ''
             }
-            var welcome = h('div', {classList: 'message', innerHTML: 'Connected to: <a href="'+ req.url +'">' + req.url + '</a>. ' + connections}, [
-              h('div', {innerHTML: marked('> ' + req.welcome)})
+            var welcome = h('div', {classList: 'message', innerHTML: 'Connected to <a href="'+ req.url +'">' + req.url + '</a>' + connections}, [
+              //h('div', {innerHTML: marked('> ' + req.welcome)})
             ])
             scroller.insertBefore(welcome, scroller.firstChild)
           }

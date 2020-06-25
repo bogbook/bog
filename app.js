@@ -609,7 +609,8 @@ bog.keys().then(keys => {
           {name: '#nofilter', filter: null},
           {name: 'Thoreau', filter: 'thoreau'},
           {name: 'Melville', filter: 'melville'},
-          {name: 'Hoover', filter: 'hoover'}
+          {name: 'Hoover', filter: 'hoover'},
+          {name: 'Yeats', filter: 'yeats'}
         ]
 
         var filter

@@ -65,6 +65,7 @@ readBog().then(feeds => {
             }
           } else {
             feeds[opened.author] = [req.msg]
+            console.log('first post from: '+ url + opened.author)
             var gossip = {feed: opened.author, seq: opened.seq}
             ws.send(JSON.stringify(gossip))
           }

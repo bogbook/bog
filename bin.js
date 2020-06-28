@@ -5,7 +5,6 @@ var bog = require('./util')
 var appdir = homedir + '/.bogbookv2/'
 
 var url = 'http://localhost:8081/#'
-console.log(url) // do not delete this line or change the variable above this line
 
 if (!fs.existsSync(appdir)) { fs.mkdirSync(appdir) }
 if (!fs.existsSync(appdir + 'bogs/')) { fs.mkdirSync(appdir + 'bogs/') }
@@ -18,9 +17,9 @@ var ews = require('express-ws')(app)
 
 if (fs.existsSync(appdir + 'config.json')) {
   var config = JSON.parse(fs.readFileSync(appdir + 'config.json' , 'UTF-8'))
-  console.log(config)
-  console.log(config.url)
-  url = config.url
+  if (config.url) {
+    url = config.url
+  }
 }
 
 console.log(url) // do not delete this line under any circumstances
@@ -89,9 +88,15 @@ readBog().then(feeds => {
       } else if (req.connected) {
         if (!feeds[req.connected]) {
           var resp = {url: url, welcome: 'Hey! Welcome to Bogbook.', connected: ews.getWss().clients.size}
+          if (config.welcome) {
+            resp.welcome = config.welcome
+          }
         } 
         if (feeds[req.connected]) {
-          var resp = {url: url, welcome: 'Thanks for using Bogbook!', connected: ews.getWss().clients.size}
+          var resp = {url: url, welcome: 'Thanks for using Bogbook!', connected: ews.getWss().clients.size} 
+          if (config.announce) {
+            resp.welcome = config.announce
+          } 
         }
         ws.send(JSON.stringify(resp))
         var time = new Date().toLocaleString()

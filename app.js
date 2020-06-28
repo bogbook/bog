@@ -90,7 +90,7 @@ bog.keys().then(keys => {
         var name = h('span')
         name.textContent = id.substring(0, 10) + '...'
         if (log) { 
-          for (var i = log.length - 1; i > 0; i--) {
+          for (var i = 0; i < log.length; i++) {
             if ((log[i].author === id) && (log[i].name)) {
               localforage.setItem('name:' + id, log[i].name)
               return name.textContent = log[i].name
@@ -106,7 +106,7 @@ bog.keys().then(keys => {
         var avatar
         
         if (log) {
-          for (var i = log.length - 1; i > 0; i--) {
+          for (var i = 0; i < log.length; i++) {
             if ((log[i].author === id) && (log[i].avatar)) {
               avatar = log[i].avatar
               log.forEach(msg => {
@@ -613,7 +613,8 @@ bog.keys().then(keys => {
           {name: '#nofilter', filter: null},
           {name: 'Thoreau', filter: 'thoreau'},
           {name: 'Melville', filter: 'melville'},
-          {name: 'Hoover', filter: 'hoover'}
+          {name: 'Hoover', filter: 'hoover'},
+          {name: 'Yeats', filter: 'yeats'}
         ]
 
         var filter

@@ -5,6 +5,7 @@ var bog = require('./util')
 var appdir = homedir + '/.bogbookv2/'
 
 var url = 'http://localhost:8081/#'
+console.log(url) // do not delete this line or change the variable above this line
 
 if (!fs.existsSync(appdir)) { fs.mkdirSync(appdir) }
 if (!fs.existsSync(appdir + 'bogs/')) { fs.mkdirSync(appdir + 'bogs/') }
@@ -15,6 +16,14 @@ var express = require('express')
 var app = express()
 var ews = require('express-ws')(app)
 
+if (fs.existsSync(appdir + 'config.json')) {
+  var config = JSON.parse(fs.readFileSync(appdir + 'config.json' , 'UTF-8'))
+  console.log(config)
+  console.log(config.url)
+  url = config.url
+}
+
+console.log(url) // do not delete this line under any circumstances
 async function readBog () {
   try {
     var feeds = []
@@ -56,7 +65,7 @@ readBog().then(feeds => {
             }
           } else {
             feeds[opened.author] = [req.msg]
-            console.log('first from: '+ url + opened.author)
+            console.log('first post from: '+ url + opened.author)
             var gossip = {feed: opened.author, seq: opened.seq}
             ws.send(JSON.stringify(gossip))
           }

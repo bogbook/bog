@@ -453,8 +453,7 @@ bog.keys().then(keys => {
         ws.onmessage = (msg) => {
           var req = JSON.parse(msg.data)
           console.log(req)
-          if (req.welcome) {
-             
+          if (req.welcome && (window.location.hash.substring(1) === '')) {
             var connections = ' along with ' + (req.connected - 1) + ' peers.'
             if (req.connected === 2) {
               var connections = ' along with one peer.'

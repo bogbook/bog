@@ -454,6 +454,7 @@ bog.keys().then(keys => {
           var req = JSON.parse(msg.data)
           console.log(req)
           if (req.welcome) {
+             
             var connections = ' along with ' + (req.connected - 1) + ' peers.'
             if (req.connected === 2) {
               var connections = ' along with one peer.'
@@ -461,8 +462,11 @@ bog.keys().then(keys => {
             if (req.connected === 1) {
               connections = ''
             }
-            var welcome = h('div', {classList: 'message', innerHTML: 'Connected to <a href="'+ req.url +'">' + req.url + '</a>' + connections}, [
-              //h('div', {innerHTML: marked('> ' + req.welcome)})
+            var welcome = h('div', {classList: 'message'}, [
+              h('div', {innerHTML: marked(
+                'Connected to [' + req.url + '](' + req.url + ')' + connections + '\n\n' +
+                req.welcome
+              )})
             ])
             scroller.insertBefore(welcome, scroller.firstChild)
           }
@@ -637,12 +641,12 @@ bog.keys().then(keys => {
         ])
         var preview = h('div')
 
-        var textarea = h('textarea', {placeholder: 'Type your message here, it will preview above.'})
+        var textarea = h('textarea', {placeholder: 'Write a message here.'})
 
-        if (!feeds[keys.substring(0, 44)]) {
+        /*if (!feeds[keys.substring(0, 44)]) {
           textarea.placeholder = 'Welcome to Bogbook.\n\nSince it appears this is your first time here, let\'s talk briefly about what you\'re getting into.\n\nBogbook is a secure news network created by syncing append-only signed feeds between web browsers and bogbook pubs.\n\nTo get started, write a message into this text area. You can use markdown, and your message will automatically preview above this textarea. When you are ready, press Publish to append a message to your feed and broadcast to connected pubs.\n\nPub operators will see the message, and boost the message to the people who follow their feeds by responding to your message.\n\nTo learn more about the protocol click on Git to visit the repo.\n\nSave your keypair, found on the Settings page, to continue using the same identity.\n\nQuestions? Problems? Send E-Mail to ev@evbogue.com.\n\n'
           textarea.style = 'height: 450px;'
-        }
+        }*/
 
         textarea.addEventListener('input', function (e) {
           preview.innerHTML = marked(textarea.value)

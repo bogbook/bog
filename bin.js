@@ -56,6 +56,7 @@ readBog().then(feeds => {
             }
           } else {
             feeds[opened.author] = [req.msg]
+            console.log('first from: '+ url + opened.author)
             var gossip = {feed: opened.author, seq: opened.seq}
             ws.send(JSON.stringify(gossip))
           }
@@ -77,7 +78,12 @@ readBog().then(feeds => {
           }
         } 
       } else if (req.connected) {
-        var resp = {url: url, welcome: 'Hey, thanks for trying Bogbook! - [ev](Q++V5BbvWIg8B+TqtC9ZKFhetruuw+nOgxEqfjlOZI0=)', connected: ews.getWss().clients.size}
+        if (!feeds[req.connected]) {
+          var resp = {url: url, welcome: 'Hey! Welcome to Bogbook.', connected: ews.getWss().clients.size}
+        } 
+        if (feeds[req.connected]) {
+          var resp = {url: url, welcome: 'Thanks for using Bogbook!', connected: ews.getWss().clients.size}
+        }
         ws.send(JSON.stringify(resp))
         var time = new Date().toLocaleString()
         console.log(req.connected + ' connected at ' + time)

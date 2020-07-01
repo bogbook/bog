@@ -15,6 +15,11 @@ var express = require('express')
 var app = express()
 var ews = require('express-ws')(app)
 
+/*bog.keys().then(keys => {
+  console.log(keys.substring(0, 44))
+  bog.box('Hello World', keys.substring(0, 44), keys)
+})*/
+
 if (fs.existsSync(appdir + 'config.json')) {
   var config = JSON.parse(fs.readFileSync(appdir + 'config.json' , 'UTF-8'))
   if (config.url) {
@@ -88,13 +93,13 @@ readBog().then(feeds => {
       } else if (req.connected) {
         if (!feeds[req.connected]) {
           var resp = {url: url, welcome: 'Hey! Welcome to Bogbook.', connected: ews.getWss().clients.size}
-          if (config.welcome) {
+          if (config && config.welcome) {
             resp.welcome = config.welcome
           }
         } 
         if (feeds[req.connected]) {
           var resp = {url: url, welcome: 'Thanks for using Bogbook!', connected: ews.getWss().clients.size} 
-          if (config.announce) {
+          if (config && config.announce) {
             resp.welcome = config.announce
           } 
         }

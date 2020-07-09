@@ -17,7 +17,10 @@ var ews = require('express-ws')(app)
 
 /*bog.keys().then(keys => {
   console.log(keys.substring(0, 44))
-  bog.box('Hello World', keys.substring(0, 44), keys)
+  bog.box('Hello World', keys.substring(0, 44), keys).then(boxed => {
+    console.log(boxed)
+    bog.unbox(boxed, keys)
+  })
 })*/
 
 if (fs.existsSync(appdir + 'config.json')) {
@@ -27,7 +30,6 @@ if (fs.existsSync(appdir + 'config.json')) {
   }
 }
 
-console.log(url) // do not delete this line under any circumstances
 async function readBog () {
   try {
     var feeds = []

@@ -2,8 +2,11 @@ if ((typeof process !== 'undefined') && (process.release.name === 'node')) {
   var nacl = require('./lib/nacl.min.js')
   nacl.util = require('./lib/nacl-util.min.js')
   var sha256 = require('./lib/sha256.min.js')
+  var fs = require('fs')
+  var homedir = require('os').homedir()
+  var appdir = homedir + '/.bogbookv2/'
+  var ed2curve = require('ed2curve')
 }
-
 
 const bog = {}
 
@@ -17,10 +20,19 @@ bog.generate = async function generatekey () {
 }
 
 bog.keys = async function keys () {
-  var keypair = await localforage.getItem('keypair')
-  if (keypair === null) {
-    var keypair = await bog.generate()
-    localforage.setItem('keypair', keypair)
+  if (fs) {
+    if (fs.existsSync(appdir + 'keypair')) {
+      var keypair = await fs.promises.readFile(appdir + 'keypair', 'UTF-8')
+    } else {
+      var keypair = await bog.generate()
+      fs.promises.writeFile(appdir + 'keypair', keypair, 'UTF-8')
+    }
+  } else {
+    var keypair = await localforage.getItem('keypair')
+    if (keypair === null) {
+      var keypair = await bog.generate()
+      localforage.setItem('keypair', keypair)
+    }
   }
 
   return keypair
@@ -40,6 +52,39 @@ bog.open = async function open (msg) {
     return obj
   }
 }
+
+bog.box = async function (msg, recp, keys) {
+  var nonce = nacl.randomBytes(nacl.box.nonceLength)
+  var message = nacl.util.decodeUTF8(msg)
+  var encrypted = nacl.box(message, nonce, ed2curve.convertPublicKey(nacl.util.decodeBase64(recp)), ed2curve.convertSecretKey(nacl.util.decodeBase64(keys.substring(44))))
+  var nonceMsg = recp + nacl.util.encodeBase64(nonce) + nacl.util.encodeBase64(encrypted)
+  return nonceMsg 
+}
+
+//bog.unbox -- decrypts a message sent to our pubkey
+bog.unbox = async function (boxed, keys) {
+  var sender = boxed.substring(0, 44)
+  var nonceMsg = nacl.util.decodeBase64(boxed.substring(44))
+  var nonce = nonceMsg.slice(0, nacl.box.nonceLength)
+  var msg = nonceMsg.slice(nacl.box.nonceLength, nonceMsg.length)
+  var message = nacl.util.encodeUTF8(nacl.box.open(msg, nonce, ed2curve.convertPublicKey(nacl.util.decodeBase64(sender)), ed2curve.convertSecretKey(nacl.util.decodeBase64(keys.substring(44)))))
+  console.log(message)
+  return message
+}
+
+bog.unbox = async function (msg, keys) {
+  console.log(msg)
+  console.log(keys)
+  var pubkey = msg.substring(0, 44)
+  var sig = nacl.util.decodeBase64(msg.substring(44))
+  var nonce = sig.slice(0, nacl.box.nonceLength)
+  var mess = sig.slice(nacl.box.nonceLength, sig.length)
+  var senderkey = ed2curve.convertPublicKey(pubkey)
+  var secretkey = ed2curve.convertSecretKey(keys.substring(44))
+  var message = nacl.box.open(mess, nonce, senderkey, secretkey)
+  console.log(message)
+  //return nacl.util.encodeUTF8(unboxed) 
+}*/
 
 bog.publish = async function (obj, keys) {
   if (!obj.seq) { console.log('must provide sequence number!')}

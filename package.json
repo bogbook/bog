@@ -16,6 +16,7 @@
   "author": "Ev Bogue <ev@evbogue.com>",
   "license": "MIT",
   "dependencies": {
+    "ed2curve": "^0.3.0",
     "express": "^4.17.1",
     "express-ws": "^4.0.0"
   }

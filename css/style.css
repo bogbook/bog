@@ -16,9 +16,27 @@ body {
   margin: .5em;
 }
 
+.banner {
+  height: 0;
+  border-radius: 5px;
+  margin-bottom: .5em;
+}
+
 @media only screen and (max-width: 480px) {
   body { margin: .5em; }
   .navbar { margin-bottom: 2em;}
+}
+
+.profileImage {
+  width: 175px;
+  margin-top: .5em;
+  margin-left: .5em;
+  margin-right: .5em;
+  float: left; 
+}
+
+.inner-profile {
+  min-height: 190px;
 }
 
 .avatar {
@@ -29,7 +47,7 @@ body {
 
 p {
   margin-top: .5ex;
-  margin-bottom: 1ex;
+  margin-bottom: .5ex;
   font-size: 1em;
 }
 
@@ -57,6 +75,13 @@ hr {
 
 br {
   line-height: .5em;
+}
+
+.profile {
+  background: #333;
+  margin-top: 1em;
+  border-radius: 5px;
+  min-height: 100px;
 }
 
 .message {
@@ -109,6 +134,8 @@ textarea:focus {
   outline: none;
   background: #222;
 }
+
+button {font-size: 1em; margin: 0; padding-top: 0; padding-bottom: 0;}
 
 textarea {
   width: 100%; 

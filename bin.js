@@ -114,5 +114,6 @@ readBog().then(feeds => {
   app.use(express.static('.'))
   
   app.listen(PORT)
+  console.log(url)
 })
 

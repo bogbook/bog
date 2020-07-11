@@ -90,14 +90,35 @@ bog.keys().then(keys => {
         var name = h('span')
         name.textContent = id.substring(0, 10) + '...'
         if (log) { 
-          for (var i = 0; i < log.length; i++) {
+          for (var i = log.length - 1; i > 0; i--) {
             if ((log[i].author === id) && (log[i].name)) {
-              localforage.setItem('name:' + id, log[i].name)
+              //localforage.setItem('name:' + id, log[i].name)
               return name.textContent = log[i].name
             }
           }
         }
         return name
+      }
+
+      function getProfileImage (id) {
+
+        var img = h('img')
+        var avatar
+
+        if (log) {
+          for (var i = 0; i < log.length; i++) {
+            if ((log[i].author === id) && (log[i].avatar)) {
+              avatar = log[i].avatar
+              log.forEach(msg => {
+                if (msg.raw.includes(avatar)) {
+                  img.classList = 'profileImage ' + msg.filter
+                  return img.src = msg.image
+                }
+              })
+            }
+          }
+        }
+        return img
       }
 
       function getImage (id) {
@@ -212,6 +233,23 @@ bog.keys().then(keys => {
       
         if (msg.text) {
           message.appendChild(h('div', {classList: 'content', innerHTML: marked(msg.text)}))
+          if (msg.author === keys.substring(0, 44)) {
+            makeBio = h('button', {
+              onclick: function (e) {
+                e.preventDefault(),
+                makeBio.parentNode.removeChild(makeBio)
+                console.log(msg.raw.substring(0, 44))
+                var obj = {bio: msg.raw.substring(0, 44)}
+                console.log(obj)
+                bog.open(feeds[keys.substring(0,44)][0]).then(opened => {
+                  obj.seq = ++opened.seq
+                  obj.previous = opened.raw.substring(0,44)
+                  createpost(obj, keys)
+                })
+              }
+            }, ['Set as bio'])
+            message.appendChild(makeBio)
+          }
         }
         if (msg.name) {
           message.appendChild(h('span', [' identified as ' + msg.name]))
@@ -219,6 +257,13 @@ bog.keys().then(keys => {
         if (msg.avatar) {
           message.appendChild(h('span', [' set profile photo as ', h('a', {href: '#' + msg.avatar}, [msg.avatar.substring(0, 7)])]))
         }
+        if (msg.background) {
+          message.appendChild(h('span', [' set background photo as ', h('a', {href: '#' + msg.background}, [msg.background.substring(0, 7)])]))
+        }
+        if (msg.bio) {
+          message.appendChild(h('span', [' set bio as ', h('a', {href: '#' + msg.background}, [msg.bio.substring(0, 7)])]))
+        }
+
         if (msg.image) {
           var image = h('img', {
             src: msg.image,
@@ -251,6 +296,21 @@ bog.keys().then(keys => {
               }
             }, ['Set as profile photo'])
             message.appendChild(makeProfile)
+            makeBackground = h('button', {
+              onclick: function (e) {
+                e.preventDefault(),
+                makeBackground.parentNode.removeChild(makeBackground)
+                console.log(msg.raw.substring(0, 44))
+                var obj = {background: msg.raw.substring(0, 44)}
+                console.log(obj)
+                bog.open(feeds[keys.substring(0,44)][0]).then(opened => {
+                  obj.seq = ++opened.seq
+                  obj.previous = opened.raw.substring(0,44)
+                  createpost(obj, keys)
+                })
+              }
+            }, ['Set as profile background'])
+            message.appendChild(makeBackground)
           }
         }
 
@@ -261,7 +321,7 @@ bog.keys().then(keys => {
             cancel.parentNode.removeChild(cancel)
           }
         }, ['Cancel'])
-        if (!(msg.name || msg.avatar)) {
+        if (!(msg.name || msg.avatar || msg.background || msg.bio)) {
           message.appendChild(h('button', {
             onclick: function () {
               messageDiv.appendChild(reply)
@@ -293,34 +353,6 @@ bog.keys().then(keys => {
         var screen = document.getElementById('screen')
 
         screen.appendChild(navbar)
-        if (src === keys.substring(0, 44)) {
-          var nameInput = h('input', {placeholder: 'Give yourself a name'})
-
-
-          var name = h('div', [
-            nameInput,
-            h('button', { onclick: function () {
-              if (nameInput.value) {
-                var obj = {}
-                obj.name = nameInput.value
-                nameInput.value = ''    
-                if (feeds[keys.substring(0,44)]) {
-                  bog.open(feeds[keys.substring(0,44)][0]).then(opened => {
-                    obj.seq = ++opened.seq
-                    obj.previous = opened.raw.substring(0,44)
-                    createpost(obj, keys)
-                  })
-                } else {
-                  obj.seq = 1
-                  obj.previous = null
-                  createpost(obj, keys)
-                }
-              }
-            }}, ['Identify'])
-          ])
-
-          screen.appendChild(name)
-        }
 
         screen.appendChild(scroller)
 
@@ -389,6 +421,7 @@ bog.keys().then(keys => {
         }
 
         if (src.length === 44) {
+
           var shouldSync = true
           if (log) {
             log.forEach(msg => {
@@ -408,6 +441,80 @@ bog.keys().then(keys => {
           }
           setTimeout(function () {
             if (shouldSync) {
+              var profile = h('div', {classList: 'profile'})
+              screen.insertBefore(profile, scroller)
+              var banner = h('div', {classList: 'banner'})
+
+              function getBg (src) {
+                if (log) {
+                  for (var i = 0; i < log.length; i++) {
+                    if ((log[i].background) && (log[i].author === src)) {
+                      log.forEach(msg => {
+                        if (msg.raw.includes(log[i].background)) {
+                          banner.classList = 'banner ' + msg.filter
+                          banner.style.height = '200px'
+                          return banner.style.background = 'fixed center -175px no-repeat url(' + msg.image + ')'
+                        }
+                      })
+                    }
+                  }
+                }
+              }
+
+              function getBio (src) {
+                var bio = h('div')
+                if (log) {
+                  for (var i = 0; i < log.length; i++) {
+                    if ((log[i].bio) && (log[i].author === src)) {
+                      log.forEach(msg => {
+                        if (msg.raw.includes(log[i].bio)) {
+                          bio.innerHTML = marked(msg.text)
+                        }
+                      })
+                    }
+                  }
+                }
+                return bio
+              }
+
+              getBg(src)
+              profile.appendChild(banner)
+              profile.appendChild(h('div', {classList: 'inner-profile'}, [
+                h('a', {href: '#' + src}, [
+                  getProfileImage(src),
+                  h('br'),
+                  h('div', [getName(src)])
+                ]),
+                getBio(src)
+              ]))
+
+              if (src === keys.substring(0, 44)) {
+                var nameInput = h('input', {placeholder: 'Give yourself a name'})
+                var name = h('div', [
+                  nameInput,
+                  h('button', { onclick: function () {
+                    if (nameInput.value) {
+                      var obj = {}
+                      obj.name = nameInput.value
+                      nameInput.value = ''    
+                      if (feeds[keys.substring(0,44)]) {
+                        bog.open(feeds[keys.substring(0,44)][0]).then(opened => {
+                          obj.seq = ++opened.seq
+                          obj.previous = opened.raw.substring(0,44)
+                          createpost(obj, keys)
+                        })
+                      } else {
+                        obj.seq = 1
+                        obj.previous = null
+                        createpost(obj, keys)
+                      }
+                    }
+                  }}, ['Identify'])
+                ])
+
+                profile.appendChild(name)
+              }
+
               var gossip = {feed: src}
               if (feeds[src]) {
                 gossip.seq = feeds[src].length

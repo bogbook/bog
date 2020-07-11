@@ -72,20 +72,6 @@ bog.unbox = async function (boxed, keys) {
   return message
 }
 
-bog.unbox = async function (msg, keys) {
-  console.log(msg)
-  console.log(keys)
-  var pubkey = msg.substring(0, 44)
-  var sig = nacl.util.decodeBase64(msg.substring(44))
-  var nonce = sig.slice(0, nacl.box.nonceLength)
-  var mess = sig.slice(nacl.box.nonceLength, sig.length)
-  var senderkey = ed2curve.convertPublicKey(pubkey)
-  var secretkey = ed2curve.convertSecretKey(keys.substring(44))
-  var message = nacl.box.open(mess, nonce, senderkey, secretkey)
-  console.log(message)
-  //return nacl.util.encodeUTF8(unboxed) 
-}*/
-
 bog.publish = async function (obj, keys) {
   if (!obj.seq) { console.log('must provide sequence number!')}
 

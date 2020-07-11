@@ -261,7 +261,7 @@ bog.keys().then(keys => {
           message.appendChild(h('span', [' set background photo as ', h('a', {href: '#' + msg.background}, [msg.background.substring(0, 7)])]))
         }
         if (msg.bio) {
-          message.appendChild(h('span', [' set bio as ', h('a', {href: '#' + msg.background}, [msg.bio.substring(0, 7)])]))
+          message.appendChild(h('span', [' set bio as ', h('a', {href: '#' + msg.bio}, [msg.bio.substring(0, 7)])]))
         }
 
         if (msg.image) {

@@ -92,7 +92,7 @@ bog.keys().then(keys => {
         if (log) { 
           for (var i = log.length - 1; i > 0; i--) {
             if ((log[i].author === id) && (log[i].name)) {
-              //localforage.setItem('name:' + id, log[i].name)
+              localforage.setItem('name:' + id, log[i].name)
               return name.textContent = log[i].name
             }
           }

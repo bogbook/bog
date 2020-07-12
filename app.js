@@ -90,7 +90,7 @@ bog.keys().then(keys => {
         var name = h('span')
         name.textContent = id.substring(0, 10) + '...'
         if (log) { 
-          for (var i = log.length - 1; i > 0; i--) {
+          for (var i = log.length - 1 ; i > 0; i--) {
             if ((log[i].author === id) && (log[i].name)) {
               localforage.setItem('name:' + id, log[i].name)
               return name.textContent = log[i].name
@@ -151,7 +151,7 @@ bog.keys().then(keys => {
       }, 10000)
 
       var searchInput = h('input', {placeholder: '#bogbook'})
-      var search = h('div', [
+      var search = h('div', {classList: 'right'}, [
         searchInput,
         h('button', {
           onclick: function () {
@@ -162,15 +162,17 @@ bog.keys().then(keys => {
         }, ['Search'])
       ])
 
-      var navbar = h('div', {classList: 'navbar'} ,[
-        h('a', {href: '#'}, ['Home']),
-        ' ',
-        h('a', {href: '#?' + keys.substring(0, 44)}, ['Mentions']),
-        ' ',
-        h('a', {href: '#settings'}, ['Settings']),
-        h('a', {classList: 'right', href: 'http://git.sr.ht/~ev/v2'}, ['Git']),
-        h('span', {classList: 'right'}, [search])
-        
+      var navbar = h('div', {classList: 'navbar'}, [
+        h('div', {classList: 'internal'}, [
+          h('a', {href: '#'}, ['Home']),
+          ' ',
+          h('a', {href: '#?' + keys.substring(0, 44)}, ['Mentions']),
+          ' ',
+          h('a', {href: '#key'}, ['Key']),
+          //' ',
+          //h('a', {href: 'http://git.sr.ht/~ev/v2'}, ['Git']),
+          search
+        ])
       ])
 
       async function render (msg) {
@@ -352,12 +354,12 @@ bog.keys().then(keys => {
         var scroller = h('div', {id: 'scroller'})
         var screen = document.getElementById('screen')
 
-        screen.appendChild(navbar)
+        document.body.appendChild(navbar)
 
         screen.appendChild(scroller)
 
         if (src === '') {
-          screen.insertBefore(composer(keys), screen.childNodes[1])
+          scroller.insertBefore(composer(keys), scroller.childNodes[1])
 
           var index = 0
 
@@ -384,7 +386,7 @@ bog.keys().then(keys => {
           })
         }
 
-        if (src === 'settings') {
+        if (src === 'key') {
           scroller.appendChild(h('p', ['This is your keypair, save it to use the same identity in the future.']))
           scroller.appendChild(h('p', [keys]))
           var input = h('textarea', {placeholder: 'Import your existing keypair. If you\'re importing a bogbook key, please concat (by hand) your pubkey/private keypairs before pasting below -- make sure to remove the @ sign.  It should look like the key above.'})
@@ -442,7 +444,7 @@ bog.keys().then(keys => {
           setTimeout(function () {
             if (shouldSync) {
               var profile = h('div', {classList: 'profile'})
-              screen.insertBefore(profile, scroller)
+              scroller.insertBefore(profile, scroller.firstChild)
               var banner = h('div', {classList: 'banner'})
 
               function getBg (src) {
@@ -452,7 +454,7 @@ bog.keys().then(keys => {
                       log.forEach(msg => {
                         if (msg.raw.includes(log[i].background)) {
                           banner.classList = 'banner ' + msg.filter
-                          banner.style.height = '200px'
+                          banner.style.height = '300px'
                           return banner.style.background = 'fixed center -175px no-repeat url(' + msg.image + ')'
                         }
                       })

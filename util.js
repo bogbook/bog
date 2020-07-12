@@ -29,7 +29,7 @@ bog.keys = async function keys () {
     }
   } else {
     var keypair = await localforage.getItem('keypair')
-    if (keypair === null) {
+    if ((keypair === null) || (keypair.length != 132)) {
       var keypair = await bog.generate()
       localforage.setItem('keypair', keypair)
     }

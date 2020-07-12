@@ -404,7 +404,7 @@ bog.keys().then(keys => {
             input,
             h('button', {
               onclick: function () {
-                if (input.value) {
+                if (input.value && (input.value.length == 132)) {
                   localforage.setItem('keypair', input.value).then(function () {
                     location.reload()
                   })

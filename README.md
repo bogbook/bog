@@ -2,6 +2,8 @@
 
 ### by Everett Bogue
 
+[!bogbook](bogbook.png)
+
 Try it: http://bogbook.com/
 
 So after working on [bogbook](https://git.sr.ht/~ev/bogbook) [git.sr.ht] for a year, and [news](https://git.sr.ht/~ev/news) [git.sr.ht] for a few weeks, I realized that append-only logs are a great way to distribute data and treating messages as seperate makes it really challenging to distribute data.

@@ -150,17 +150,27 @@ bog.keys().then(keys => {
         })
       }, 10000)
 
-      var searchInput = h('input', {placeholder: '#bogbook'})
-      var search = h('div', {classList: 'right'}, [
-        searchInput,
-        h('button', {
+      var searchInput = h('input', {id: 'searchInput', placeholder: '#bogbook'})
+      var searchButton = h('button', {
+          id: 'searchButton',
           onclick: function () {
             if (searchInput.value) {
               location.hash = '?' + searchInput.value
             }
           }
         }, ['Search'])
+
+      var search = h('div', {classList: 'right'}, [
+        searchInput,
+        searchButton
       ])
+
+      searchInput.addEventListener("keyup", function(event) {
+        if (event.keyCode === 13) {
+          //event.preventDefault()
+          searchButton.click()
+        }
+      })
 
       var navbar = h('div', {classList: 'navbar'}, [
         h('div', {classList: 'internal'}, [

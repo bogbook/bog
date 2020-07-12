@@ -10,7 +10,7 @@ body {
 }
 
 #scroller {
-  margin-top: 40px;
+  margin-top: 45px;
   width: 680px;
   max-width: 94%; 
   margin-left: auto; 
@@ -140,7 +140,7 @@ textarea, input {
   font-family: 'Source Sans Pro';
   font-size: 1em;
   color: #f5f5f5;
-  background: #333;
+  background: #444;
   border: none;
   border-radius: 5px;
 }

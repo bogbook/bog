@@ -9,8 +9,15 @@ body {
   line-height: 1.25em;
 }
 
+#screen {
+  position: absolute;
+  top: 40px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+
 #scroller {
-  margin-top: 45px;
   width: 680px;
   max-width: 94%; 
   margin-left: auto; 

@@ -2,7 +2,7 @@
 
 ### by Everett Bogue
 
-[!bogbook](bogbook.png)
+![bogbook](bogbook.png)
 
 Try it: http://bogbook.com/
 

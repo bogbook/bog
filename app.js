@@ -174,6 +174,10 @@ bog.keys().then(keys => {
 
       var navbar = h('div', {classList: 'navbar'}, [
         h('div', {classList: 'internal'}, [
+          h('a', {href: '#' + keys.substring(0, 44)}, [getImage(keys.substring(0, 44)), getName(keys.substring(0, 44))]),
+          ' ',
+          h('code', [keys.substring(0, 7)]),
+          ' ',
           h('a', {href: '#'}, ['Home']),
           ' ',
           h('a', {href: '#?' + keys.substring(0, 44)}, ['Mentions']),
@@ -231,6 +235,8 @@ bog.keys().then(keys => {
         messageDiv.appendChild(message)
       
         message.appendChild(h('span', {classList: 'right'}, [
+          h('code', [msg.author.substring(0, 7)]),
+          ' ',
           h('a', {href: '#' + msg.raw.substring(0, 44)}, [
             human(new Date(msg.timestamp))
           ])
@@ -495,8 +501,10 @@ bog.keys().then(keys => {
                 h('a', {href: '#' + src}, [
                   getProfileImage(src),
                   h('br'),
-                  h('div', [getName(src)])
+                  getName(src)
                 ]),
+                ' ',
+                h('code', [src]),
                 getBio(src)
               ]))
 
@@ -755,7 +763,10 @@ bog.keys().then(keys => {
         }
 
         var header = h('div', [
-          h('span', {classList: 'right'}, ['Preview']),
+          h('span', {classList: 'right'}, [
+            h('code', [keys.substring(0, 7)]),
+            ' Preview'
+          ]),
           h('a', {href: '#' + keys.substring(0, 44)}, [getImage(keys.substring(0, 44)), getName(keys.substring(0, 44))])
         ])
         var preview = h('div')

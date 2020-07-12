@@ -6,7 +6,11 @@ body {
   overflow-wrap: break-word;
   word-wrap: break-word;
   word-break: break-word;
-  line-height: 1.25em;
+}
+
+pre, code {
+  font-size: 1em;
+  color: #ccc;
 }
 
 #screen {
@@ -27,7 +31,7 @@ body {
 .navbar {
   width: 100%;
   position: fixed;
-  padding-top: 1em;
+  padding-top: .4em;
   padding-bottom: .3em;
   top: 0;
   z-index: 1000;
@@ -49,6 +53,8 @@ body {
   body { margin-top: 5em; }
 }
 
+img {margin-top: .5em;}
+
 .profileImage {
   width: 125px;
   margin-top: .5em;
@@ -63,14 +69,10 @@ body {
 
 .avatar {
   width: 25px;
+  margin-top: 0;
   margin-right: .5em;
-  vertical-align: middle;
-}
-
-p {
-  margin-top: .5ex;
-  margin-bottom: .5ex;
-  font-size: 1em;
+  margin-bottom: 0;
+  vertical-align: top;
 }
 
 blockquote {
@@ -96,7 +98,9 @@ hr {
 }
 
 br {
-  line-height: .5em;
+  display: block;
+  content: "";
+  margin: .7em;
 }
 
 .profile {
@@ -157,10 +161,25 @@ textarea:focus {
   background: #222;
 }
 
-button {font-size: 1em; margin: 0; padding-top: 0; padding-bottom: 0;}
+button {
+  font-size: 1em; 
+  margin: 0; 
+  padding-top: 0; 
+  padding-bottom: 0;
+  color: white;
+  font-family: 'Source Sans Pro';
+  background: #444;
+  border: 1px solid #333;
+  border-radius: 5px;
+}
+
+button:hover {
+  background: #555;
+}
 
 textarea {
-  width: 100%; 
+  width: 100%;
+  margin-top: .5em; 
   margin-bottom: .5em;
   height: 100px;
 }

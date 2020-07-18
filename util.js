@@ -57,7 +57,7 @@ bog.box = async function (msg, recp, keys) {
   var nonce = nacl.randomBytes(nacl.box.nonceLength)
   var message = nacl.util.decodeUTF8(msg)
   var encrypted = nacl.box(message, nonce, ed2curve.convertPublicKey(nacl.util.decodeBase64(recp)), ed2curve.convertSecretKey(nacl.util.decodeBase64(keys.substring(44))))
-  var nonceMsg = recp + nacl.util.encodeBase64(nonce) + nacl.util.encodeBase64(encrypted)
+  var nonceMsg = keys.substring(0, 44) + nacl.util.encodeBase64(nonce) + nacl.util.encodeBase64(encrypted)
   return nonceMsg 
 }
 

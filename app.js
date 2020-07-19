@@ -28,10 +28,6 @@ async function savefeeds (feeds, log) {
     console.log('unable to save feeds')
   }
 }
-   
-const servers = ['ws://' + window.location.host + '/ws']
-
-console.log(servers)
 
 const peers = new Map()
 var serverId = 0
@@ -429,6 +425,48 @@ bog.keys().then(keys => {
           ]))
         }
 
+        if (src === 'pubs') {
+          var pubs = h('div', {classList: 'message'})
+
+          var add = h('input', {placeholder: 'Add a pub. Ex: ws://bogbook.com/ws'})
+
+          localforage.getItem('servers').then(servers => {
+            pubs.appendChild(h('div', [
+              add,
+              h('button', {
+                onclick: function () {
+                  if (add.value) {
+                    servers.push(add.value)
+                    localforage.setItem('servers', servers).then(function () { location.hash = '' })
+                  }
+                }
+              }, ['Add a pub'])
+            ]))
+            servers.forEach(function (pub) {
+              pubs.appendChild(h('p', [
+                pub,
+                h('button', {
+                  onclick: function () {
+                    var newServers = servers.filter(item => item !== pub)
+                    localforage.setItem('servers', newServers).then(function () { location.hash = '' })
+                  }
+                }, ['Remove'])
+              ]))
+            })
+            pubs.appendChild(h('button', {
+              onclick: function () {
+                localforage.removeItem('servers').then(function () {
+                  location.hash = ''
+                  location.reload()
+                })
+              }
+            }, ['Reset pubs']))
+
+
+          })
+          scroller.appendChild(pubs)
+        }
+
         if (src[0] === '?') {
           var search = src.substring(1).replace(/%20/g, ' ').toUpperCase()
             
@@ -575,86 +613,94 @@ bog.keys().then(keys => {
         savefeeds(feeds, log)
       }, 10000)
  
-      servers.forEach(server => {
-        var ws = new WebSocket(server)
-
-        var id = ++serverId
-        ws.onopen = () => {
-          ws.send(JSON.stringify({connected: keys.substring(0, 44)}))
+      localforage.getItem('servers').then(servers => {
+        if (!servers) {
+          servers = ['ws://' + window.location.host + '/ws']
+          localforage.setItem('servers', servers)
         }
 
-        ws.onmessage = (msg) => {
-          ws.pubkey = msg.data.substring(0, 44)
-          peers.set(id, ws)
+        servers.forEach(server => {
+          var ws = new WebSocket(server)
 
-          bog.unbox(msg.data, keys).then(unboxed => {
-            var req = JSON.parse(unboxed)
-            if (req.welcome && (window.location.hash.substring(1) === '')) {
-              var connections = ' along with ' + (req.connected - 1) + ' peers.'
-              if (req.connected === 2) {
-                var connections = ' along with one peer.'
+          var id = ++serverId
+          ws.onopen = () => {
+            ws.send(JSON.stringify({connected: keys.substring(0, 44)}))
+          }
+
+          ws.onmessage = (msg) => {
+            ws.pubkey = msg.data.substring(0, 44)
+            peers.set(id, ws)
+
+            bog.unbox(msg.data, keys).then(unboxed => {
+              var req = JSON.parse(unboxed)
+              if (req.welcome && (window.location.hash.substring(1) === '')) {
+                var connections = ' along with ' + (req.connected - 1) + ' peers.'
+                if (req.connected === 2) {
+                  var connections = ' along with one peer.'
+                }
+                if (req.connected === 1) {
+                  connections = ''
+                }
+                var welcome = h('div', {classList: 'message'}, [
+                  h('div', {innerHTML: marked(
+                    'Connected to [' + req.url + '](' + req.url + ')' + connections + '\n\n' +
+                    req.welcome
+                  )})
+                ])
+                scroller.insertBefore(welcome, scroller.childNodes[1])
               }
-              if (req.connected === 1) {
-                connections = ''
-              }
-              var welcome = h('div', {classList: 'message'}, [
-                h('div', {innerHTML: marked(
-                  'Connected to [' + req.url + '](' + req.url + ')' + connections + '\n\n' +
-                  req.welcome
-                )})
-              ])
-              scroller.insertBefore(welcome, scroller.childNodes[1])
-            }
-            if (req.msg) {
-              bog.open(req.msg).then(opened => {
-                if (feeds[opened.author]) {
-                  if (feeds[opened.author][0].substring(0, 44) === opened.previous) {
-                    feeds[opened.author].unshift(req.msg)
+              if (req.msg) {
+                bog.open(req.msg).then(opened => {
+                  if (feeds[opened.author]) {
+                    if (feeds[opened.author][0].substring(0, 44) === opened.previous) {
+                      feeds[opened.author].unshift(req.msg)
+                      log.push(opened)
+                      var gossip = {feed: opened.author, seq: opened.seq}
+                      bog.box(JSON.stringify(gossip), ws.pubkey, keys).then(boxed => {
+                        ws.send(boxed)
+                      })
+                      render(opened).then(rendered => {
+                        scroller.insertBefore(rendered, scroller.firstChild)
+                      })
+                    }
+                  } else {
+                    feeds[opened.author] = [req.msg]
                     log.push(opened)
                     var gossip = {feed: opened.author, seq: opened.seq}
                     bog.box(JSON.stringify(gossip), ws.pubkey, keys).then(boxed => {
                       ws.send(boxed)
                     })
-                    render(opened).then(rendered => {
-                      scroller.insertBefore(rendered, scroller.firstChild)
-                    })
                   }
-                } else {
-                  feeds[opened.author] = [req.msg]
-                  log.push(opened)
-                  var gossip = {feed: opened.author, seq: opened.seq}
-                  bog.box(JSON.stringify(gossip), ws.pubkey, keys).then(boxed => {
-                    ws.send(boxed)
-                  })
-                }
-              })
-            }
-
-            else if (req.seq || (req.seq === 0)) {
-              if ((!feeds[req.feed]) && (req.seq != 0)) { 
-                var gossip = {feed: req.feed, seq: 0}
-                bog.box(JSON.stringify(gossip), ws.pubkey, keys).then(boxed => {
-                  ws.send(boxed)
                 })
               }
-              else if (feeds[req.feed]) {
-                if (req.seq < feeds[req.feed].length) {
-                  var resp = {}
-                  resp.msg = feeds[req.feed][feeds[req.feed].length - req.seq - 1]
-                  bog.box(JSON.stringify(resp), ws.pubkey, keys).then(boxed => {
-                    ws.send(boxed)
-                  })
-                }
-                else if (req.seq > feeds[req.feed].length){
-                  var gossip = {feed: req.feed, seq: feeds[req.feed].length}
+
+              else if (req.seq || (req.seq === 0)) {
+                if ((!feeds[req.feed]) && (req.seq != 0)) { 
+                  var gossip = {feed: req.feed, seq: 0}
                   bog.box(JSON.stringify(gossip), ws.pubkey, keys).then(boxed => {
                     ws.send(boxed)
                   })
                 }
-              } 
-            }
-          })
-        }
+                else if (feeds[req.feed]) {
+                  if (req.seq < feeds[req.feed].length) {
+                    var resp = {}
+                    resp.msg = feeds[req.feed][feeds[req.feed].length - req.seq - 1]
+                    bog.box(JSON.stringify(resp), ws.pubkey, keys).then(boxed => {
+                      ws.send(boxed)
+                    })
+                  }
+                  else if (req.seq > feeds[req.feed].length){
+                    var gossip = {feed: req.feed, seq: feeds[req.feed].length}
+                    bog.box(JSON.stringify(gossip), ws.pubkey, keys).then(boxed => {
+                      ws.send(boxed)
+                    })
+                  }
+                } 
+              }
+            })
+          }
+        })
+        
       })
     
       function createpost (obj, keys, compose) {

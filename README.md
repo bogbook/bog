@@ -44,7 +44,7 @@ Will use the `.testbognet/` folder instead of the default.
 
 ### config options
 
-Save a `config.json` folder to your `.bogbookv2` folder in order to configure your local bogbook.
+Save a `config.json` file to your `.bogbookv2` folder in order to configure your local bogbook.
 
 #### specify your url
 

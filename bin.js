@@ -12,7 +12,7 @@ if (process.argv[2]) {
 var appdir = homedir + '/.' + root + '/'
 console.log('saving bogs to ' + appdir)
 
-var url = 'http://localhost:8081/#'
+var url = 'localhost'
 var fortified = false
 
 

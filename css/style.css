@@ -45,10 +45,6 @@ pre, code {
   margin-right: auto;
 }
 
-.banner {
-  height: 0;
-}
-
 @media only screen and (max-width: 480px) {
   body { margin-top: 5em; }
 }
@@ -57,14 +53,12 @@ img {margin-top: .5em;}
 
 .profileImage {
   width: 125px;
-  margin-top: .5em;
-  margin-left: .5em;
   margin-right: .5em;
   float: left; 
 }
 
 .inner-profile {
-  min-height: 135px;
+  padding: .5em;
 }
 
 .avatar {
@@ -105,9 +99,8 @@ br {
 
 .profile {
   background: #333;
-  margin-top: 1em;
+  margin-top: .5em;
   border-radius: 5px;
-  min-height: 100px;
 }
 
 .message {

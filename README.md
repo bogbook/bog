@@ -4,15 +4,15 @@
 
 ![bogbook](bogbook.png)
 
-Try it: [bogbook.com](http://bogbook.com/)
+Bogbook is a distributed news network made up of feeds signed by ed25519 keypairs, and then replicated between bogbook pub server. 
 
-So after working on [bogbook](https://git.sr.ht/~ev/bogbook) [git.sr.ht] for a year, and [news](https://git.sr.ht/~ev/news) [git.sr.ht] for a few weeks, I realized that append-only logs are a great way to distribute data and treating messages as seperate makes it really challenging to distribute data.
+On bgobook you can post images with filters and posts that are rendered in markdown. You can identify your ed25519 pubkey with a name, an image, a bio, and a background.
 
-However, some of the ideas from news are very good, so I want to bring them into bogbook. But that'll mean I'll need to throw out how it worked before, and start over from scratch. If you want to read the code it is [here](https://git.sr.ht/~ev/gossip).
+The bogbook protocol is secure (no one can modify your posts) and the data exists in your browser, as well as any bogbook pubs you have replicated to, and all of the clients who have replicated your posts from bogbook pubs.  
 
-In the meantime, just email me [ev@evbogue.com](mailto:ev@evbogue.com) if you want to talk.
-
-Or join #bogbook on irc.freenode.net to talk to me in a chat format. 
++ Try it: [bogbook.com](http://bogbook.com/)
++ Help: [ev@evbogue.com](mailto:ev@evbogue.com)
++ IRC: irc.freenode.net #bogbook
 
 ---
 

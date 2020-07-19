@@ -499,6 +499,8 @@ bog.keys().then(keys => {
                 return bio
               }
 
+              var buttons = h('span')
+
               getBg(src)
               profile.appendChild(banner)
               profile.appendChild(h('div', {classList: 'inner-profile'}, [
@@ -509,7 +511,8 @@ bog.keys().then(keys => {
                 ]),
                 ' ',
                 h('code', [src]),
-                getBio(src)
+                getBio(src),
+                buttons
               ]))
 
               if (src === keys.substring(0, 44)) {
@@ -536,7 +539,7 @@ bog.keys().then(keys => {
                   }}, ['Identify'])
                 ])
 
-                profile.appendChild(name)
+                buttons.appendChild(name)
               }
 
               var gossip = {feed: src}

@@ -64,6 +64,7 @@ img {margin-top: .5em;}
 
 .inner-profile {
   padding: .5em;
+  min-height: 135px;
 }
 
 .avatar {

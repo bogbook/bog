@@ -16,6 +16,63 @@ Or join #bogbook on irc.freenode.net to talk to me in a chat format.
 
 ---
 
+### Run it
+
+```
+git clone https://git.sr.ht/~ev/v2
+cd v2
+npm install
+node bin
+```
+
+Navigate to http://localhost:8081/ to view your local bogbook
+
+### use an alterative .bogbook folder
+
+The first argument passed to node will specify a different directly to save bogs, the server keypair, and used to find config options.
+
+
+Ex: 
+
+```
+node bin testbognet
+```
+
+Will use the `.testbognet/` folder instead of the default.
+
+```
+
+### config options
+
+Save a `config.json` folder to your `.bogbookv2` folder in order to configure your local bogbook.
+
+specify your url
+```
+{"url": "yoururl.com"}
+```
+
+fortify your bogs by only accepting replication requests from existing boggers. Bogbook will only respond to messages from public keys that have already published bogs to the server, this means all lurkers and new boggers will be unable to publish or replicate from the bogbook while the bog is fortified. This could be useful for a private bogging group, or for possible abuse cases.
+
+```
+{"fort": "true"}
+```
+
+announcement messages are sent to boggers who have existing feeds on the server. welcome messages are sent to lurkers.
+
+```
+{
+  "welcome": "Hey, thanks for lurking on Bogbook",
+  "announcement": "Hey, thanks for syncing your bogs to this bogbook server!"
+}
+```
+
+you can change your bogbook port with
+```
+{"port": "1337"}
+```
+
+---
+
 ## log spec
 
 The aim of bogbook is to be a public gossiped news and photo sharing network where you can apply filters to images. There are no private messages on the log (that became a security issue with ssb), we only encrypt/decrypt messages in transit during replication.

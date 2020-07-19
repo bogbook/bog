@@ -8,6 +8,10 @@ body {
   word-break: break-word;
 }
 
+p {
+  margin-bottom: .35ex;
+}
+
 pre, code {
   font-size: 1em;
   color: #ccc;
@@ -44,6 +48,7 @@ pre, code {
   margin-left: auto;
   margin-right: auto;
 }
+
 
 @media only screen and (max-width: 480px) {
   body { margin-top: 5em; }
@@ -94,7 +99,7 @@ hr {
 br {
   display: block;
   content: "";
-  margin: .7em;
+  margin: .2em;
 }
 
 .profile {
@@ -168,6 +173,10 @@ button {
 
 button:hover {
   background: #555;
+}
+
+ul {
+  list-style: square;
 }
 
 textarea {

@@ -584,11 +584,9 @@ bog.keys().then(keys => {
         }
 
         ws.onmessage = (msg) => {
-          if (!peers[id]) {
-            console.log('did not save ws yet')
-            ws.pubkey = msg.data.substring(0, 44)
-            peers.set(id, ws)
-          }
+          ws.pubkey = msg.data.substring(0, 44)
+          peers.set(id, ws)
+
           bog.unbox(msg.data, keys).then(unboxed => {
             var req = JSON.parse(unboxed)
             if (req.welcome && (window.location.hash.substring(1) === '')) {
@@ -605,7 +603,7 @@ bog.keys().then(keys => {
                   req.welcome
                 )})
               ])
-              scroller.insertBefore(welcome, scroller.firstChild)
+              scroller.insertBefore(welcome, scroller.childNodes[1])
             }
             if (req.msg) {
               bog.open(req.msg).then(opened => {
@@ -634,14 +632,12 @@ bog.keys().then(keys => {
 
             else if (req.seq || (req.seq === 0)) {
               if ((!feeds[req.feed]) && (req.seq != 0)) { 
-                console.log('we do not have it')
                 var gossip = {feed: req.feed, seq: 0}
                 bog.box(JSON.stringify(gossip), ws.pubkey, keys).then(boxed => {
                   ws.send(boxed)
                 })
               }
               else if (feeds[req.feed]) {
-                console.log('we have it')
                 if (req.seq < feeds[req.feed].length) {
                   var resp = {}
                   resp.msg = feeds[req.feed][feeds[req.feed].length - req.seq - 1]
@@ -661,11 +657,11 @@ bog.keys().then(keys => {
         }
       })
     
-      function createpost (obj, keys) {
+      function createpost (obj, keys, compose) {
         bog.publish(obj, keys).then(msg => {
           bog.open(msg).then(opened => {
             if (feeds[keys.substring(0, 44)]) {
-              if (opened.previous === feeds[keys.substring(0, 44)[0].substring(0, 44)])
+              //if (opened.previous === feeds[keys.substring(0, 44)[0].substring(0, 44)]) {
                 console.log('insert ' + opened.seq + 'ed message')
                 console.log(feeds)
                 var gossip = {feed: opened.author, seq: opened.seq}
@@ -674,8 +670,13 @@ bog.keys().then(keys => {
                 log.push(opened)
                 savefeeds(feeds, log)
                 render(opened).then(rendered => {
-                  scroller.insertBefore(rendered, scroller.firstChild)
+                  if (compose) {
+                    compose.parentNode.replaceChild(h('div', {classList: 'reply'}, [rendered]), compose)
+                  } else {
+                    scroller.insertBefore(rendered, scroller.childNodes[1])
+                  }
                 })
+              //}
             }
             if (opened.seq === 1) {
               console.log('insert first message')
@@ -684,7 +685,11 @@ bog.keys().then(keys => {
               log.push(opened)
               savefeeds(feeds, log)
               render(opened).then(rendered => {
-                scroller.insertBefore(rendered, scroller.firstChild)
+                if (compose) {
+                  compose.parentNode.replaceChild(h('div', {classList: 'reply'}, [rendered]), compose)
+                } else {
+                  scroller.insertBefore(rendered, scroller.firstChild)
+                }
               })
             }
           })
@@ -796,11 +801,6 @@ bog.keys().then(keys => {
 
         var textarea = h('textarea', {placeholder: 'Write a message here.'})
 
-        /*if (!feeds[keys.substring(0, 44)]) {
-          textarea.placeholder = 'Welcome to Bogbook.\n\nSince it appears this is your first time here, let\'s talk briefly about what you\'re getting into.\n\nBogbook is a secure news network created by syncing append-only signed feeds between web browsers and bogbook pubs.\n\nTo get started, write a message into this text area. You can use markdown, and your message will automatically preview above this textarea. When you are ready, press Publish to append a message to your feed and broadcast to connected pubs.\n\nPub operators will see the message, and boost the message to the people who follow their feeds by responding to your message.\n\nTo learn more about the protocol click on Git to visit the repo.\n\nSave your keypair, found on the Settings page, to continue using the same identity.\n\nQuestions? Problems? Send E-Mail to ev@evbogue.com.\n\n'
-          textarea.style = 'height: 450px;'
-        }*/
-
         textarea.addEventListener('input', function (e) {
           preview.innerHTML = marked(textarea.value)
         })
@@ -843,15 +843,20 @@ bog.keys().then(keys => {
                 bog.open(feeds[keys.substring(0,44)][0]).then(opened => {
                   obj.seq = ++opened.seq
                   obj.previous = opened.raw.substring(0,44)
-                  createpost(obj, keys)
+                  if (msg) {
+                    createpost(obj, keys, compose)
+                  } else {
+                    createpost(obj, keys)
+                  }
                 })
               } else {
                 obj.seq = 1
                 obj.previous = null
-                createpost(obj, keys)
-              }
-              if (msg) {
-                compose.parentNode.removeChild(compose)
+                if (msg) {
+                  createpost(obj, keys, compose)
+                } else {
+                  createpost(obj, keys)
+                }
               }
             }
           }

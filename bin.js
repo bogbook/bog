@@ -72,7 +72,7 @@ readBog().then(feeds => {
       }
     } else {console.log('no feeds?', feeds)}
   }, 10000)
-  bog.keys().then(keys => {
+  bog.keys(appdir).then(keys => {
     console.log(keys.substring(0, 44))
     app.ws('/ws', function (ws, req) {
       ws.on('message', function (msg) {

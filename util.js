@@ -4,7 +4,6 @@ if ((typeof process !== 'undefined') && (process.release.name === 'node')) {
   var sha256 = require('./lib/sha256.min.js')
   var fs = require('fs')
   var homedir = require('os').homedir()
-  var appdir = homedir + '/.bogbookv2/'
   var ed2curve = require('ed2curve')
 }
 
@@ -19,7 +18,7 @@ bog.generate = async function generatekey () {
   return keypair
 }
 
-bog.keys = async function keys () {
+bog.keys = async function keys (appdir) {
   if (fs) {
     if (fs.existsSync(appdir + 'keypair')) {
       var keypair = await fs.promises.readFile(appdir + 'keypair', 'UTF-8')

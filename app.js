@@ -29,14 +29,18 @@ async function savefeeds (feeds, log) {
   }
 }
    
-const servers = ['ws://bogbook.com/ws', 'ws://localhost:8081/ws', 'ws://gwenbell.com/ws']
+const servers = ['ws://' + window.location.host + '/ws']
+
+console.log(servers)
 
 const peers = new Map()
 var serverId = 0
 
-function dispatch(msg) {
+function dispatch(msg, keys) {
   for (const peer of peers.values()) {
-    peer.send(msg)
+    bog.box(JSON.stringify(msg), peer.pubkey, keys).then(boxed => {
+      peer.send(boxed)
+    })
   }
 }
 
@@ -82,7 +86,7 @@ bog.keys().then(keys => {
           console.log('gossiping with ev, since there is nothing else')
           var gossip = {feed: 'Q++V5BbvWIg8B+TqtC9ZKFhetruuw+nOgxEqfjlOZI0='}
           gossip.seq = 0
-          dispatch(JSON.stringify(gossip))
+          dispatch(gossip, keys)
         }, 500)
       }
 
@@ -146,7 +150,7 @@ bog.keys().then(keys => {
         Object.keys(feeds).forEach(function(key,index) {
           var gossip = {feed: key}
           gossip.seq = feeds[key].length
-          dispatch(JSON.stringify(gossip))
+          dispatch(gossip, keys)
         })
       }, 10000)
 
@@ -542,7 +546,7 @@ bog.keys().then(keys => {
                 gossip.seq = 0
               }
               console.log('syncing ' + src)
-              dispatch(JSON.stringify(gossip))
+              dispatch(gossip, keys)
             }
           }, 500)
         }
@@ -571,70 +575,86 @@ bog.keys().then(keys => {
       servers.forEach(server => {
         var ws = new WebSocket(server)
 
+        var id = ++serverId
         ws.onopen = () => {
-          var id = ++serverId
-          peers.set(id, ws)
           ws.send(JSON.stringify({connected: keys.substring(0, 44)}))
         }
 
         ws.onmessage = (msg) => {
-          var req = JSON.parse(msg.data)
-          console.log(req)
-          if (req.welcome && (window.location.hash.substring(1) === '')) {
-            var connections = ' along with ' + (req.connected - 1) + ' peers.'
-            if (req.connected === 2) {
-              var connections = ' along with one peer.'
-            }
-            if (req.connected === 1) {
-              connections = ''
-            }
-            var welcome = h('div', {classList: 'message'}, [
-              h('div', {innerHTML: marked(
-                'Connected to [' + req.url + '](' + req.url + ')' + connections + '\n\n' +
-                req.welcome
-              )})
-            ])
-            scroller.insertBefore(welcome, scroller.firstChild)
+          if (!peers[id]) {
+            console.log('did not save ws yet')
+            ws.pubkey = msg.data.substring(0, 44)
+            peers.set(id, ws)
           }
-          if (req.msg) {
-            bog.open(req.msg).then(opened => {
-              if (feeds[opened.author]) {
-                if (feeds[opened.author][0].substring(0, 44) === opened.previous) {
-                  feeds[opened.author].unshift(req.msg)
+          bog.unbox(msg.data, keys).then(unboxed => {
+            var req = JSON.parse(unboxed)
+            if (req.welcome && (window.location.hash.substring(1) === '')) {
+              var connections = ' along with ' + (req.connected - 1) + ' peers.'
+              if (req.connected === 2) {
+                var connections = ' along with one peer.'
+              }
+              if (req.connected === 1) {
+                connections = ''
+              }
+              var welcome = h('div', {classList: 'message'}, [
+                h('div', {innerHTML: marked(
+                  'Connected to [' + req.url + '](' + req.url + ')' + connections + '\n\n' +
+                  req.welcome
+                )})
+              ])
+              scroller.insertBefore(welcome, scroller.firstChild)
+            }
+            if (req.msg) {
+              bog.open(req.msg).then(opened => {
+                if (feeds[opened.author]) {
+                  if (feeds[opened.author][0].substring(0, 44) === opened.previous) {
+                    feeds[opened.author].unshift(req.msg)
+                    log.push(opened)
+                    var gossip = {feed: opened.author, seq: opened.seq}
+                    bog.box(JSON.stringify(gossip), ws.pubkey, keys).then(boxed => {
+                      ws.send(boxed)
+                    })
+                    render(opened).then(rendered => {
+                      scroller.insertBefore(rendered, scroller.firstChild)
+                    })
+                  }
+                } else {
+                  feeds[opened.author] = [req.msg]
                   log.push(opened)
                   var gossip = {feed: opened.author, seq: opened.seq}
-                  ws.send(JSON.stringify(gossip))
-                  render(opened).then(rendered => {
-                    scroller.insertBefore(rendered, scroller.firstChild)
+                  bog.box(JSON.stringify(gossip), ws.pubkey, keys).then(boxed => {
+                    ws.send(boxed)
                   })
                 }
-              } else {
-                feeds[opened.author] = [req.msg]
-                log.push(opened)
-                var gossip = {feed: opened.author, seq: opened.seq}
-                ws.send(JSON.stringify(gossip))
-              }
-            })
-          }
-
-          else if (req.seq || (req.seq === 0)) {
-            if ((!feeds[req.feed]) && (req.seq != 0)) { 
-              console.log('we do not have it')
-              ws.send(JSON.stringify({feed: req.feed, seq: 0}))
+              })
             }
-            else if (feeds[req.feed]) {
-              console.log('we have it')
-              if (req.seq < feeds[req.feed].length) {
-                var resp = {}
-                resp.msg = feeds[req.feed][feeds[req.feed].length - req.seq - 1]
-                ws.send(JSON.stringify(resp))
+
+            else if (req.seq || (req.seq === 0)) {
+              if ((!feeds[req.feed]) && (req.seq != 0)) { 
+                console.log('we do not have it')
+                var gossip = {feed: req.feed, seq: 0}
+                bog.box(JSON.stringify(gossip), ws.pubkey, keys).then(boxed => {
+                  ws.send(boxed)
+                })
               }
-              else if (req.seq > feeds[req.feed].length){
-                var gossip = {feed: req.feed, seq: feeds[req.feed].length}
-                ws.send(JSON.stringify(gossip))
-              }
-            } 
-          }
+              else if (feeds[req.feed]) {
+                console.log('we have it')
+                if (req.seq < feeds[req.feed].length) {
+                  var resp = {}
+                  resp.msg = feeds[req.feed][feeds[req.feed].length - req.seq - 1]
+                  bog.box(JSON.stringify(resp), ws.pubkey, keys).then(boxed => {
+                    ws.send(boxed)
+                  })
+                }
+                else if (req.seq > feeds[req.feed].length){
+                  var gossip = {feed: req.feed, seq: feeds[req.feed].length}
+                  bog.box(JSON.stringify(gossip), ws.pubkey, keys).then(boxed => {
+                    ws.send(boxed)
+                  })
+                }
+              } 
+            }
+          })
         }
       })
     
@@ -646,7 +666,7 @@ bog.keys().then(keys => {
                 console.log('insert ' + opened.seq + 'ed message')
                 console.log(feeds)
                 var gossip = {feed: opened.author, seq: opened.seq}
-                dispatch(JSON.stringify(gossip))
+                dispatch(gossip, keys)
                 console.log(feeds[keys.substring(0, 44)].unshift(msg))
                 log.push(opened)
                 savefeeds(feeds, log)

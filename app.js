@@ -660,7 +660,7 @@ bog.keys().then(keys => {
                         ws.send(boxed)
                       })
                       render(opened).then(rendered => {
-                        scroller.insertBefore(rendered, scroller.firstChild)
+                        scroller.insertBefore(rendered, scroller.childNodes[1])
                       })
                     }
                   } else {

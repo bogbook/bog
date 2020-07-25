@@ -76,7 +76,8 @@ bog.keys().then(keys => {
 
   loadfeeds().then(feeds => {
     loadlog().then(log => {
-
+      console.log(feeds)
+      console.log(log)
       /*if (!log[0]) {
         setTimeout(function () {
           console.log('gossiping with ev, since there is nothing else')
@@ -142,13 +143,19 @@ bog.keys().then(keys => {
         return img 
       }
 
-      setInterval(function () {
-        Object.keys(feeds).forEach(function(key,index) {
-          var gossip = {feed: key}
-          gossip.seq = feeds[key].length
-          dispatch(gossip, keys)
-        })
-      }, 10000)
+      var timer
+
+      function start () {
+        setInterval(function () {
+          Object.keys(feeds).forEach(function(key,index) {
+            var gossip = {feed: key}
+            gossip.seq = feeds[key].length
+            dispatch(gossip, keys)
+          })
+        }, 10000)
+      }
+
+      start()
 
       var searchInput = h('input', {id: 'searchInput', placeholder: '#bogbook'})
       var searchButton = h('button', {
@@ -459,9 +466,8 @@ bog.keys().then(keys => {
                 })
               }
             }, ['Reset pubs']))
-
-
           })
+
           scroller.appendChild(pubs)
 
           var deleteeverything = h('div', {classList: 'message'})
@@ -591,6 +597,42 @@ bog.keys().then(keys => {
                 buttons.appendChild(name)
               }
 
+              var deletefeed = h('button', {
+                onclick: function () {
+                  clearInterval(timer)
+                  var newlog = log.filter(msg => msg.author != src)
+                  delete feeds[src]
+                  console.log(newlog)
+                  console.log(feeds)
+                  setTimeout(function () {
+                    localforage.setItem('feeds', feeds)
+                    window.location.hash = ''
+                    localforage.setItem('log', newlog).then(function () {
+                      window.location.reload()
+                    })
+                  }, 200)
+                  /*clearInterval(timer)
+                  for (i = 0; i< log.length; i++) {
+                    if (log[i].author === src) {
+                      var message = document.getElementById(log[i].raw.substring(0, 44))
+                      log.splice(i, 1)
+                      if (message) {
+                        message.parentNode.removeChild(message)
+                      }
+                    }
+                    if (i === log.length -1 ) {
+                      savefeeds(feeds, log)
+                      console.log(feeds)
+                      console.log(log)
+                      console.log('done')
+                      //location.href = ''
+                    }
+                  }*/
+                }
+              }, ['Delete Feed'])
+
+              buttons.appendChild(deletefeed)
+
               var gossip = {feed: src}
               if (feeds[src]) {
                 gossip.seq = feeds[src].length
@@ -622,6 +664,7 @@ bog.keys().then(keys => {
 
       setInterval(function () {
         savefeeds(feeds, log)
+        console.log('saving feeds')
       }, 10000)
  
       localforage.getItem('servers').then(servers => {

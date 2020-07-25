@@ -670,6 +670,9 @@ bog.keys().then(keys => {
                     bog.box(JSON.stringify(gossip), ws.pubkey, keys).then(boxed => {
                       ws.send(boxed)
                     })
+                    render(opened).then(rendered => {
+                      scroller.insertBefore(rendered, scroller.childNodes[1])
+                    })
                   }
                 })
               }

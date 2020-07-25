@@ -77,14 +77,14 @@ bog.keys().then(keys => {
   loadfeeds().then(feeds => {
     loadlog().then(log => {
 
-      if (!log[0]) {
+      /*if (!log[0]) {
         setTimeout(function () {
           console.log('gossiping with ev, since there is nothing else')
           var gossip = {feed: 'Q++V5BbvWIg8B+TqtC9ZKFhetruuw+nOgxEqfjlOZI0='}
           gossip.seq = 0
           dispatch(gossip, keys)
         }, 500)
-      }
+      }*/
 
       function getName (id) {
         var name = h('span')
@@ -167,7 +167,6 @@ bog.keys().then(keys => {
 
       searchInput.addEventListener("keyup", function(event) {
         if (event.keyCode === 13) {
-          //event.preventDefault()
           searchButton.click()
         }
       })
@@ -183,8 +182,6 @@ bog.keys().then(keys => {
           h('a', {href: '#?' + keys.substring(0, 44)}, ['Mentions']),
           ' ',
           h('a', {href: '#key'}, ['Key']),
-          //' ',
-          //h('a', {href: 'http://git.sr.ht/~ev/v2'}, ['Git']),
           search
         ])
       ])
@@ -199,7 +196,6 @@ bog.keys().then(keys => {
             if (word.startsWith('#')) {
               let end
               if ((word[word.length -1] === '.') || (word[word.length - 1] === ',') || (word[word.length -1] === ':')) {
-                //console.log('and it ends with a ' + word[word.length - 1])
                 end = word[word.length - 1]
                 word = word.substring(0, word.length - 1)
               }
@@ -207,7 +203,6 @@ bog.keys().then(keys => {
               if (end) {
                 hashtag = hashtag + end
               }
-              //console.log(hashtag)
               array[i] = hashtag
             }
           }
@@ -402,11 +397,12 @@ bog.keys().then(keys => {
           })
         }
 
-        if (src === 'key') {
-          scroller.appendChild(h('p', ['This is your keypair, save it to use the same identity in the future.']))
-          scroller.appendChild(h('p', [keys]))
-          var input = h('textarea', {placeholder: 'Import your existing keypair. If you\'re importing a bogbook key, please concat (by hand) your pubkey/private keypairs before pasting below -- make sure to remove the @ sign.  It should look like the key above.'})
-          scroller.appendChild(h('div', [
+        if ((src === 'key') || (src === 'pubs')) {
+          var keypair = h('div', {classList: 'message'})
+          keypair.appendChild(h('span', ['This is your keypair. Save your keypair to use the same identity in the future.']))
+          keypair.appendChild(h('pre', [keys]))
+          var input = h('textarea', {placeholder: 'Import your existing keypair here. If you\'re unable to save, your keypair is not valid.'})
+          keypair.appendChild(h('div', [
             input,
             h('button', {
               onclick: function () {
@@ -423,10 +419,12 @@ bog.keys().then(keys => {
               })
             }}, ['Delete Keypair'])
           ]))
-        }
 
-        if (src === 'pubs') {
+          scroller.appendChild(keypair)
+
           var pubs = h('div', {classList: 'message'})
+
+          pubs.appendChild(h('span', ['These are your pubs. Add more pubs to replicate with multiple servers.']))
 
           var add = h('input', {placeholder: 'Add a pub. Ex: ws://bogbook.com/ws'})
 
@@ -465,6 +463,19 @@ bog.keys().then(keys => {
 
           })
           scroller.appendChild(pubs)
+
+          var deleteeverything = h('div', {classList: 'message'})
+
+          deleteeverything.appendChild(h('div', ['To delete everything, click the button below. This will delete your keypair and the feeds you have replicated into your browser. You will start from scratch with a new keypair.']))
+
+          deleteeverything.appendChild(h('button', {onclick: function () {
+            localforage.clear().then(function () {
+              location.reload()
+            })
+          }}, ['Delete Everything']))
+
+          scroller.appendChild(deleteeverything)
+
         }
 
         if (src[0] === '?') {
@@ -710,26 +721,19 @@ bog.keys().then(keys => {
         bog.publish(obj, keys).then(msg => {
           bog.open(msg).then(opened => {
             if (feeds[keys.substring(0, 44)]) {
-              //if (opened.previous === feeds[keys.substring(0, 44)[0].substring(0, 44)]) {
-                console.log('insert ' + opened.seq + 'ed message')
-                console.log(feeds)
-                var gossip = {feed: opened.author, seq: opened.seq}
-                dispatch(gossip, keys)
-                console.log(feeds[keys.substring(0, 44)].unshift(msg))
-                log.push(opened)
-                savefeeds(feeds, log)
-                render(opened).then(rendered => {
-                  if (compose) {
-                    compose.parentNode.replaceChild(h('div', {classList: 'reply'}, [rendered]), compose)
-                  } else {
-                    scroller.insertBefore(rendered, scroller.childNodes[1])
-                  }
-                })
-              //}
+              var gossip = {feed: opened.author, seq: opened.seq}
+              dispatch(gossip, keys)
+              log.push(opened)
+              savefeeds(feeds, log)
+              render(opened).then(rendered => {
+                if (compose) {
+                  compose.parentNode.replaceChild(h('div', {classList: 'reply'}, [rendered]), compose)
+                } else {
+                  scroller.insertBefore(rendered, scroller.childNodes[1])
+                }
+              })
             }
             if (opened.seq === 1) {
-              console.log('insert first message')
-              console.log(feeds)
               feeds[keys.substring(0, 44)] = [msg]
               log.push(opened)
               savefeeds(feeds, log)
@@ -856,7 +860,6 @@ bog.keys().then(keys => {
 
         if (msg) {
           var thread = '↳ [' + msg.raw.substring(0, 7) + '](' + msg.raw.substring(0, 44) + ')\n\n'
-          //var replyContent = '['+ msg.author.substring(0,7) + '](' +msg.author +') ↳ [' + msg.raw.substring(0, 7) + '](' + msg.raw.substring(0, 44) + ')\n\n'
 
           textarea.value = thread
           localforage.getItem('name:' + msg.author).then(name => {
@@ -914,7 +917,6 @@ bog.keys().then(keys => {
         compose.appendChild(preview)
         compose.appendChild(textarea)
         compose.appendChild(newPhoto)
-        //compose.appendChild(filters)
         compose.appendChild(publish) 
         return compose
       }

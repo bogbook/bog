@@ -84,7 +84,7 @@ readBog().then(feeds => {
               if (fortified) {
                 console.log('access denied to ' + req.connected  + ' at ' + time)
               } else {
-                var resp = {pubkey: keys.substring(0, 44), url: url, welcome: 'Hey! Welcome to Bogbook.', connected: ews.getWss().clients.size}
+                var resp = {pubkey: keys.substring(0, 44), url: url, welcome: 'Hey! Welcome to Bogbook. If you do not see any posts, consider adding `ws://bogbook.com/ws` to your [pubs](#pubs) and syncing my feed. —[ev](#Q++V5BbvWIg8B+TqtC9ZKFhetruuw+nOgxEqfjlOZI0=)', connected: ews.getWss().clients.size}
                 if (config && config.welcome) {
                   resp.welcome = config.welcome
                 }
@@ -96,7 +96,7 @@ readBog().then(feeds => {
               }
             }
             if (feeds[req.connected]) {
-              var resp = {pubkey: keys.substring(0, 44), url: url, welcome: 'Thanks for using Bogbook!', connected: ews.getWss().clients.size}
+              var resp = {pubkey: keys.substring(0, 44), url: url, welcome: 'Hey! Welcome to Bogbook. If you do not see any posts, consider adding `ws://bogbook.com/ws` to your [pubs](#pubs) and syncing my feed. —[ev](#Q++V5BbvWIg8B+TqtC9ZKFhetruuw+nOgxEqfjlOZI0=)', connected: ews.getWss().clients.size}
               if (config && config.announce) {
                 resp.welcome = config.announce
               }

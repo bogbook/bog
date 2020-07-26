@@ -660,7 +660,7 @@ bog.keys().then(keys => {
       sort(log)
       route()
 
-      //regenerate(feeds)
+      regenerate(feeds)
 
       setInterval(function () {
         savefeeds(feeds, log)

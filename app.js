@@ -50,7 +50,7 @@ async function regenerate (feeds) {
       var log = []
       all.forEach((msg, index) => {
         bog.open(msg).then(opened => {
-          scroller.appendChild(h('div', [opened]))
+          //scroller.appendChild(h('div', [opened]))
           log.push(opened)
           if (index === all.length -1) {
             localforage.setItem('log', log)
@@ -764,18 +764,24 @@ bog.keys().then(keys => {
         bog.publish(obj, keys).then(msg => {
           bog.open(msg).then(opened => {
             if (feeds[keys.substring(0, 44)]) {
-              var gossip = {feed: opened.author, seq: opened.seq}
-              dispatch(gossip, keys)
-              console.log(feeds[keys.substring(0, 44)].unshift(msg))
-              log.push(opened)
-              savefeeds(feeds, log)
-              render(opened).then(rendered => {
-                if (compose) {
-                  compose.parentNode.replaceChild(h('div', {classList: 'reply'}, [rendered]), compose)
-                } else {
-                  scroller.insertBefore(rendered, scroller.childNodes[1])
-                }
-              })
+              console.log(opened)
+              console.log(feeds[keys.substring(0,44)][0])
+              if (opened.previous === feeds[keys.substring(0,44)][0].substring(0, 44)) {
+                console.log('WE HAVE A MATCH')
+                var gossip = {feed: opened.author, seq: opened.seq}
+                dispatch(gossip, keys)
+                //console.log(feeds[keys.substring(0, 44)].unshift(msg))
+                feeds[keys.substring(0, 44)].unshift(msg)
+                log.push(opened)
+                savefeeds(feeds, log)
+                render(opened).then(rendered => {
+                  if (compose) {
+                    compose.parentNode.replaceChild(h('div', {classList: 'reply'}, [rendered]), compose)
+                  } else {
+                    scroller.insertBefore(rendered, scroller.childNodes[1])
+                  }
+                })
+              }
             }
             if (opened.seq === 1) {
               feeds[keys.substring(0, 44)] = [msg]

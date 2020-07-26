@@ -766,6 +766,7 @@ bog.keys().then(keys => {
             if (feeds[keys.substring(0, 44)]) {
               var gossip = {feed: opened.author, seq: opened.seq}
               dispatch(gossip, keys)
+              console.log(feeds[keys.substring(0, 44)].unshift(msg))
               log.push(opened)
               savefeeds(feeds, log)
               render(opened).then(rendered => {

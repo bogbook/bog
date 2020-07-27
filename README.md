@@ -14,6 +14,8 @@ The bogbook protocol is secure (no one can modify your posts) and the data exist
 + Help: [ev@evbogue.com](mailto:ev@evbogue.com)
 + IRC: irc.freenode.net #bogbook
 
+If you want to see posts from others, try syncing my feed: http://bogbook.com/#Q++V5BbvWIg8B+TqtC9ZKFhetruuw+nOgxEqfjlOZI0=
+
 Prior art:
 
 + [old bogbook](http://git.sr.ht/~ev/bogbook) -- the protocol wasn't as optimized as I wanted, and the replication sucked

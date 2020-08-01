@@ -595,7 +595,17 @@ bog.keys().then(keys => {
                 ])
 
                 buttons.appendChild(name)
+
               }
+              var replyto = h('button', {
+                onclick: function () {
+                  var msg = {author: src}
+                  profile.parentNode.insertBefore(composer(keys, msg), profile.parentNode.childNodes[1])
+                }
+              }, ['Compose'])
+
+              buttons.appendChild(replyto)
+
 
               var deletefeed = h('button', {
                 onclick: function () {
@@ -611,23 +621,6 @@ bog.keys().then(keys => {
                       window.location.reload()
                     })
                   }, 200)
-                  /*clearInterval(timer)
-                  for (i = 0; i< log.length; i++) {
-                    if (log[i].author === src) {
-                      var message = document.getElementById(log[i].raw.substring(0, 44))
-                      log.splice(i, 1)
-                      if (message) {
-                        message.parentNode.removeChild(message)
-                      }
-                    }
-                    if (i === log.length -1 ) {
-                      savefeeds(feeds, log)
-                      console.log(feeds)
-                      console.log(log)
-                      console.log('done')
-                      //location.href = ''
-                    }
-                  }*/
                 }
               }, ['Delete Feed'])
 
@@ -822,7 +815,11 @@ bog.keys().then(keys => {
         var photoURL = {}
 
         if (msg) {
-          var canvasID = msg.raw.substring(0, 44)
+          if (msg.raw) {
+            var canvasID = msg.raw.substring(0, 44)
+          } else {
+            var canvasID = msg.author
+          }
         } else {
           var canvasID = "composer"
         }
@@ -909,8 +906,11 @@ bog.keys().then(keys => {
         })
 
         if (msg) {
-          var thread = '↳ [' + msg.raw.substring(0, 7) + '](' + msg.raw.substring(0, 44) + ')\n\n'
-
+          if (msg.raw) {
+            var thread = '↳ [' + msg.raw.substring(0, 7) + '](' + msg.raw.substring(0, 44) + ')\n\n'
+          } else {
+            var thread = ''
+          }
           textarea.value = thread
           localforage.getItem('name:' + msg.author).then(name => {
             if (name === null) {

@@ -690,7 +690,7 @@ bog.keys().then(keys => {
                 }
                 var welcome = h('div', {classList: 'message'}, [
                   h('div', {innerHTML: marked(
-                    'Connected to [' + req.url + '](' + req.url + ')' + connections + '\n\n' +
+                    'Connected to [http://' + req.url + '](' + req.url + ')' + connections + '\n\n' +
                     req.welcome
                   )})
                 ])

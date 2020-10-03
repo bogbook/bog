@@ -68,8 +68,10 @@ async function sort (log) {
   }
 }
 
+
 bog.keys().then(keys => {
 
+  var servers = ['ws://' + window.location.host + '/ws']
   var screen = h('screen', {id: 'screen'})
   document.body.appendChild(screen)
 
@@ -78,14 +80,14 @@ bog.keys().then(keys => {
     loadlog().then(log => {
       console.log(feeds)
       console.log(log)
-      /*if (!log[0]) {
+      if (!log[0]) {
         setTimeout(function () {
           console.log('gossiping with ev, since there is nothing else')
           var gossip = {feed: 'Q++V5BbvWIg8B+TqtC9ZKFhetruuw+nOgxEqfjlOZI0='}
           gossip.seq = 0
           dispatch(gossip, keys)
         }, 500)
-      }*/
+      }
 
       function getName (id) {
         var name = h('span')
@@ -435,38 +437,44 @@ bog.keys().then(keys => {
 
           var add = h('input', {placeholder: 'Add a pub. Ex: ws://bogbook.com/ws'})
 
-          localforage.getItem('servers').then(servers => {
-            pubs.appendChild(h('div', [
-              add,
+          //localforage.getItem('servers').then(servers => {
+          pubs.appendChild(h('div', [
+            add,
+            h('button', {
+              onclick: function () {
+                if (add.value) {
+                  servers.push(add.value)
+                  localforage.setItem('servers', servers).then(function () { 
+                    location.hash = '' 
+                    location.reload()
+                  })
+                }
+              }
+            }, ['Add a pub'])
+          ]))
+          servers.forEach(function (pub) {
+            pubs.appendChild(h('p', [
+              pub,
               h('button', {
                 onclick: function () {
-                  if (add.value) {
-                    servers.push(add.value)
-                    localforage.setItem('servers', servers).then(function () { location.hash = '' })
-                  }
+                  var newServers = servers.filter(item => item !== pub)
+                  localforage.setItem('servers', newServers).then(function () { 
+                    location.hash = '' 
+                    location.reload()
+                  })
                 }
-              }, ['Add a pub'])
+              }, ['Remove'])
             ]))
-            servers.forEach(function (pub) {
-              pubs.appendChild(h('p', [
-                pub,
-                h('button', {
-                  onclick: function () {
-                    var newServers = servers.filter(item => item !== pub)
-                    localforage.setItem('servers', newServers).then(function () { location.hash = '' })
-                  }
-                }, ['Remove'])
-              ]))
-            })
-            pubs.appendChild(h('button', {
-              onclick: function () {
-                localforage.removeItem('servers').then(function () {
-                  location.hash = ''
-                  location.reload()
-                })
-              }
-            }, ['Reset pubs']))
           })
+          pubs.appendChild(h('button', {
+            onclick: function () {
+              localforage.removeItem('servers').then(function () {
+                location.hash = ''
+                location.reload()
+              })
+            }
+          }, ['Reset pubs']))
+          //})
 
           scroller.appendChild(pubs)
 
@@ -476,6 +484,7 @@ bog.keys().then(keys => {
 
           deleteeverything.appendChild(h('button', {onclick: function () {
             localforage.clear().then(function () {
+              location.hash = ''
               location.reload()
             })
           }}, ['Delete Everything']))
@@ -660,11 +669,12 @@ bog.keys().then(keys => {
         console.log('saving feeds')
       }, 10000)
  
-      localforage.getItem('servers').then(servers => {
-        if (!servers) {
+      localforage.getItem('servers').then(pubs => {
+        if (pubs) { servers = pubs}
+        /*if (!servers) {
           servers = ['ws://' + window.location.host + '/ws']
           localforage.setItem('servers', servers)
-        }
+        }*/
 
         servers.forEach(server => {
           var ws = new WebSocket(server)
@@ -706,9 +716,11 @@ bog.keys().then(keys => {
                       bog.box(JSON.stringify(gossip), ws.pubkey, keys).then(boxed => {
                         ws.send(boxed)
                       })
-                      render(opened).then(rendered => {
-                        scroller.insertBefore(rendered, scroller.childNodes[1])
-                      })
+                      if ((window.location.hash.substring(1) == opened.author) || (window.location.hash.substring(1) == '')) {
+                        render(opened).then(rendered => {
+                          scroller.insertBefore(rendered, scroller.childNodes[1])
+                        })
+                      }
                     }
                   } else {
                     feeds[opened.author] = [req.msg]
@@ -717,9 +729,11 @@ bog.keys().then(keys => {
                     bog.box(JSON.stringify(gossip), ws.pubkey, keys).then(boxed => {
                       ws.send(boxed)
                     })
-                    render(opened).then(rendered => {
-                      scroller.insertBefore(rendered, scroller.childNodes[1])
-                    })
+                    if ((window.location.hash.substring(1) == opened.author) || (window.location.hash.substring(1) == '')) {
+                      render(opened).then(rendered => {
+                        scroller.insertBefore(rendered, scroller.childNodes[1])
+                      })
+                    }
                   }
                 })
               }

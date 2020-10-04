@@ -94,7 +94,7 @@ bog.keys().then(keys => {
             gossip.seq = 0
           }
           dispatch(gossip, keys)
-        }, 500)
+        }, 1500)
       //}
 
       function getName (id) {

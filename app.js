@@ -71,6 +71,10 @@ async function sort (log) {
 
 bog.keys().then(keys => {
 
+  if (config.title) {
+    document.title = config.title
+  }
+
   var servers = ['ws://' + window.location.host + '/ws']
   var screen = h('screen', {id: 'screen'})
   document.body.appendChild(screen)
@@ -78,16 +82,20 @@ bog.keys().then(keys => {
 
   loadfeeds().then(feeds => {
     loadlog().then(log => {
-      console.log(feeds)
-      console.log(log)
-      if (!log[0]) {
+      //console.log(feeds)
+      //console.log(log)
+
+      //if (!log[0]) {
         setTimeout(function () {
-          console.log('gossiping with ev, since there is nothing else')
-          var gossip = {feed: 'Q++V5BbvWIg8B+TqtC9ZKFhetruuw+nOgxEqfjlOZI0='}
-          gossip.seq = 0
+          var gossip = {feed: config.author}
+          if (feeds[config.author]) {
+            gossip.seq = feeds[config.author].length
+          } else {
+            gossip.seq = 0
+          }
           dispatch(gossip, keys)
         }, 500)
-      }
+      //}
 
       function getName (id) {
         var name = h('span')
@@ -159,7 +167,7 @@ bog.keys().then(keys => {
 
       start()
 
-      var searchInput = h('input', {id: 'searchInput', placeholder: '#bogbook'})
+      var searchInput = h('input', {id: 'searchInput', placeholder: config.searchterm})
       var searchButton = h('button', {
           id: 'searchButton',
           onclick: function () {

@@ -1,0 +1,9 @@
+/* put your custom css theme in this file */
+
+body, button, textarea, input {
+  font-family: 'Source Sans Pro'; 
+}
+
+.navbar, .profile, .message {
+  background: #f5f5f5;
+}

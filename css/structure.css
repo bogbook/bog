@@ -53,9 +53,18 @@ pre, code {
   margin-right: auto;
 }
 
+textarea {
+  width: 100%;
+  max-width: 100%;
+  margin-top: .5em; 
+  margin-bottom: .5em;
+  height: 100px;
+}
 
 @media only screen and (max-width: 480px) {
-  body { margin-top: 5em; }
+  #screen { top: 4em; }
+  #scroller {max-width: 100%;}
+  textarea { height: 200px;}
 }
 
 img {margin-top: .5em;}
@@ -156,13 +165,6 @@ textarea:focus {
 
 ul {
   list-style: square;
-}
-
-textarea {
-  width: 100%;
-  margin-top: .5em; 
-  margin-bottom: .5em;
-  height: 100px;
 }
 
 .thoreau {

@@ -37,6 +37,10 @@ pre, code {
   margin-right: auto;
 }
 
+#scroller:last-child {
+  margin-bottom: 20em;
+}
+
 .navbar {
   width: 100%;
   position: fixed;
@@ -71,8 +75,10 @@ img {margin-top: .5em;}
 
 .profileImage {
   width: 125px;
+  height: 125px;
   margin-right: .5em;
-  float: left; 
+  float: left;
+  object-fit: cover; 
 }
 
 .inner-profile {
@@ -82,10 +88,12 @@ img {margin-top: .5em;}
 
 .avatar {
   width: 25px;
+  height: 25px;
   margin-top: 0;
   margin-right: .5em;
   margin-bottom: 0;
   vertical-align: top;
+  object-fit: cover;
 }
 
 blockquote {

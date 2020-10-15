@@ -297,11 +297,11 @@ bog.keys().then(keys => {
         if (msg.image) {
           var image = h('img', {
             src: msg.image,
-            style: 'width: 175px', 
+            style: 'width: 175px; height: 175px; object-fit: cover;', 
             onclick: function () {
               console.log(image.classList)
               if (image.style.width === '100%') {
-                image.style = 'width: 175px;'
+                image.style = 'width: 175px; height: 175px; object-fit: cover;'
               } else {
                 image.style = 'width: 100%;'
               }
@@ -547,7 +547,7 @@ bog.keys().then(keys => {
                         if (msg.raw.includes(log[i].background)) {
                           banner.classList = 'banner ' + msg.filter
                           banner.style.height = '300px'
-                          return banner.style.background = 'fixed center -175px no-repeat url(' + msg.image + ')'
+                          return banner.style.background = 'fixed center -50px no-repeat url(' + msg.image + ')'
                         }
                       })
                     }
@@ -846,12 +846,15 @@ bog.keys().then(keys => {
           var canvasID = "composer"
         }
 
+        var autocrop = h('input', {type: 'checkbox', checked: true, name: 'autocrop'})
+
         var input = h('input', {id: 'input' + canvasID, type: 'file',
           onclick: function () {
             var canvas = document.getElementById("canvas" + canvasID)
             console.log(canvas)
             var ctx = canvas.getContext("2d")
             var input = document.getElementById('input' + canvasID)
+
 
             console.log(canvas.parentNode)
             if (!canvas.parentNode.childNodes[2]) {
@@ -863,12 +866,19 @@ bog.keys().then(keys => {
             function handleFile (e) {
               var img = new Image
               img.onload = function() {
-                canvas.width = 680 
-                canvas.height = 680
-                var scale = Math.max(canvas.width / img.width, canvas.height / img.height)
-                var x = (canvas.width / 2) - (img.width / 2) * scale;
-                var y = (canvas.height / 2) - (img.height / 2) * scale;
-                ctx.drawImage(img, x, y, img.width * scale, img.height * scale);
+                if (autocrop.checked === true) {
+                  canvas.width = 680 
+                  canvas.height = 680
+                  var scale = Math.max(canvas.width / img.width, canvas.height / img.height)
+                  var x = (canvas.width / 2) - (img.width / 2) * scale
+                  var y = (canvas.height / 2) - (img.height / 2) * scale
+                  ctx.drawImage(img, x, y, img.width * scale, img.height * scale)
+                } else {
+                  var aspect = img.width/img.height
+                  canvas.width = 680
+                  canvas.height = canvas.width / aspect
+                  ctx.drawImage(img, 0, 0, canvas.width, canvas.height)
+                }
                 photoURL.value = canvas.toDataURL('image/jpeg', 0.8)
               }
 
@@ -882,6 +892,8 @@ bog.keys().then(keys => {
 
         var newPhoto = h('span', [
           input,
+          autocrop,
+          h('label', {for: 'autocrop'}, ['Auto-crop?']),
           canvasEl
         ])
 

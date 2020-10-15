@@ -857,7 +857,7 @@ bog.keys().then(keys => {
 
 
             console.log(canvas.parentNode)
-            if (!canvas.parentNode.childNodes[2]) {
+            if (!canvas.parentNode.childNodes[4]) {
               canvas.parentNode.appendChild(filters)
             }
 

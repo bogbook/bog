@@ -547,7 +547,7 @@ bog.keys().then(keys => {
                         if (msg.raw.includes(log[i].background)) {
                           banner.classList = 'banner ' + msg.filter
                           banner.style.height = '300px'
-                          return banner.style.background = 'fixed center -50px no-repeat url(' + msg.image + ')'
+                          return banner.style.background = 'fixed center 3.1em no-repeat url(' + msg.image + ')'
                         }
                       })
                     }

@@ -735,17 +735,21 @@ bog.keys().then(keys => {
               var req = JSON.parse(unboxed)
               console.log(req)
               if (req.permalink) {
-                var nofeed = h('div', {classList: 'message', innerHTML: 'You are not syncing <a href=#' + req.permalink.substring(44,88) + '>' + req.permalink.substring(44,54) + '</a>\'s feed. <a href=#' + req.permalink.substring(44,88) + '>Sync Now</a>.'
+                var nofeed = h('div', {id: 'nofeed', classList: 'message', innerHTML: 'You are not syncing <a href=#' + req.permalink.substring(44,88) + '>' + req.permalink.substring(44,54) + '</a>\'s feed. <a href=#' + req.permalink.substring(44,88) + '>Sync Now</a>.'
                 })
-                scroller.appendChild(nofeed)
-                bog.open(req.permalink).then(opened => {
-                  console.log(opened)
-                  if (window.location.hash.substring(1) === opened.raw.substring(0, 44)) {
-                    render(opened).then(rendered => {
-                      scroller.appendChild(rendered)
-                    }) 
-                  }
-                })
+                if (!document.getElementById('nofeed')) { 
+                  scroller.appendChild(nofeed)
+                }
+                if (!document.getElementById(req.permalink.substring(0, 44))) {
+                  bog.open(req.permalink).then(opened => {
+                    console.log(opened)
+                    if (window.location.hash.substring(1) === opened.raw.substring(0, 44)) {
+                      render(opened).then(rendered => {
+                        scroller.appendChild(rendered)
+                      }) 
+                    }
+                  })
+                }
               }
               if (req.welcome && (window.location.hash.substring(1) === '')) {
                 var connections = ' along with ' + (req.connected - 1) + ' peers.'

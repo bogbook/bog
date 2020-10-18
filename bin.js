@@ -146,12 +146,12 @@ readBog().then(feeds => {
   console.log('http://' + url + ':' + PORT + '/')
 
   function processReq (req, ws, keys) {
-    console.log(req)
     if (req.msg) {
       bog.open(req.msg).then(opened => {
         if (feeds[opened.author]) {
           if (feeds[opened.author][0].substring(0, 44) === opened.previous) {
             feeds[opened.author].unshift(req.msg)
+            log.push(opened)
             console.log('new post from: http://'+ url + '/#' + opened.author)
             var gossip = {feed: opened.author, seq: opened.seq}
             bog.box(JSON.stringify(gossip), ws.pubkey, keys).then(boxed => {
@@ -174,9 +174,9 @@ readBog().then(feeds => {
           if (msg.raw.substring(0, 44) === req.feed) {
             var message = {permalink: msg.raw}
             bog.box(JSON.stringify(message), ws.pubkey, keys).then(boxed => {
+              console.log('sent permalink http://' + url + '/#' + msg.raw.substring(0, 44) + ' to ' + ws.pubkey)
               ws.send(boxed)
             })
-            console.log(msg)
           }
         }) 
         var gossip = {feed: req.feed, seq: 0}

@@ -15,6 +15,7 @@ console.log('saving bogs to ' + appdir)
 var url = 'localhost'
 var fortified = false
 
+var log = []
 
 if (!fs.existsSync(appdir)) { fs.mkdirSync(appdir) }
 if (!fs.existsSync(appdir + 'bogs/')) { fs.mkdirSync(appdir + 'bogs/') }
@@ -62,8 +63,30 @@ async function readBog () {
   return feeds
 }
 
+async function makeLog (feeds) {
+  if (feeds) {
+    console.log('generating log from feeds, this may take a moment to complete...')
+    var all = []
+    Object.keys(feeds).forEach(function(key,index) {
+      all = all.concat(feeds[key])
+      if (Object.keys(feeds).length -1 === index) {
+        //console.log(all)
+        all.forEach((msg, index) => {
+          bog.open(msg).then(opened => {
+            log.push(opened)
+            if (index === all.length -1) {
+              console.log(log.length + ' posts from ' + (Object.keys(feeds).length -1) + ' authors')
+              //localforage.setItem('log', log)
+            }
+          })
+        })
+      }
+    })
+  }
+}
+
 readBog().then(feeds => {
-  
+  makeLog(feeds)
   setInterval(function () {
     if (feeds) {
       for (var key in feeds) {
@@ -123,6 +146,7 @@ readBog().then(feeds => {
   console.log('http://' + url + ':' + PORT + '/')
 
   function processReq (req, ws, keys) {
+    console.log(req)
     if (req.msg) {
       bog.open(req.msg).then(opened => {
         if (feeds[opened.author]) {
@@ -146,7 +170,15 @@ readBog().then(feeds => {
     }
     else if (req.seq || (req.seq === 0)) {
       if (!feeds[req.feed]) {
-        
+        log.forEach(msg => {
+          if (msg.raw.substring(0, 44) === req.feed) {
+            var message = {permalink: msg.raw}
+            bog.box(JSON.stringify(message), ws.pubkey, keys).then(boxed => {
+              ws.send(boxed)
+            })
+            console.log(msg)
+          }
+        }) 
         var gossip = {feed: req.feed, seq: 0}
         bog.box(JSON.stringify(gossip), ws.pubkey, keys).then(boxed => {
           ws.send(boxed)

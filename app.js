@@ -698,6 +698,18 @@ bog.keys().then(keys => {
 
             bog.unbox(msg.data, keys).then(unboxed => {
               var req = JSON.parse(unboxed)
+              console.log(req)
+              if (req.permalink) {
+                console.log('IT IS A MESSAGE!')
+                bog.open(req.permalink).then(opened => {
+                  console.log(opened)
+                  if (window.location.hash.substring(1) === opened.raw.substring(0, 44)) {
+                    render(opened).then(rendered => {
+                      scroller.appendChild(rendered)
+                    }) 
+                  }
+                })
+              }
               if (req.welcome && (window.location.hash.substring(1) === '')) {
                 var connections = ' along with ' + (req.connected - 1) + ' peers.'
                 if (req.connected === 2) {

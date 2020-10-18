@@ -160,6 +160,7 @@ readBog().then(feeds => {
           }
         } else {
           feeds[opened.author] = [req.msg]
+          log.push(opened)
           console.log('first post from: http://'+ url + '/#'  + opened.author)
           var gossip = {feed: opened.author, seq: opened.seq}
           bog.box(JSON.stringify(gossip), ws.pubkey, keys).then(boxed => {

@@ -735,7 +735,7 @@ bog.keys().then(keys => {
               var req = JSON.parse(unboxed)
               console.log(req)
               if (req.permalink) {
-                var nofeed = h('div', {classList: 'message', innerHTML: 'You are not syncing <a href=#' + req.permalink.substring(44,54) + '>' + req.permalink.substring(44,54) + '</a>\'s feed. <a href=#' + req.permalink.substring(44,88) + '>Sync Now</a>.'
+                var nofeed = h('div', {classList: 'message', innerHTML: 'You are not syncing <a href=#' + req.permalink.substring(44,88) + '>' + req.permalink.substring(44,54) + '</a>\'s feed. <a href=#' + req.permalink.substring(44,88) + '>Sync Now</a>.'
                 })
                 scroller.appendChild(nofeed)
                 bog.open(req.permalink).then(opened => {

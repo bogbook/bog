@@ -695,6 +695,10 @@ bog.keys().then(keys => {
         }
  
         ws.onerror = (err) => {
+          var disconnected = h('div', {classList: 'message', innerHTML: 'Unable to connect to <code> ' + server + '</code>.'})
+
+          scroller.insertBefore(disconnected, scroller.childNodes[1])
+
           console.log('unable to connect, closing connection to ' + server)
           ws.close()
         }

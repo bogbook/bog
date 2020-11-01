@@ -44,9 +44,7 @@ async function regenerate (feeds) {
   var all = []
   Object.keys(feeds).forEach(function(key,index) {
     all = all.concat(feeds[key])
-    console.log(key, index)
     if (Object.keys(feeds).length -1 === index) {
-      console.log(all)
       var log = []
       all.forEach((msg, index) => {
         bog.open(msg).then(opened => {
@@ -82,20 +80,15 @@ bog.keys().then(keys => {
 
   loadfeeds().then(feeds => {
     loadlog().then(log => {
-      //console.log(feeds)
-      //console.log(log)
-
-      //if (!log[0]) {
-        setTimeout(function () {
-          var gossip = {feed: config.author}
-          if (feeds[config.author]) {
-            gossip.seq = feeds[config.author].length
-          } else {
-            gossip.seq = 0
-          }
-          dispatch(gossip, keys)
-        }, 1500)
-      //}
+      setTimeout(function () {
+        var gossip = {feed: config.author}
+        if (feeds[config.author]) {
+          gossip.seq = feeds[config.author].length
+        } else {
+          gossip.seq = 0
+        }
+        dispatch(gossip, keys)
+      }, 1500)
 
       function getName (id) {
         var name = h('span')
@@ -268,9 +261,7 @@ bog.keys().then(keys => {
               onclick: function (e) {
                 e.preventDefault(),
                 makeBio.parentNode.removeChild(makeBio)
-                console.log(msg.raw.substring(0, 44))
                 var obj = {bio: msg.raw.substring(0, 44)}
-                console.log(obj)
                 bog.open(feeds[keys.substring(0,44)][0]).then(opened => {
                   obj.seq = ++opened.seq
                   obj.previous = opened.raw.substring(0,44)
@@ -299,7 +290,6 @@ bog.keys().then(keys => {
             src: msg.image,
             style: 'width: 175px; height: 175px; object-fit: cover;', 
             onclick: function () {
-              console.log(image.classList)
               if (image.style.width === '100%') {
                 image.style = 'width: 175px; height: 175px; object-fit: cover;'
               } else {
@@ -315,9 +305,7 @@ bog.keys().then(keys => {
               onclick: function (e) {
                 e.preventDefault(),
                 makeProfile.parentNode.removeChild(makeProfile) 
-                console.log(msg.raw.substring(0, 44))
                 var obj = {avatar: msg.raw.substring(0, 44)}
-                console.log(obj)
                 bog.open(feeds[keys.substring(0,44)][0]).then(opened => {
                   obj.seq = ++opened.seq
                   obj.previous = opened.raw.substring(0,44)
@@ -330,9 +318,7 @@ bog.keys().then(keys => {
               onclick: function (e) {
                 e.preventDefault(),
                 makeBackground.parentNode.removeChild(makeBackground)
-                console.log(msg.raw.substring(0, 44))
                 var obj = {background: msg.raw.substring(0, 44)}
-                console.log(obj)
                 bog.open(feeds[keys.substring(0,44)][0]).then(opened => {
                   obj.seq = ++opened.seq
                   obj.previous = opened.raw.substring(0,44)
@@ -408,7 +394,6 @@ bog.keys().then(keys => {
                 posts = reverse.slice(index, index + 25)
                 index = index + 25
                 addPosts(posts)
-                console.log("Bottom of page")
               }
             }
           })
@@ -503,8 +488,6 @@ bog.keys().then(keys => {
 
         if (src[0] === '?') {
           var search = src.substring(1).replace(/%20/g, ' ').toUpperCase()
-            
-          console.log(search)
           log.forEach(msg => {
             if (msg.text && msg.text.toUpperCase().includes(search)) {
               render(msg).then(rendered => {
@@ -609,8 +592,6 @@ bog.keys().then(keys => {
                 clearInterval(timer)
                 var newlog = log.filter(msg => msg.author != src)
                 delete feeds[src]
-                console.log(newlog)
-                console.log(feeds)
                 setTimeout(function () {
                   localforage.setItem('feeds', feeds)
                   window.location.hash = ''
@@ -631,7 +612,6 @@ bog.keys().then(keys => {
               gossip.seq = 0
             }
 
-            console.log('syncing ' + src)
             dispatch(gossip, keys)
 
             var index = 0
@@ -655,20 +635,9 @@ bog.keys().then(keys => {
                   posts = reverse.slice(index, index + 25)
                   index = index + 25
                   addMorePosts(posts)
-                  console.log("Bottom of page")
                 }
               }
             })
-
-            /*var reverse = log
-
-            reverse.reverse().forEach(msg => {
-              if (msg.author === src) {
-                render(msg).then(rendered => {
-                  scroller.appendChild(rendered)
-                })
-              }
-            })*/
           } else {
             var haveit = false
             for (var i = 0; i < log.length; i++) {
@@ -679,9 +648,7 @@ bog.keys().then(keys => {
                 })
               }
               if ((i === (log.length - 1)) && !haveit) {
-                console.log('end of log')
                 var gossip = {feed: src, seq: 0}
-                console.log('permalink? ' + src)
                 setTimeout(function () {
                   dispatch(gossip, keys)
                 }, 1000)
@@ -709,23 +676,19 @@ bog.keys().then(keys => {
 
       setInterval(function () {
         savefeeds(feeds, log)
-        console.log('saving feeds')
       }, 10000)
  
       localforage.getItem('servers').then(pubs => {
         if (pubs) { servers = pubs}
-        /*if (!servers) {
-          servers = ['ws://' + window.location.host + '/ws']
-          localforage.setItem('servers', servers)
-        }*/
 
         servers.forEach(server => {
           var ws = new WebSocket(server)
 
           var id = ++serverId
+
           ws.onopen = () => {
             ws.send(JSON.stringify({connected: keys.substring(0, 44)}))
-          }
+          } 
 
           ws.onmessage = (msg) => {
             ws.pubkey = msg.data.substring(0, 44)
@@ -733,7 +696,6 @@ bog.keys().then(keys => {
 
             bog.unbox(msg.data, keys).then(unboxed => {
               var req = JSON.parse(unboxed)
-              console.log(req)
               if (req.permalink) {
                 var nofeed = h('div', {id: 'nofeed', classList: 'message', innerHTML: 'You are not syncing <a href=#' + req.permalink.substring(44,88) + '>' + req.permalink.substring(44,54) + '</a>\'s feed. <a href=#' + req.permalink.substring(44,88) + '>Sync Now</a>.'
                 })
@@ -742,7 +704,6 @@ bog.keys().then(keys => {
                 }
                 if (!document.getElementById(req.permalink.substring(0, 44))) {
                   bog.open(req.permalink).then(opened => {
-                    console.log(opened)
                     if (window.location.hash.substring(1) === opened.raw.substring(0, 44)) {
                       render(opened).then(rendered => {
                         scroller.appendChild(rendered)
@@ -837,13 +798,9 @@ bog.keys().then(keys => {
         bog.publish(obj, keys).then(msg => {
           bog.open(msg).then(opened => {
             if (feeds[keys.substring(0, 44)]) {
-              console.log(opened)
-              console.log(feeds[keys.substring(0,44)][0])
               if (opened.previous === feeds[keys.substring(0,44)][0].substring(0, 44)) {
-                console.log('WE HAVE A MATCH')
                 var gossip = {feed: opened.author, seq: opened.seq}
                 dispatch(gossip, keys)
-                //console.log(feeds[keys.substring(0, 44)].unshift(msg))
                 feeds[keys.substring(0, 44)].unshift(msg)
                 log.push(opened)
                 savefeeds(feeds, log)
@@ -872,25 +829,6 @@ bog.keys().then(keys => {
         })
       }
       
-      /*setInterval(function () {
-        bog.generate().then(content => {
-          
-          obj = {text: content}
-  
-          if (feeds[keys.substring(0,44)]) {
-            bog.open(feeds[keys.substring(0,44)][0]).then(opened => {
-              obj.seq = ++opened.seq
-              obj.previous = opened.raw.substring(0,44)
-              createpost(obj, keys)
-            })
-          } else {
-            obj.seq = 1
-            obj.previous = null
-            createpost(obj, keys)
-          }
-        })
-      }, 50)*/
-
       function composer (keys, msg) {
         var photoURL = {}
 
@@ -909,12 +847,9 @@ bog.keys().then(keys => {
         var input = h('input', {id: 'input' + canvasID, type: 'file',
           onclick: function () {
             var canvas = document.getElementById("canvas" + canvasID)
-            console.log(canvas)
             var ctx = canvas.getContext("2d")
             var input = document.getElementById('input' + canvasID)
 
-
-            console.log(canvas.parentNode)
             if (!canvas.parentNode.childNodes[4]) {
               canvas.parentNode.appendChild(filters)
             }
@@ -969,7 +904,6 @@ bog.keys().then(keys => {
 
         filterList.forEach(f => {
           filters.appendChild(h('a', {onclick: function () {
-            console.log('FILTER')
             canvasEl.classList = f.filter
             filter = f.filter
           }}, [f.name]))

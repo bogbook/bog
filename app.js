@@ -677,121 +677,136 @@ bog.keys().then(keys => {
       setInterval(function () {
         savefeeds(feeds, log)
       }, 10000)
+
+      function connect (server) {
+        var ws = new WebSocket(server)
+
+        var id = ++serverId
+
+        ws.onopen = () => {
+          ws.send(JSON.stringify({connected: keys.substring(0, 44)}))
+        } 
+
+        ws.onclose = (e) => {
+          console.log('connection to ' + server + ' closed, reconnecting')
+          setTimeout(function () {
+            connect(server)
+          }, 10000)
+        }
  
-      localforage.getItem('servers').then(pubs => {
-        if (pubs) { servers = pubs}
+        ws.onerror = (err) => {
+          console.log('unable to connect, closing connection to ' + server)
+          ws.close()
+        }
 
-        servers.forEach(server => {
-          var ws = new WebSocket(server)
+        ws.onmessage = (msg) => {
+          ws.pubkey = msg.data.substring(0, 44)
+          peers.set(id, ws)
 
-          var id = ++serverId
-
-          ws.onopen = () => {
-            ws.send(JSON.stringify({connected: keys.substring(0, 44)}))
-          } 
-
-          ws.onmessage = (msg) => {
-            ws.pubkey = msg.data.substring(0, 44)
-            peers.set(id, ws)
-
-            bog.unbox(msg.data, keys).then(unboxed => {
-              var req = JSON.parse(unboxed)
-              if (req.permalink) {
-                var nofeed = h('div', {id: 'nofeed', classList: 'message', innerHTML: 'You are not syncing <a href=#' + req.permalink.substring(44,88) + '>' + req.permalink.substring(44,54) + '</a>\'s feed. <a href=#' + req.permalink.substring(44,88) + '>Sync Now</a>.'
+          bog.unbox(msg.data, keys).then(unboxed => {
+            var req = JSON.parse(unboxed)
+            if (req.permalink) {
+              var nofeed = h('div', {id: 'nofeed', classList: 'message', innerHTML: 'You are not syncing <a href=#' + req.permalink.substring(44,88) + '>' + req.permalink.substring(44,54) + '</a>\'s feed. <a href=#' + req.permalink.substring(44,88) + '>Sync Now</a>.'
+              })
+              if (!document.getElementById('nofeed')) { 
+                scroller.appendChild(nofeed)
+              }
+              if (!document.getElementById(req.permalink.substring(0, 44))) {
+                bog.open(req.permalink).then(opened => {
+                  if (window.location.hash.substring(1) === opened.raw.substring(0, 44)) {
+                    render(opened).then(rendered => {
+                      scroller.appendChild(rendered)
+                    }) 
+                  }
                 })
-                if (!document.getElementById('nofeed')) { 
-                  scroller.appendChild(nofeed)
-                }
-                if (!document.getElementById(req.permalink.substring(0, 44))) {
-                  bog.open(req.permalink).then(opened => {
-                    if (window.location.hash.substring(1) === opened.raw.substring(0, 44)) {
-                      render(opened).then(rendered => {
-                        scroller.appendChild(rendered)
-                      }) 
-                    }
-                  })
-                }
               }
-              if (req.welcome && (window.location.hash.substring(1) === '')) {
-                var connections = ' along with ' + (req.connected - 1) + ' peers.'
-                if (req.connected === 2) {
-                  var connections = ' along with one peer.'
-                }
-                if (req.connected === 1) {
-                  connections = ''
-                }
-                var welcome = h('div', {classList: 'message'}, [
-                  h('div', {innerHTML: marked(
-                    'Connected to [' + req.url + '](http://' + req.url + ')' + connections + '\n\n' +
-                    req.welcome
-                  )})
-                ])
-                scroller.insertBefore(welcome, scroller.childNodes[1])
+            }
+            if (req.welcome && (window.location.hash.substring(1) === '')) {
+              var connections = ' along with ' + (req.connected - 1) + ' peers.'
+              if (req.connected === 2) {
+                var connections = ' along with one peer.'
               }
-              if (req.msg) {
-                bog.open(req.msg).then(opened => {
-                  if (feeds[opened.author]) {
-                    if (feeds[opened.author][0].substring(0, 44) === opened.previous) {
-                      feeds[opened.author].unshift(req.msg)
-                      log.push(opened)
-                      var gossip = {feed: opened.author, seq: opened.seq}
-                      bog.box(JSON.stringify(gossip), ws.pubkey, keys).then(boxed => {
-                        ws.send(boxed)
-                      })
-                      if ((window.location.hash.substring(1) == opened.author) || (window.location.hash.substring(1) == '')) {
-                        render(opened).then(rendered => {
-                          scroller.insertBefore(rendered, scroller.childNodes[1])
-                        })
-                      }
-                    }
-                  } else {
-                    feeds[opened.author] = [req.msg]
+              if (req.connected === 1) {
+                connections = ''
+              }
+              var welcome = h('div', {classList: 'message'}, [
+                h('div', {innerHTML: marked(
+                  'Connected to [' + req.url + '](http://' + req.url + ')' + connections + '\n\n' +
+                  req.welcome
+                )})
+              ])
+              scroller.insertBefore(welcome, scroller.childNodes[1])
+            }
+            if (req.msg) {
+              bog.open(req.msg).then(opened => {
+                if (feeds[opened.author]) {
+                  if (feeds[opened.author][0].substring(0, 44) === opened.previous) {
+                    feeds[opened.author].unshift(req.msg)
                     log.push(opened)
                     var gossip = {feed: opened.author, seq: opened.seq}
                     bog.box(JSON.stringify(gossip), ws.pubkey, keys).then(boxed => {
                       ws.send(boxed)
                     })
                     if ((window.location.hash.substring(1) == opened.author) || (window.location.hash.substring(1) == '')) {
-                      if (!scroller.firstChild) {
-                        // quick fix if no profile can be generated yet
-                        var div = h('div')
-                        scroller.appendChild(div)
-                      }
                       render(opened).then(rendered => {
                         scroller.insertBefore(rendered, scroller.childNodes[1])
                       })
                     }
                   }
+                } else {
+                  feeds[opened.author] = [req.msg]
+                  log.push(opened)
+                  var gossip = {feed: opened.author, seq: opened.seq}
+                  bog.box(JSON.stringify(gossip), ws.pubkey, keys).then(boxed => {
+                    ws.send(boxed)
+                  })
+                  if ((window.location.hash.substring(1) == opened.author) || (window.location.hash.substring(1) == '')) {
+                    if (!scroller.firstChild) {
+                      // quick fix if no profile can be generated yet
+                      var div = h('div')
+                      scroller.appendChild(div)
+                    }
+                    render(opened).then(rendered => {
+                      scroller.insertBefore(rendered, scroller.childNodes[1])
+                    })
+                  }
+                }
+              })
+            }
+
+            else if (req.seq || (req.seq === 0)) {
+              if ((!feeds[req.feed]) && (req.seq != 0)) { 
+                var gossip = {feed: req.feed, seq: 0}
+                bog.box(JSON.stringify(gossip), ws.pubkey, keys).then(boxed => {
+                  ws.send(boxed)
                 })
               }
-
-              else if (req.seq || (req.seq === 0)) {
-                if ((!feeds[req.feed]) && (req.seq != 0)) { 
-                  var gossip = {feed: req.feed, seq: 0}
+              else if (feeds[req.feed]) {
+                if (req.seq < feeds[req.feed].length) {
+                  var resp = {}
+                  resp.msg = feeds[req.feed][feeds[req.feed].length - req.seq - 1]
+                  bog.box(JSON.stringify(resp), ws.pubkey, keys).then(boxed => {
+                    ws.send(boxed)
+                  })
+                }
+                else if (req.seq > feeds[req.feed].length){
+                  var gossip = {feed: req.feed, seq: feeds[req.feed].length}
                   bog.box(JSON.stringify(gossip), ws.pubkey, keys).then(boxed => {
                     ws.send(boxed)
                   })
                 }
-                else if (feeds[req.feed]) {
-                  if (req.seq < feeds[req.feed].length) {
-                    var resp = {}
-                    resp.msg = feeds[req.feed][feeds[req.feed].length - req.seq - 1]
-                    bog.box(JSON.stringify(resp), ws.pubkey, keys).then(boxed => {
-                      ws.send(boxed)
-                    })
-                  }
-                  else if (req.seq > feeds[req.feed].length){
-                    var gossip = {feed: req.feed, seq: feeds[req.feed].length}
-                    bog.box(JSON.stringify(gossip), ws.pubkey, keys).then(boxed => {
-                      ws.send(boxed)
-                    })
-                  }
-                } 
-              }
-            })
-          }
+              } 
+            }
+          })
+        }
+      }
+
+      localforage.getItem('servers').then(pubs => {
+        if (pubs) { servers = pubs}
+
+        servers.forEach(server => {
+          connect(server)
         })
-        
       })
     
       function createpost (obj, keys, compose) {

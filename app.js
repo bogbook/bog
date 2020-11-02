@@ -688,10 +688,10 @@ bog.keys().then(keys => {
         } 
 
         ws.onclose = (e) => {
-          console.log('connection to ' + server + ' closed, reconnecting')
           setTimeout(function () {
+            console.log('connection to ' + server + ' closed, reconnecting')
             connect(server)
-          }, 10000)
+          }, 1000)
         }
  
         ws.onerror = (err) => {
@@ -700,7 +700,9 @@ bog.keys().then(keys => {
           scroller.insertBefore(disconnected, scroller.childNodes[1])
 
           console.log('unable to connect, closing connection to ' + server)
-          ws.close()
+          setTimeout(function () {
+            ws.close()
+          }, 10000)
         }
 
         ws.onmessage = (msg) => {

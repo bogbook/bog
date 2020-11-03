@@ -694,15 +694,22 @@ bog.keys().then(keys => {
           }, 1000)
         }
  
-        ws.onerror = (err) => {
-          var disconnected = h('div', {classList: 'message', innerHTML: 'Unable to connect to <code> ' + server + '</code>.'})
+        var retryCount = 1
 
+        ws.onerror = (err) => {
+          var disconnected = h('div', {classList: 'message', id: 'unable:' + server, innerHTML: 'Unable to connect to <code> ' + server + '</code>.'})
+
+          var unable = document.getElementById('unable:' + server)
+          if (unable) {
+            unable.parentNode.removeChild(unable)
+          } 
           scroller.insertBefore(disconnected, scroller.childNodes[1])
 
           console.log('unable to connect, closing connection to ' + server)
           setTimeout(function () {
             ws.close()
-          }, 10000)
+            retryCount++
+          }, 1000 * retryCount)
         }
 
         ws.onmessage = (msg) => {

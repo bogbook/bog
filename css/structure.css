@@ -57,14 +57,6 @@ pre, code {
   margin-right: auto;
 }
 
-textarea {
-  width: 100%;
-  max-width: 100%;
-  margin-top: .5em; 
-  margin-bottom: .5em;
-  height: 100px;
-}
-
 @media only screen and (max-width: 680px) {
   #screen { top: 4em; }
   #scroller {max-width: 100%;}
@@ -163,12 +155,37 @@ a {text-decoration: none;}
 
 a:hover {text-decoration: underline; }
 
-textarea, input {
+textarea {
+  width: 100%;
+  max-width: 100%;
+  margin-top: .5em;
+  margin-bottom: .5em;
   font-size: 1em;
+  border: none;
+  border-radius: 5px;
+}
+
+input {
+  font-size: 1em;
+  border: none;
+  border-radius: 5px;
 }
 
 textarea:focus {
   outline: none;
+}
+
+button {
+  font-size: 1em;
+  margin: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+button:hover {
+  background: #fff;
 }
 
 ul {

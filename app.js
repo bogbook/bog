@@ -181,6 +181,18 @@ bog.keys().then(keys => {
         }
       })
 
+      var darktheme = h('link', {rel: 'stylesheet', href: './css/darktheme.css', type: 'text/css'})
+
+      var bulbon = h('span', {classList: 'right', style: 'cursor:pointer;', innerHTML: '&#128261;', onclick: function () {
+        document.head.appendChild(darktheme)
+        bulbon.parentNode.replaceChild(bulboff, bulbon)
+      }})
+
+      var bulboff = h('span', {classList: 'right', style: 'cursor:pointer;', innerHTML: '&#128262;', onclick: function () {
+        darktheme.parentNode.removeChild(darktheme) 
+        bulboff.parentNode.replaceChild(bulbon, bulboff)
+      }})
+
       var navbar = h('div', {classList: 'navbar'}, [
         h('div', {classList: 'internal'}, [
           h('a', {href: '#' + keys.substring(0, 44)}, [getImage(keys.substring(0, 44)), getName(keys.substring(0, 44))]),
@@ -192,6 +204,7 @@ bog.keys().then(keys => {
           h('a', {href: '#?' + keys.substring(0, 44)}, ['Mentions']),
           ' ',
           h('a', {href: '#key'}, ['Key']),
+          bulbon,
           search
         ])
       ])

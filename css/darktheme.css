@@ -1,0 +1,54 @@
+body {
+  background: #222;
+  color: #f5f5f5;
+}
+
+pre, code {
+  color: #ccc;
+}
+
+.navbar {
+  background: #333;
+}
+
+hr {
+  border-color: #ddd;
+}
+
+.profile {
+  background: #333;
+}
+
+.message {
+  background: #333;
+}
+
+a {color: cyan;}
+
+textarea, input {
+  color: #f5f5f5;
+  background: #444;
+}
+
+textarea:focus {
+  background: #222;
+}
+
+button {
+  color: white;
+  border: 1px solid #333;
+  background: #444;
+}
+
+button:hover {
+  background: #555;
+}
+
+ul {
+  list-style: square;
+}
+
+hr {
+  border: 1px solid #444;
+}
+

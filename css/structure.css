@@ -65,7 +65,7 @@ textarea {
   height: 100px;
 }
 
-@media only screen and (max-width: 480px) {
+@media only screen and (max-width: 680px) {
   #screen { top: 4em; }
   #scroller {max-width: 100%;}
   textarea { height: 200px;}

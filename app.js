@@ -186,11 +186,13 @@ bog.keys().then(keys => {
       var bulbon = h('span', {classList: 'right', style: 'cursor:pointer;', innerHTML: '&#128261;', onclick: function () {
         document.head.appendChild(darktheme)
         bulbon.parentNode.replaceChild(bulboff, bulbon)
+        localforage.setItem('theme', 'dark')
       }})
 
       var bulboff = h('span', {classList: 'right', style: 'cursor:pointer;', innerHTML: '&#128262;', onclick: function () {
         darktheme.parentNode.removeChild(darktheme) 
         bulboff.parentNode.replaceChild(bulbon, bulboff)
+        localforage.setItem('theme', 'light')
       }})
 
       var navbar = h('div', {classList: 'navbar'}, [
@@ -208,6 +210,13 @@ bog.keys().then(keys => {
           search
         ])
       ])
+
+      localforage.getItem('theme').then(theme => {
+        if (theme === 'dark') {
+          document.head.appendChild(darktheme)
+          bulbon.parentNode.replaceChild(bulboff, bulbon)
+        }
+      })
 
       async function render (msg) {
         var renderer = new marked.Renderer()

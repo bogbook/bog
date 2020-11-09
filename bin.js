@@ -75,7 +75,7 @@ async function makeLog (feeds) {
           bog.open(msg).then(opened => {
             log.push(opened)
             if (index === all.length -1) {
-              console.log(log.length + ' posts from ' + (Object.keys(feeds).length -1) + ' authors')
+              console.log(log.length + ' posts from ' + (Object.keys(feeds).length) + ' authors')
               //localforage.setItem('log', log)
             }
           })

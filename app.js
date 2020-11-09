@@ -894,7 +894,7 @@ bog.keys().then(keys => {
 
         var autocrop = h('input', {type: 'checkbox', checked: true, name: 'autocrop'})
 
-        var input = h('input', {id: 'input' + canvasID, type: 'file',
+        var input = h('input', {id: 'input' + canvasID, type: 'file', style: 'display: none',
           onclick: function () {
             var canvas = document.getElementById("canvas" + canvasID)
             var ctx = canvas.getContext("2d")
@@ -946,6 +946,7 @@ bog.keys().then(keys => {
         var newPhoto = h('span', [
           canvasEl,
           input,
+          h('button', {onclick: function () {input.click()}},['Upload Image']),
           h('label', {for: 'autocrop'}, ['Autocrop?']),
           autocrop
         ])

@@ -310,12 +310,12 @@ bog.keys().then(keys => {
         if (msg.image) {
           var image = h('img', {
             src: msg.image,
-            style: 'width: 175px; height: 175px; object-fit: cover;', 
+            style: 'width: 175px; height: 175px; object-fit: cover; cursor: pointer;', 
             onclick: function () {
               if (image.style.width === '100%') {
-                image.style = 'width: 175px; height: 175px; object-fit: cover;'
+                image.style = 'width: 175px; height: 175px; object-fit: cover; cursor: pointer;'
               } else {
-                image.style = 'width: 100%;'
+                image.style = 'width: 100%; cursor: pointer;'
               }
             }
           })
@@ -900,10 +900,6 @@ bog.keys().then(keys => {
             var ctx = canvas.getContext("2d")
             var input = document.getElementById('input' + canvasID)
 
-            if (!canvas.parentNode.childNodes[4]) {
-              canvas.parentNode.appendChild(filters)
-            }
-
             input.addEventListener('change', handleFile)
 
             function handleFile (e) {
@@ -928,16 +924,30 @@ bog.keys().then(keys => {
               img.src = URL.createObjectURL(e.target.files[0])
               input.value = ''
             }
+
+            var buttonsDiv = h('div', {id: 'buttons:'+ canvasID}, [
+              filters,
+              h('button', { onclick: function () {
+                canvas.height = 0
+                canvas.width = 0
+                canvas.classList = null
+                photoURL.value = ''
+                filter = null
+                buttonsDiv.parentNode.removeChild(buttonsDiv)
+              }}, ['Cancel'])
+            ])
+
+            input.parentNode.appendChild(buttonsDiv)
           }
         })
 
         var canvasEl = h('canvas', {id: "canvas" + canvasID, width: '0', height: '0'})
 
         var newPhoto = h('span', [
+          canvasEl,
           input,
-          autocrop,
-          h('label', {for: 'autocrop'}, ['Auto-crop?']),
-          canvasEl
+          h('label', {for: 'autocrop'}, ['Autocrop?']),
+          autocrop
         ])
 
         var filterList = [
@@ -954,8 +964,8 @@ bog.keys().then(keys => {
 
         filterList.forEach(f => {
           filters.appendChild(h('a', {onclick: function () {
-            canvasEl.classList = f.filter
             filter = f.filter
+            canvasEl.classList = filter
           }}, [f.name]))
           filters.appendChild(h('span', [' ']))
         })
@@ -1009,10 +1019,15 @@ bog.keys().then(keys => {
                 photoURL.value = ''
                 canvasEl.width = 0
                 canvasEl.height = 0
+                canvasEl.classList = null
+                var buttonsDiv = document.getElementById('buttons:' + canvasID)
+                buttonsDiv.parentNode.removeChild(buttonsDiv)
               }
               if (filter) {
                 obj.filter = filter
+                filter = ''
               }
+
               var newpreview = h('div')
               
               preview.parentNode.replaceChild(newpreview, preview)
@@ -1041,8 +1056,8 @@ bog.keys().then(keys => {
         }, ['Publish'])
         compose.appendChild(header)
         compose.appendChild(preview)
-        compose.appendChild(textarea)
         compose.appendChild(newPhoto)
+        compose.appendChild(textarea)
         compose.appendChild(publish) 
         return compose
       }

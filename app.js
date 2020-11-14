@@ -310,7 +310,7 @@ bog.keys().then(keys => {
         if (msg.image) {
           var image = h('img', {
             src: msg.image,
-            style: 'width: 175px; height: 175px; object-fit: cover; cursor: pointer;', 
+            style: 'width: 175px; height: 175px; object-fit: cover; cursor: pointer;',
             onclick: function () {
               if (image.style.width === '100%') {
                 image.style = 'width: 175px; height: 175px; object-fit: cover; cursor: pointer;'
@@ -881,7 +881,8 @@ bog.keys().then(keys => {
       
       function composer (keys, msg) {
         var photoURL = {}
-
+        var croppedURL = {}
+        var uncroppedURL = {}
         if (msg) {
           if (msg.raw) {
             var canvasID = msg.raw.substring(0, 44)
@@ -892,48 +893,93 @@ bog.keys().then(keys => {
           var canvasID = "composer"
         }
 
-        var autocrop = h('input', {type: 'checkbox', checked: true, name: 'autocrop'})
-
         var input = h('input', {id: 'input' + canvasID, type: 'file', style: 'display: none',
           onclick: function () {
-            var canvas = document.getElementById("canvas" + canvasID)
-            var ctx = canvas.getContext("2d")
-            var input = document.getElementById('input' + canvasID)
-
+            //var input = document.getElementById('input' + canvasID)
             input.addEventListener('change', handleFile)
 
             function handleFile (e) {
               var img = new Image
               img.onload = function() {
-                if (autocrop.checked === true) {
-                  canvas.width = 680 
-                  canvas.height = 680
-                  var scale = Math.max(canvas.width / img.width, canvas.height / img.height)
-                  var x = (canvas.width / 2) - (img.width / 2) * scale
-                  var y = (canvas.height / 2) - (img.height / 2) * scale
-                  ctx.drawImage(img, x, y, img.width * scale, img.height * scale)
-                } else {
-                  var aspect = img.width/img.height
-                  canvas.width = 680
-                  canvas.height = canvas.width / aspect
-                  ctx.drawImage(img, 0, 0, canvas.width, canvas.height)
-                }
-                photoURL.value = canvas.toDataURL('image/jpeg', 0.8)
-              }
 
+                var cropped = h('canvas', {width: 680, height: 680})
+                var cctx = cropped.getContext('2d')
+                var scale = Math.max(cropped.width / img.width, cropped.height / img.height)
+                var x = (cropped.width / 2) - (img.width / 2) * scale
+                var y = (cropped.height / 2) - (img.height / 2) * scale
+                cctx.drawImage(img, x, y, img.width * scale, img.height * scale)
+                croppedURL.value = cropped.toDataURL('image/jpeg', 0.8)
+
+                var croppedImg = h('img', {
+                  src: croppedURL.value,
+                  style: 'width: 175px; height: 175px; object-fit: cover; cursor: pointer;',
+                  onclick: function () {
+                    if (this.style.width === '100%') {
+                      this.style = 'width: 175px; height: 175px; object-fit: cover; cursor: pointer;'
+                    } else {
+                      this.style = 'width: 100%; cursor: pointer;'
+                    }
+                  }
+                })
+
+                photoDiv.appendChild(croppedImg)
+
+
+                if (!(img.width === img.height)) {
+                  var crop = true
+                  var autocrop = h('div', [
+                   h('button', { onclick: function () {
+                     if (crop) { 
+                       croppedImg.parentNode.replaceChild(uncroppedImg, croppedImg)
+                       crop = false
+                       photoURL = uncroppedURL
+                       this.textContent = 'Crop'
+                     } else {
+                       uncroppedImg.parentNode.replaceChild(croppedImg, uncroppedImg)
+                       photoURL = croppedURL
+                       crop = true
+                       this.textContent = 'Uncrop'
+                     }
+                   }}, ['Uncrop']),
+                  ])
+
+                  photoDiv.appendChild(autocrop)
+                  
+                  var aspect = img.width / img.height
+                  var uncropped = h('canvas', {width: 680, height: 680 / aspect}) 
+                  var uctx = uncropped.getContext('2d')
+                  uctx.drawImage(img, 0, 0, uncropped.width, uncropped.height)
+                  uncroppedURL.value = uncropped.toDataURL('image.jpeg', 0.8)
+                  var uncroppedImg = h('img', {
+                    src: uncroppedURL.value,
+                    style: 'width: 175px; cursor: pointer;',
+                    onclick: function () {
+                      if (this.style.width === '100%') {
+                        this.style = 'width: 175px; cursor: pointer;'
+                      } else {
+                        this.style = 'width: 100%; cursor: pointer;'
+                      }
+                    }
+                  })
+                } else { photoURL = croppedURL}
+                img.src = ''
+              }
               img.src = URL.createObjectURL(e.target.files[0])
               input.value = ''
             }
 
             var buttonsDiv = h('div', {id: 'buttons:'+ canvasID}, [
+              photoDiv,
               filters,
               h('button', { onclick: function () {
-                canvas.height = 0
-                canvas.width = 0
-                canvas.classList = null
                 photoURL.value = ''
+                croppedURL.value = ''
+                uncroppedURL.value = ''
                 filter = null
+                photoDiv.parentNode.removeChild(photoDiv)
+                photoDiv = h('div')
                 buttonsDiv.parentNode.removeChild(buttonsDiv)
+                newPhoto.appendChild(uploadButton)                
               }}, ['Cancel'])
             ])
 
@@ -941,15 +987,20 @@ bog.keys().then(keys => {
           }
         })
 
-        var canvasEl = h('canvas', {id: "canvas" + canvasID, width: '0', height: '0'})
+        var uploadButton = h('button', {onclick: function () {
+          input.click()
+          uploadButton.parentNode.removeChild(uploadButton)
+        }, innerHTML: '&#128247;'})
+
+        var photoDiv = h('div')
 
         var newPhoto = h('span', [
-          canvasEl,
+          photoDiv,
           input,
-          h('button', {onclick: function () {input.click()}},['Upload Image']),
-          h('label', {for: 'autocrop'}, ['Autocrop?']),
-          autocrop
+          uploadButton
         ])
+
+        var filters = h('span')
 
         var filterList = [
           {name: '#nofilter', filter: null},
@@ -961,16 +1012,14 @@ bog.keys().then(keys => {
 
         var filter
 
-        var filters = h('span')
-
         filterList.forEach(f => {
           filters.appendChild(h('a', {onclick: function () {
             filter = f.filter
-            canvasEl.classList = filter
+            photoDiv.classList = filter
           }}, [f.name]))
           filters.appendChild(h('span', [' ']))
         })
-        
+
         if (msg) {
           var compose = h('div', {classList: 'message reply'})
         } else {
@@ -984,7 +1033,8 @@ bog.keys().then(keys => {
           ]),
           h('a', {href: '#' + keys.substring(0, 44)}, [getImage(keys.substring(0, 44)), getName(keys.substring(0, 44))])
         ])
-        var preview = h('div')
+
+        var preview = h('div', {classList: 'content'})
 
         var textarea = h('textarea', {placeholder: 'Write a message here.'})
 
@@ -1018,10 +1068,9 @@ bog.keys().then(keys => {
               if (photoURL.value) {
                 obj.image = photoURL.value
                 photoURL.value = ''
-                canvasEl.width = 0
-                canvasEl.height = 0
-                canvasEl.classList = null
+                photoDiv = h('div')
                 var buttonsDiv = document.getElementById('buttons:' + canvasID)
+                buttonsDiv.parentNode.appendChild(uploadButton)
                 buttonsDiv.parentNode.removeChild(buttonsDiv)
               }
               if (filter) {

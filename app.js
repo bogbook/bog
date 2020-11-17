@@ -924,7 +924,7 @@ bog.keys().then(keys => {
 
                 photoDiv.appendChild(croppedImg)
 
-                photoURL = uncroppedURL
+                photoURL = croppedURL
 
                 if (!(img.width === img.height)) {
                   var crop = true

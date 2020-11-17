@@ -924,23 +924,24 @@ bog.keys().then(keys => {
 
                 photoDiv.appendChild(croppedImg)
 
+                photoURL = uncroppedURL
 
                 if (!(img.width === img.height)) {
                   var crop = true
                   var autocrop = h('div', [
-                   h('button', { onclick: function () {
-                     if (crop) { 
-                       croppedImg.parentNode.replaceChild(uncroppedImg, croppedImg)
-                       crop = false
-                       photoURL = uncroppedURL
-                       this.textContent = 'Crop'
-                     } else {
-                       uncroppedImg.parentNode.replaceChild(croppedImg, uncroppedImg)
-                       photoURL = croppedURL
-                       crop = true
-                       this.textContent = 'Uncrop'
-                     }
-                   }}, ['Uncrop']),
+                    h('button', { onclick: function () {
+                      if (crop) { 
+                        croppedImg.parentNode.replaceChild(uncroppedImg, croppedImg)
+                        crop = false
+                        photoURL = uncroppedURL
+                        this.textContent = 'Crop'
+                      } else {
+                        uncroppedImg.parentNode.replaceChild(croppedImg, uncroppedImg)
+                        photoURL = croppedURL
+                        crop = true
+                        this.textContent = 'Uncrop'
+                      }
+                    }}, ['Uncrop']),
                   ])
 
                   photoDiv.appendChild(autocrop)

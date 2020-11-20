@@ -94,7 +94,7 @@ bog.keys().then(keys => {
         var name = h('span')
         name.textContent = id.substring(0, 10) + '...'
         if (log) { 
-          for (var i = log.length - 1 ; i > 0; i--) {
+          for (var i = log.length - 1; i >= 0; i--) {
             if ((log[i].author === id) && (log[i].name)) {
               localforage.setItem('name:' + id, log[i].name)
               return name.textContent = log[i].name

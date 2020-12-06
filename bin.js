@@ -187,6 +187,13 @@ readBog().then(feeds => {
       }
       else if (feeds[req.feed]) {
         if (req.seq < feeds[req.feed].length) {
+	  if ((req.seq == 0) && feeds[req.feed].length) {
+            console.log('sending first post of ' + req.feed + ' to ' + ws.pubkey + ' at ' + new Date().toLocaleString())
+          } 
+	  if (req.seq == (feeds[req.feed].length - 1)) {
+            console.log('sending latest post of ' + req.feed + ' to ' + ws.pubkey + ' at ' + new Date().toLocaleString())
+
+	  }
           var resp = {}
           resp.msg = feeds[req.feed][feeds[req.feed].length - req.seq - 1]
           bog.box(JSON.stringify(resp), ws.pubkey, keys).then(boxed => {
@@ -194,6 +201,7 @@ readBog().then(feeds => {
           })
         }
         if (req.seq > [feeds[req.feed].length]){
+	  console.log(req.seq)
           var gossip = {feed: req.feed, seq: feeds[req.feed].length}
           bog.box(JSON.stringify(gossip), ws.pubkey, keys).then(boxed => {
             ws.send(boxed)

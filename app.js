@@ -520,6 +520,38 @@ bog.keys().then(keys => {
         }
 
         if (src.length === 44) {
+          if (src === keys.substring(0, 44)) {
+	    console.log('this is you')
+	    if (!feeds[src]) {
+              var nameInput = h('input', {placeholder: 'Give yourself a name'})
+              var name = h('div', [
+                nameInput,
+                h('button', { onclick: function () {
+                  if (nameInput.value) {
+                    var obj = {}
+                    obj.name = nameInput.value
+                    nameInput.value = ''
+                    if (feeds[keys.substring(0,44)]) {
+                      bog.open(feeds[keys.substring(0,44)][0]).then(opened => {
+                        obj.seq = ++opened.seq
+                        obj.previous = opened.raw.substring(0,44)
+                        createpost(obj, keys)
+                      })
+                    } else {
+                      obj.seq = 1
+                      obj.previous = null
+                      createpost(obj, keys)
+                    }
+                  }
+                }}, ['Identify'])
+              ])
+	      scroller.appendChild(h('div', {classList: 'profile'}, [
+	        h('a', {href: keys.substring(0, 44)}, [keys.substring(0, 10) + '...']),
+		name
+              ]))
+	    }
+          }i
+
           if (feeds[src]) {
             var profile = h('div', {classList: 'profile'})
             scroller.appendChild(profile)
@@ -572,7 +604,6 @@ bog.keys().then(keys => {
               getBio(src),
               buttons
             ]))
-
             if (src === keys.substring(0, 44)) {
               var nameInput = h('input', {placeholder: 'Give yourself a name'})
               var name = h('div', [
@@ -596,6 +627,7 @@ bog.keys().then(keys => {
                   }
                 }}, ['Identify'])
               ])
+
 
               buttons.appendChild(name)
             }

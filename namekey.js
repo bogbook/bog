@@ -8,8 +8,11 @@ var keypair = 'blah'
 
 while (keypair.substring(0, 2) != name) {
   var genkey = nacl.sign.keyPair()
-  keypair = nacl.util.encodeBase64(genkey.publicKey) + nacl.util.encodeBase64(genkey.secretKey)
-  console.log(keypair)
+  var base64 = nacl.util.encodeBase64(genkey.publicKey) + nacl.util.encodeBase64(genkey.secretKey)
+  if (!base64.includes('/')) {
+    keypair = base64 
+    console.log(keypair)
+  }
 }
 
 

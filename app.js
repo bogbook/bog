@@ -275,9 +275,20 @@ bog.keys().then(keys => {
             getName(msg.author)
           ])
         ]))
-      
+
+        var retractor = h('span', [
+          h('button', {onclick: function () {
+            retractor.parentNode.replaceChild(expander, retractor)
+	  }},['-'])
+	])
+
+        var expander = h('button', {onclick: function () {
+          expander.parentNode.replaceChild(retractor, expander)
+	}}, ['+'])
+
         if (msg.text) {
           message.appendChild(h('div', {classList: 'content', innerHTML: marked(msg.text)}))
+	  message.appendChild(expander)
           if (msg.author === keys.substring(0, 44)) {
             makeBio = h('button', {
               onclick: function (e) {
@@ -291,7 +302,7 @@ bog.keys().then(keys => {
                 })
               }
             }, ['Set as bio'])
-            message.appendChild(makeBio)
+            retractor.appendChild(makeBio)
           }
         }
         if (msg.name) {
@@ -335,7 +346,7 @@ bog.keys().then(keys => {
                 })
               }
             }, ['Set as profile photo'])
-            message.appendChild(makeProfile)
+            retractor.appendChild(makeProfile)
             makeBackground = h('button', {
               onclick: function (e) {
                 e.preventDefault(),
@@ -348,7 +359,7 @@ bog.keys().then(keys => {
                 })
               }
             }, ['Set as profile background'])
-            message.appendChild(makeBackground)
+            retractor.appendChild(makeBackground)
           }
         }
 

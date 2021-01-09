@@ -288,7 +288,6 @@ bog.keys().then(keys => {
 
         if (msg.text) {
           message.appendChild(h('div', {classList: 'content', innerHTML: marked(msg.text)}))
-	  message.appendChild(expander)
           if (msg.author === keys.substring(0, 44)) {
             makeBio = h('button', {
               onclick: function (e) {
@@ -362,7 +361,6 @@ bog.keys().then(keys => {
             retractor.appendChild(makeBackground)
           }
         }
-
         var reply = composer(keys, msg)
         var cancel = h('button', {
           onclick: function () {
@@ -377,6 +375,9 @@ bog.keys().then(keys => {
               reply.appendChild(cancel)
             }
           }, ['Reply']))
+	  if (retractor.childNodes[1]) {
+	    message.appendChild(expander)
+	  }
         }
 
         log.forEach(reply => {

@@ -201,7 +201,6 @@ readBog().then(feeds => {
           })
         }
         if (req.seq > [feeds[req.feed].length]){
-	  console.log(req.seq)
           var gossip = {feed: req.feed, seq: feeds[req.feed].length}
           bog.box(JSON.stringify(gossip), ws.pubkey, keys).then(boxed => {
             ws.send(boxed)

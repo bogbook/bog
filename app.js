@@ -105,8 +105,10 @@ bog.keys().then(keys => {
       }
 
       function getProfileImage (id) {
-
         var img = h('img')
+        var link = h('a', [
+          img
+        ])
         var avatar
 
         if (log) {
@@ -116,13 +118,15 @@ bog.keys().then(keys => {
               log.forEach(msg => {
                 if (msg.raw.includes(avatar)) {
                   img.classList = 'profileImage ' + msg.filter
-                  return img.src = msg.image
+                  img.src = msg.image
+		  link.href = '#' + msg.raw.substring(0, 44)
+		  return link
                 }
               })
             }
           }
         }
-        return img
+        return link
       }
 
       function getImage (id) {
@@ -562,7 +566,7 @@ bog.keys().then(keys => {
 		name
               ]))
 	    }
-          }i
+          }
 
           if (feeds[src]) {
             var profile = h('div', {classList: 'profile'})
@@ -592,7 +596,7 @@ bog.keys().then(keys => {
                   if ((log[i].bio) && (log[i].author === src)) {
                     log.forEach(msg => {
                       if (msg.raw.includes(log[i].bio)) {
-                        bio.innerHTML = marked(msg.text)
+                        bio.innerHTML = '<span class="right"><a href="#' + msg.raw.substring(0, 44) + '">' + human(new Date(msg.timestamp)) + '</a></span>' + marked(msg.text)
                       }
                     })
                   }

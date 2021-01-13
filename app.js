@@ -80,10 +80,22 @@ bog.keys().then(keys => {
 
   loadfeeds().then(feeds => {
     loadlog().then(log => {
+
       setTimeout(function () {
         var gossip = {feed: config.author}
         if (feeds[config.author]) {
           gossip.seq = feeds[config.author].length
+        } else {
+          gossip.seq = 0
+        }
+        dispatch(gossip, keys)
+      }, 1500)
+
+      setTimeout(function () {
+        var me = keys.substring(0, 44)
+        var gossip = {feed: me}
+        if (feeds[me]) {
+          gossip.seq = feeds[me].length
         } else {
           gossip.seq = 0
         }
@@ -215,6 +227,78 @@ bog.keys().then(keys => {
         ])
       ])
 
+      localforage.getItem('name:' + keys.substring(0, 44)).then(name => {
+        if (name) { navbar.id = '' }
+	else {
+
+          navbar.id = 'full'
+
+          var keypair = h('div')
+          keypair.appendChild(h('span', ['This is your keypair. Save your keypair to use the same identity in the future.']))
+          keypair.appendChild(h('pre', [keys]))
+          var input = h('textarea', {placeholder: 'Import your existing keypair here. If you\'re unable to save, your keypair is not valid.'})
+          keypair.appendChild(h('div', [
+            input,
+            h('button', {
+              onclick: function () {
+                if (input.value && (input.value.length == 132)) {
+                  localforage.setItem('keypair', input.value).then(function () {
+                    location.reload()
+                  })
+                }
+              }
+            }, ['Import Ed25519 Keypair']),
+            h('button', {onclick: function () {
+              localforage.removeItem('keypair').then(function () {
+                location.reload()
+              })
+            }}, ['Delete Keypair'])
+          ]))
+
+
+
+          var nameInput = h('input', {placeholder: 'Lurker'})
+          var name = h('div', [
+            nameInput,
+            h('button', { onclick: function () {
+              if (nameInput.value) {
+                var obj = {}
+                obj.name = nameInput.value
+                nameInput.value = ''
+                if (feeds[keys.substring(0,44)]) {
+                  bog.open(feeds[keys.substring(0,44)][0]).then(opened => {
+                    obj.seq = ++opened.seq
+                    obj.previous = opened.raw.substring(0,44)
+                    createpost(obj, keys)
+                  })
+                } else {
+                  obj.seq = 1
+                  obj.previous = null
+                  createpost(obj, keys)
+                }
+		identify.parentNode.removeChild(identify)
+		navbar.id = ''
+              }
+            }}, ['Identify'])
+          ])
+          var identify = h('div', {id: 'welcome', classList: 'message'},[
+	    'Hello! Welcome to ', 
+	    h('a', {href: location.href}, [config.title]),
+	    h('br'),
+	    'For more information on this project, visit the ',
+	    h('a', {href: 'https://git.sr.ht/~ev/v2'}, ['git repository']),
+	    h('hr'),
+	    keypair,
+	    h('hr'),
+	    'To continue, please identify yourself:',
+	    h('br'),
+	    name
+	  ])
+
+          navbar.appendChild(identify)
+        }
+      })
+
       localforage.getItem('theme').then(theme => {
         if (theme === 'dark') {
           document.head.appendChild(darktheme)
@@ -309,6 +393,9 @@ bog.keys().then(keys => {
           }
         }
         if (msg.name) {
+	  if (msg.author == keys.substring(0, 44)) {
+            if (navbar.id) {navbar.id = ''}
+	  }
           message.appendChild(h('span', [' identified as ' + msg.name]))
         }
         if (msg.avatar) {
@@ -661,14 +748,16 @@ bog.keys().then(keys => {
               onclick: function () {
                 clearInterval(timer)
                 var newlog = log.filter(msg => msg.author != src)
-                delete feeds[src]
-                setTimeout(function () {
-                  localforage.setItem('feeds', feeds)
-                  window.location.hash = ''
-                  localforage.setItem('log', newlog).then(function () {
-                    window.location.reload()
-                  })
-                }, 200)
+		localforage.removeItem('name:' + src).then(function () {
+                  delete feeds[src]
+                  setTimeout(function () {
+                    localforage.setItem('feeds', feeds)
+                    window.location.hash = ''
+                    localforage.setItem('log', newlog).then(function () {
+                      window.location.reload()
+                    })
+                  }, 200)
+		})
               }
             }, ['Delete Feed'])
 

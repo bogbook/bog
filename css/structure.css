@@ -11,6 +11,11 @@ p {
   margin-bottom: .35ex;
 }
 
+#full {
+  height: 100%;
+  background-color: rgba(0,0,0,0.8);
+}
+
 pre, code {
   font-size: 1em;
   overflow: auto;
@@ -30,7 +35,7 @@ pre, code {
   bottom: 0;
 }
 
-#scroller {
+#scroller, #welcome {
   width: 680px;
   max-width: 94%; 
   margin-left: auto; 
@@ -43,6 +48,7 @@ pre, code {
 
 .navbar {
   width: 100%;
+  height: 27px;
   position: fixed;
   padding-top: .4em;
   padding-bottom: .3em;
@@ -100,6 +106,7 @@ hr {
   border-width: 1px 0 0;
   height: 0;
   margin-bottom: .9em;
+  border-color: #fff;
 }
 
 br {

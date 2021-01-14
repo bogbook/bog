@@ -230,12 +230,12 @@ bog.keys().then(keys => {
       localforage.getItem('name:' + keys.substring(0, 44)).then(name => {
         if (name) { navbar.id = '' }
 	else {
-
+          
           navbar.id = 'full'
-
+          
           var keypair = h('div')
-          keypair.appendChild(h('span', ['This is your keypair. Save your keypair to use the same identity in the future.']))
-          keypair.appendChild(h('pre', [keys]))
+          //keypair.appendChild(h('span', ['This is your keypair. Save your keypair to use the same identity in the future.']))
+          //keypair.appendChild(h('pre', [keys]))
           var input = h('textarea', {placeholder: 'Import your existing keypair here. If you\'re unable to save, your keypair is not valid.'})
           keypair.appendChild(h('div', [
             input,
@@ -252,13 +252,18 @@ bog.keys().then(keys => {
               localforage.removeItem('keypair').then(function () {
                 location.reload()
               })
-            }}, ['Delete Keypair'])
+            }}, ['Delete Keypair']),
+	    h('button', {onclick: function () {
+              keypair.parentNode.replaceChild(name, keypair)
+	    }}, ['Identify Keypair'])
           ]))
 
 
 
           var nameInput = h('input', {placeholder: 'Lurker'})
           var name = h('div', [
+	    'To continue, please identify yourself:',
+	    h('br'),
             nameInput,
             h('button', { onclick: function () {
               if (nameInput.value) {
@@ -279,7 +284,10 @@ bog.keys().then(keys => {
 		identify.parentNode.removeChild(identify)
 		navbar.id = ''
               }
-            }}, ['Identify'])
+            }}, ['Identify']),
+	    h('button', {onclick: function () {
+              name.parentNode.replaceChild(keypair, name)
+	    }}, ['Import Keypair'])
           ])
           var identify = h('div', {id: 'welcome', classList: 'message'},[
 	    'Hello! Welcome to ', 
@@ -288,11 +296,7 @@ bog.keys().then(keys => {
 	    'For more information on this project, visit the ',
 	    h('a', {href: 'https://git.sr.ht/~ev/v2'}, ['git repository']),
 	    h('hr'),
-	    keypair,
-	    h('hr'),
-	    'To continue, please identify yourself:',
-	    h('br'),
-	    name
+	    name,
 	  ])
 
           navbar.appendChild(identify)

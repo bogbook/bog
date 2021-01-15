@@ -187,10 +187,10 @@ readBog().then(feeds => {
       else if (feeds[req.feed]) {
         if (req.seq < feeds[req.feed].length) {
 	  if ((req.seq == 0) && feeds[req.feed].length) {
-            console.log('sending first post of ' + req.feed + ' to ' + bog.name(log, ws.pubkey) + ' ' + ws.pubkey + ' at ' + new Date().toLocaleString())
+            console.log('sending first post of ' + bog.name(log, req.feed) + req.feed + ' to ' + bog.name(log, ws.pubkey) + ' ' + ws.pubkey + ' at ' + new Date().toLocaleString())
           } 
 	  if (req.seq == (feeds[req.feed].length - 1)) {
-            console.log('sending latest post of ' + req.feed + ' to ' + bog.name(log, ws.pubkey) + ' '+ ws.pubkey + ' at ' + new Date().toLocaleString())
+            console.log('sending latest post of ' + bog.name(log, req.feed) + req.feed + ' to ' + bog.name(log, ws.pubkey) + ' '+ ws.pubkey + ' at ' + new Date().toLocaleString())
 
 	  }
           var resp = {}

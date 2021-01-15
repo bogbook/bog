@@ -34,6 +34,7 @@ var ews = require('express-ws')(app)
   })
 })*/
 
+
 if (fs.existsSync(appdir + 'config.json')) {
   var config = JSON.parse(fs.readFileSync(appdir + 'config.json' , 'UTF-8'))
   if (config.url) {
@@ -70,13 +71,11 @@ async function makeLog (feeds) {
     Object.keys(feeds).forEach(function(key,index) {
       all = all.concat(feeds[key])
       if (Object.keys(feeds).length -1 === index) {
-        //console.log(all)
         all.forEach((msg, index) => {
           bog.open(msg).then(opened => {
             log.push(opened)
             if (index === all.length -1) {
               console.log(log.length + ' posts from ' + (Object.keys(feeds).length) + ' authors')
-              //localforage.setItem('log', log)
             }
           })
         })
@@ -96,7 +95,7 @@ readBog().then(feeds => {
     } else {console.log('no feeds?', feeds)}
   }, 10000)
   bog.keys(appdir).then(keys => {
-    console.log(keys.substring(0, 44))
+    console.log(bog.name(log, keys.substring(0, 44)))
     app.ws('/ws', function (ws, req) {
       ws.on('message', function (msg) {
         if (msg[0] === '{') {
@@ -115,7 +114,7 @@ readBog().then(feeds => {
                 bog.box(JSON.stringify(resp), req.connected, keys).then(boxed => {
                   ws.send(boxed)
                 })
-                console.log(req.connected + ' connected at ' + time)
+                console.log(bog.name(log, req.connected) + ' ' + req.connected + ' connected at ' + time)
               }
             }
             if (feeds[req.connected]) {
@@ -127,7 +126,7 @@ readBog().then(feeds => {
               bog.box(JSON.stringify(resp), req.connected, keys).then(boxed => {
                 ws.send(boxed)
               })
-              console.log(req.connected + ' connected at ' + time)
+              console.log(bog.name(log, req.connected) + ' ' + req.connected + ' connected at ' + time)
             }
           }
         } else {
@@ -152,7 +151,7 @@ readBog().then(feeds => {
           if (feeds[opened.author][0].substring(0, 44) === opened.previous) {
             feeds[opened.author].unshift(req.msg)
             log.push(opened)
-            console.log('new post from: http://'+ url + '/#' + opened.author)
+            console.log(bog.name(log, opened.author) + ' posted: http://'+ url + '/#' + opened.author)
             var gossip = {feed: opened.author, seq: opened.seq}
             bog.box(JSON.stringify(gossip), ws.pubkey, keys).then(boxed => {
               ws.send(boxed)
@@ -161,7 +160,7 @@ readBog().then(feeds => {
         } else {
           feeds[opened.author] = [req.msg]
           log.push(opened)
-          console.log('first post from: http://'+ url + '/#'  + opened.author)
+          console.log(bog.name(log, opened.author) + ' posted: http://'+ url + '/#'  + opened.author)
           var gossip = {feed: opened.author, seq: opened.seq}
           bog.box(JSON.stringify(gossip), ws.pubkey, keys).then(boxed => {
             ws.send(boxed)
@@ -175,7 +174,7 @@ readBog().then(feeds => {
           if (msg.raw.substring(0, 44) === req.feed) {
             var message = {permalink: msg.raw}
             bog.box(JSON.stringify(message), ws.pubkey, keys).then(boxed => {
-              console.log('sent permalink http://' + url + '/#' + msg.raw.substring(0, 44) + ' to ' + ws.pubkey)
+              console.log('sent permalink http://' + url + '/#' + msg.raw.substring(0, 44) + ' to ' +  bog.name(log, ws.pubkey) + ' ' + ws.pubkey)
               ws.send(boxed)
             })
           }
@@ -188,10 +187,10 @@ readBog().then(feeds => {
       else if (feeds[req.feed]) {
         if (req.seq < feeds[req.feed].length) {
 	  if ((req.seq == 0) && feeds[req.feed].length) {
-            console.log('sending first post of ' + req.feed + ' to ' + ws.pubkey + ' at ' + new Date().toLocaleString())
+            console.log('sending first post of ' + req.feed + ' to ' + bog.name(log, ws.pubkey) + ' ' + ws.pubkey + ' at ' + new Date().toLocaleString())
           } 
 	  if (req.seq == (feeds[req.feed].length - 1)) {
-            console.log('sending latest post of ' + req.feed + ' to ' + ws.pubkey + ' at ' + new Date().toLocaleString())
+            console.log('sending latest post of ' + req.feed + ' to ' + bog.name(log, ws.pubkey) + ' '+ ws.pubkey + ' at ' + new Date().toLocaleString())
 
 	  }
           var resp = {}

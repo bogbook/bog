@@ -66,6 +66,7 @@ async function sort (log) {
   }
 }
 
+var cache = []
 
 bog.keys().then(keys => {
 
@@ -152,6 +153,11 @@ bog.keys().then(keys => {
               avatar = log[i].avatar
               log.forEach(msg => {
                 if (msg.raw.includes(avatar)) {
+		  var image = {image: msg.image}
+		  if (msg.filter) {
+		    image.filter = msg.filter
+		  }
+		  cache[id] = image
                   img.classList = 'avatar ' + msg.filter
                   return img.src = msg.image
                 }
@@ -336,11 +342,23 @@ bog.keys().then(keys => {
           return newgraph + '<br /><br />'
         }
         renderer.link = function (href, title, text) {
-          if ((href[0] == '@') || (href.length == 44)) {
-            href = '#' + href
-          }
-          var link = marked.Renderer.prototype.link.call(this, href, title, text);
-          return link
+          if (href.length == 44) {
+	    var image
+	    if (cache[href]) {
+              console.log(cache[href])
+	      image = '<a href="#' + href +'"><img src="' + cache[href].image + '" class="avatar ' + cache[href].filter + '" /></a>'
+              href = '#' + href
+              var link = image + marked.Renderer.prototype.link.call(this, href, title, text);
+              return link
+	    } else {
+              href = '#' + href
+              var link = marked.Renderer.prototype.link.call(this, href, title, text);
+              return link
+	    }
+          } else { 
+            var link = marked.Renderer.prototype.link.call(this, href, title, text);
+            return link
+	  }
         }
 
         marked.setOptions({

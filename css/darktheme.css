@@ -15,15 +15,12 @@ hr {
   border-color: #ddd;
 }
 
-.profile {
+.profile, .message {
   background: #333;
+  color: #f5f5f5;
 }
 
-.message {
-  background: #333;
-}
-
-a {color: cyan;}
+a, .navbar a {color: cyan;}
 
 textarea, input {
   color: #f5f5f5;

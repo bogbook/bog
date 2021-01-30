@@ -1,4 +1,6 @@
 var fs = require('fs')
+var chalk = require('chalk')
+
 var homedir = require('os').homedir()
 
 var bog = require('./util')
@@ -104,7 +106,7 @@ readBog().then(feeds => {
             var time = new Date().toLocaleString()
             if (!feeds[req.connected]) {
               if (fortified) {
-                console.log('access denied to ' + req.connected  + ' at ' + time)
+                console.log(chalk.red('access denied') + ' to ' + chalk.grey(req.connected)  + ' at ' + time)
               } else {
                 var resp = {pubkey: keys.substring(0, 44), url: url, welcome: 'Hey! Welcome to Bogbook. If you do not see any posts, consider adding `ws://bogbook.com/ws` to your [pubs](#pubs) and syncing my feed. —[ev](#Q++V5BbvWIg8B+TqtC9ZKFhetruuw+nOgxEqfjlOZI0=)', connected: ews.getWss().clients.size}
                 if (config && config.welcome) {
@@ -114,7 +116,7 @@ readBog().then(feeds => {
                 bog.box(JSON.stringify(resp), req.connected, keys).then(boxed => {
                   ws.send(boxed)
                 })
-                console.log(bog.name(log, req.connected) + ' ' + req.connected + ' connected at ' + time)
+                console.log(chalk.green('connect ') + chalk.cyan(bog.name(log, req.connected)) + ' ' + chalk.grey(req.connected) + ' at ' + time)
               }
             }
             if (feeds[req.connected]) {
@@ -126,7 +128,7 @@ readBog().then(feeds => {
               bog.box(JSON.stringify(resp), req.connected, keys).then(boxed => {
                 ws.send(boxed)
               })
-              console.log(bog.name(log, req.connected) + ' ' + req.connected + ' connected at ' + time)
+              console.log(chalk.green('connect ') + chalk.cyan(bog.name(log, req.connected)) + ' ' + chalk.grey(req.connected) + ' at ' + time)
             }
           }
         } else {
@@ -151,7 +153,11 @@ readBog().then(feeds => {
           if (feeds[opened.author][0].substring(0, 44) === opened.previous) {
             feeds[opened.author].unshift(req.msg)
             log.push(opened)
-            console.log(bog.name(log, opened.author) + ' posted: http://'+ url + '/#' + opened.author)
+	    var via = ''
+	    if (opened.author != ws.pubkey) {
+              via = ' via ' + chalk.cyan(bog.name(log, ws.pubkey)) + ' ' +  chalk.grey(ws.pubkey)
+	    }
+            console.log(chalk.magenta('post ' + opened.seq) + ' from ' + chalk.cyan(bog.name(log, opened.author)) + ' ' + chalk.grey(opened.author) + via)
             var gossip = {feed: opened.author, seq: opened.seq}
             bog.box(JSON.stringify(gossip), ws.pubkey, keys).then(boxed => {
               ws.send(boxed)
@@ -160,7 +166,11 @@ readBog().then(feeds => {
         } else {
           feeds[opened.author] = [req.msg]
           log.push(opened)
-          console.log(bog.name(log, opened.author) + ' posted: http://'+ url + '/#'  + opened.author)
+	  var via = ''
+	  if (opened.author != ws.pubkey) {
+            via = ' via ' + chalk.cyan(bog.name(log, ws.pubkey)) + ' ' +  chalk.grey(ws.pubkey)
+	  }
+          console.log(chalk.magenta('post ' + opened.seq) + ' from ' + chalk.cyan(bog.name(log, opened.author)) + ' '  + chalk.grey(opened.author) + via)
           var gossip = {feed: opened.author, seq: opened.seq}
           bog.box(JSON.stringify(gossip), ws.pubkey, keys).then(boxed => {
             ws.send(boxed)
@@ -187,10 +197,10 @@ readBog().then(feeds => {
       else if (feeds[req.feed]) {
         if (req.seq < feeds[req.feed].length) {
 	  if ((req.seq == 0) && feeds[req.feed].length) {
-            console.log('sending first post of ' + bog.name(log, req.feed) + req.feed + ' to ' + bog.name(log, ws.pubkey) + ' ' + ws.pubkey + ' at ' + new Date().toLocaleString())
+            console.log(chalk.yellow('sync ') + chalk.cyan(bog.name(log, req.feed)) + ' ' + chalk.grey(req.feed) + ' to ' + chalk.cyan(bog.name(log, ws.pubkey)) + ' ' + chalk.grey(ws.pubkey) + ' at ' + new Date().toLocaleString())
           } 
 	  if (req.seq == (feeds[req.feed].length - 1)) {
-            console.log('sending latest post of ' + bog.name(log, req.feed) + req.feed + ' to ' + bog.name(log, ws.pubkey) + ' '+ ws.pubkey + ' at ' + new Date().toLocaleString())
+            console.log(chalk.yellow('done ') + chalk.cyan(bog.name(log, req.feed)) + ' ' + chalk.grey(req.feed) + ' to ' + chalk.cyan(bog.name(log, ws.pubkey)) + ' '+ chalk.grey(ws.pubkey) + ' at ' + new Date().toLocaleString())
 
 	  }
           var resp = {}

@@ -14,14 +14,29 @@ The bogbook protocol is secure (no one can modify your posts) and the data exist
 + Electronic Mail: [ev@evbogue.com](mailto:ev@evbogue.com)
 + IRC: irc.freenode.net #bogbook
 
-If you want to see posts from others, try syncing my feed: http://bogbook.com/#evS+fPu6UGYfcmG5s4X18ORNHyNVrBgOJJZ2uJas+oE=
+---
 
-Prior art:
+### Features
+
++ ed25519 keypairs. Onload Bogbook will generate an [ed25519](http://ed25519.cr.yp.to/) [cr.yp.to] signing keypair. All of your posts will be signed with this keypair and appended to your log. To continue using the same identity, back up your keypair on the keys page. Example: http://bogbook.com/#key 
++ identify yourself with a name. Onload Bogbook will ask you to identify your keypair with a nickname. You can change this name at any time by posting a new `type: name` post via your profile page. Once you've added a name, consider introducing yourself here: http://bogbook.com/#M1jR2wBtUO2v+3HIa4xypc3f0+Z6YvYY2wKn/hEe/QQ=
++ markdown text posts. You can write messages in markdown by typing into the composer. You will see a real-time rendering of your markdown above the composer as you type. Once you are happy with your post, press 'Publish' to sign the message, append it to your log, and transmit your post to your bogbook pubs.  
++ image posts. You can attach one image per post. This image is by default cropped to a 680 x 680 px square and encoded using Base64. You can then apply a css filter to the image, if you choose. If the image does not look good as a square, you can uncrop the image by clicking the 'uncrop' button.
++ profile bios. You can choose for any of your posts to show up on your profile by clicking the '+' button on the individual post, and then pressing the 'Set as bio' button.
++ profile images. Once you have posted an image, you can choose to use that image as your profile photo by clicking the '+' button and then pressing the 'Set as profile phoot' button.
++ profile background/banners. Once you have posted an image, you can choose to use that image as your profile background by clicking the '+' button and then pressing the 'Set as profile background' button.
++ feed replication. Your signed feed exists first in your web browser. When you request feeds from bogbook pub servers, these feeds replicate into your browser's IndexedDB where they are stored. To replicate your posts to other bogbook pub servers, you will need to add those pubs on the key page. Example: If you're using http://bogbook.com/ your default pub will probably be `ws://bogbook.com/ws`. To add more pubs navigate to your keys page where there is a section for adding more pubs. Try adding `ws://bogbook.com/ws`, `ws://evbogue.com/ws`, and `ws://gwenbell.com/ws`. If you're running bogbook on your localhost, then your default pub will probably be `ws://localhost:8081/ws/` This adds some degree of resiliance to the bogbook network, because if your default pub server goes down you can create your own or choose a new pub server.
++ permalinks. There is no need to replicate an entire feed to view a single message. If you do not have a message in your browser, it will reach out to your pub server and request the individual message. Example: http://evbogue.com/#upRVU8f3V18TJqDyweSckS5BiRYBXyHjBAoMQYHOWmA=  
++ keyword search and hashtags. Use the search input box in the top right corner to search the feeds present in your browser. You can search for keywords, phrases, or hashtags. Examples: http://bogbook.com/#?#introductions http://bogbook.com/#?bogbook -- full-text search is coming someday. Search is local-only, so pubs are not aware of searchterms.  
++ self-moderation. Don't like what you are hearing? Navigate to the profile page of the post author and click the 'Delete Feed' button. Upon pressing this button a sophisticated algorith will take just a moment to delete the feed from your browser. Once the feed is delete, you will no longer sync the feed and will no longer receive new posts from the author of the feed. The exception to this is public bog pub owners. Example: If you're using Bogbook.com it will always sync the owner of that pub, which is [me](http://bogbook.com/#evS+fPu6UGYfcmG5s4X18ORNHyNVrBgOJJZ2uJas+oE=).
++ do it yourself. Running your own bogbook pub is as easy as cloning bogbook down to your local or virtual computer. 
+
+---
+
+### Prior art
 
 + [old bogbook](http://git.sr.ht/~ev/oldbogbookv1) -- the protocol wasn't as optimized as I wanted, and the replication sucked
 + [ssb](http://scuttlebot.io) -- While I invested 4 years developing ssb apps, ssb was always difficult to install and the data never replicated into browsers
-
----
 
 ### Run it
 
@@ -83,11 +98,11 @@ you can change your bogbook port with
 
 ---
 
-## log spec
+### log spec
 
 The aim of bogbook is to be a public gossiped news and photo sharing network where you can apply filters to images. There are no private messages on the log (that became a security issue with ssb), we only encrypt/decrypt messages in transit during replication.
 
-### keypairs
+#### keypairs
 
 keypairs are ed25519 keypairs, encoded in base64, concatenating the public key to private key
 
@@ -97,7 +112,7 @@ keypairs are ed25519 keypairs, encoded in base64, concatenating the public key t
 
 There can be no '/' characters in the public key, because file systems do not like slashes, so we will throw them out when generating new keypairs. If there is a '/' in an imported keypair, we should error out on import.
 
-### signed messages
+#### signed messages
 
 signed messages exist on a single line, and consist of a hash of the signature, the public key of an author, and the signature
 
@@ -105,7 +120,7 @@ signed messages exist on a single line, and consist of a hash of the signature, 
 <sha2hash><ed25519 public key><ed25519 signature>
 ```
 
-### opened messages
+#### opened messages
 
 when opened, it could look this way:
 
@@ -129,7 +144,7 @@ if there's an edit field pointing at a post, then we replace the post with the e
 
 NOTE: Unlike bogbook and others, we will not have a reply field or a recp field. We can easily search text to discover if it contains publickeys and/or sha2 hashes of messages that may be contained in our log. These can simply be included in the composer field, as in how it worked in news.
 
-### gossip/replication
+#### gossip/replication
 
 servers and clients all have ed25519 keypairs.
 

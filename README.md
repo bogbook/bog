@@ -1,4 +1,4 @@
-# bogbook v2 spec
+# bogbook
 
 ### by Everett Bogue
 
@@ -105,7 +105,7 @@ you can change your bogbook port with
 
 ---
 
-### log spec
+## bogbook v2 spec
 
 The aim of bogbook is to be a public gossiped news and photo sharing network where you can apply filters to images. There are no private messages on the log (that became a security issue with ssb), we only encrypt/decrypt messages in transit during replication.
 

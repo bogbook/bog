@@ -5,7 +5,7 @@ var homedir = require('os').homedir()
 
 var bog = require('./util')
 
-var root = 'bogbookv2'
+var root = 'bogbook'
 
 if (process.argv[2]) {
   root = process.argv[2]

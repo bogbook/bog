@@ -11,14 +11,14 @@ On bogbook you can post images with filters and posts that are rendered in markd
 The bogbook protocol is secure (no one can modify your posts) and the data exists in your browser, as well as any bogbook pubs you have replicated to, and all of the clients who have replicated your posts from bogbook pubs.  
 
 + Try it: [bogbook.com](http://bogbook.com/)
-+ Help: [ev@evbogue.com](mailto:ev@evbogue.com)
++ Electronic Mail: [ev@evbogue.com](mailto:ev@evbogue.com)
 + IRC: irc.freenode.net #bogbook
 
-If you want to see posts from others, try syncing my feed: http://bogbook.com/#Q++V5BbvWIg8B+TqtC9ZKFhetruuw+nOgxEqfjlOZI0=
+If you want to see posts from others, try syncing my feed: http://bogbook.com/#evS+fPu6UGYfcmG5s4X18ORNHyNVrBgOJJZ2uJas+oE=
 
 Prior art:
 
-+ [old bogbook](http://git.sr.ht/~ev/bogbook) -- the protocol wasn't as optimized as I wanted, and the replication sucked
++ [old bogbook](http://git.sr.ht/~ev/oldbogbookv1) -- the protocol wasn't as optimized as I wanted, and the replication sucked
 + [ssb](http://scuttlebot.io) -- While I invested 4 years developing ssb apps, ssb was always difficult to install and the data never replicated into browsers
 
 ---
@@ -26,8 +26,8 @@ Prior art:
 ### Run it
 
 ```
-git clone https://git.sr.ht/~ev/v2
-cd v2
+git clone https://git.sr.ht/~ev/bogbook
+cd bogbook
 npm install
 node bin
 ```

@@ -31,6 +31,13 @@ The bogbook protocol is secure (no one can modify your posts) and the data exist
 + **self-moderation**. Don't like what you are hearing? Navigate to the profile page of the post author and click the 'Delete Feed' button. Upon pressing this button a sophisticated algorith will take just a moment to delete the feed from your browser. Once the feed is delete, you will no longer sync the feed and will no longer receive new posts from the author of the feed. Only you control the feeds that you sync to your browser. The exception to this is public bog pub owners. Example: If you're using Bogbook.com it will always sync the owner of that pub, which is [me](http://bogbook.com/#evS+fPu6UGYfcmG5s4X18ORNHyNVrBgOJJZ2uJas+oE=).
 + **do it yourself**. Running your own bogbook pub is as easy as cloning bogbook down to your local or virtual computer. 
 
+#### Light mode/Dark mode
+
+Toggle between light and dark modes using the brightness emoji in the top right of the navbar.
+
+![Light mode](lightmode.png)
+![Dark dode](darkmode.png)
+
 ---
 
 ### Prior art

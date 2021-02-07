@@ -27,7 +27,7 @@ if (!fs.existsSync(appdir + 'stats/')) { fs.mkdirSync(appdir + 'stats/') }
 var counter = 0
 
 if (fs.existsSync(appdir + 'counter')) {
-  counter = fs.readFileSync(appdir + 'counter', 'UTF-8')
+  counter = JSON.parse(fs.readFileSync(appdir + 'counter', 'UTF-8'))
 }
 
 var express = require('express')
@@ -108,7 +108,8 @@ readBog().then(feeds => {
     makeLog(feeds)
     setInterval(function () {
       if (feeds) {
-        fs.writeFileSync(appdir + 'counter', counter, 'UTF-8')
+
+        fs.writeFileSync(appdir + 'counter', JSON.stringify(counter), 'UTF-8')
         for (var key in connects) {
           var value = connects[key]
   	fs.writeFileSync(appdir + 'stats/' + key, JSON.stringify(value), 'UTF-8')

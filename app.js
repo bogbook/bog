@@ -925,8 +925,7 @@ bog.keys().then(keys => {
               }
               var welcome = h('div', {classList: 'message'}, [
                 h('div', {innerHTML: marked(
-                  'Connected to [' + req.url + '](http://' + req.url + ')' + connections + '\n\n' +
-                  req.welcome
+                  'You\'ve connected to [' + req.url + '](http://' + req.url + ').' + req.welcome
                 )})
               ])
               scroller.insertBefore(welcome, scroller.childNodes[1])

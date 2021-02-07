@@ -19,6 +19,9 @@ var fortified = false
 
 var log = []
 
+var counter = 0
+var connects = []
+
 if (!fs.existsSync(appdir)) { fs.mkdirSync(appdir) }
 if (!fs.existsSync(appdir + 'bogs/')) { fs.mkdirSync(appdir + 'bogs/') }
 
@@ -36,6 +39,7 @@ var ews = require('express-ws')(app)
   })
 })*/
 
+var ad = 'Hello World!'
 
 if (fs.existsSync(appdir + 'config.json')) {
   var config = JSON.parse(fs.readFileSync(appdir + 'config.json' , 'UTF-8'))
@@ -103,15 +107,22 @@ readBog().then(feeds => {
         if (msg[0] === '{') {
           var req = JSON.parse(msg)
           if (req.connected) {
+	    counter++
+	    if (connects[req.connected]) {
+	      connects[req.connected].counter++
+	    } else {
+              connects[req.connected] = {counter: 1} 
+	    }
+	    if (config && config.welcome) {
+	      ad = config.welcome
+	    }
+	    var welcome = ' There have been ' + counter + ' visits from ' + Object.keys(connects).length + ' visitors. \n\n' + ad
             var time = new Date().toLocaleString()
             if (!feeds[req.connected]) {
               if (fortified) {
                 console.log(chalk.red('access denied') + ' to ' + chalk.grey(req.connected)  + ' at ' + time)
               } else {
-                var resp = {pubkey: keys.substring(0, 44), url: url, welcome: 'Hey! Welcome to Bogbook. If you do not see any posts, consider adding `ws://bogbook.com/ws` to your [pubs](#pubs) and syncing my feed. —[ev](#Q++V5BbvWIg8B+TqtC9ZKFhetruuw+nOgxEqfjlOZI0=)', connected: ews.getWss().clients.size}
-                if (config && config.welcome) {
-                  resp.welcome = config.welcome
-                }
+                var resp = {pubkey: keys.substring(0, 44), url: url, welcome: welcome, connected: ews.getWss().clients.size}
                 ws.pubkey = req.connected
                 bog.box(JSON.stringify(resp), req.connected, keys).then(boxed => {
                   ws.send(boxed)
@@ -120,10 +131,7 @@ readBog().then(feeds => {
               }
             }
             if (feeds[req.connected]) {
-              var resp = {pubkey: keys.substring(0, 44), url: url, welcome: 'Hey! Welcome to Bogbook. If you do not see any posts, consider adding `ws://bogbook.com/ws` to your [pubs](#pubs) and syncing my feed. —[ev](#Q++V5BbvWIg8B+TqtC9ZKFhetruuw+nOgxEqfjlOZI0=)', connected: ews.getWss().clients.size}
-              if (config && config.announce) {
-                resp.welcome = config.announce
-              }
+              var resp = {pubkey: keys.substring(0, 44), url: url, welcome: welcome, connected: ews.getWss().clients.size}
               ws.pubkey = req.connected
               bog.box(JSON.stringify(resp), req.connected, keys).then(boxed => {
                 ws.send(boxed)

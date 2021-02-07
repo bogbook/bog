@@ -32,6 +32,19 @@ The bogbook protocol is secure (no one can modify your posts) and the data exist
 + **self-moderation**. Don't like what you are hearing? Navigate to the profile page of the post author and click the 'Delete Feed' button. Upon pressing this button a sophisticated algorithm will take just a moment to delete the feed from your browser. Once the feed is delete, you will no longer see old posts or receive new posts from the author of the feed. With bogbook, only you control the feeds that you sync into your browser. The exception to this is public bog pub owners. Example: If you're using Bogbook.com it will always sync the owner of that pub, which is [me](http://bogbook.com/#evS+fPu6UGYfcmG5s4X18ORNHyNVrBgOJJZ2uJas+oE=).
 + **do it yourself**. Running your own bogbook pub is as easy as cloning bogbook down to your local or virtual computer. 
 
+---
+
+### Comparisons to other publishing networks
+
+Network | Typography | Logins
+---
+Web2.0 | Centralized | Username/Password
+Mastadon/etc | Federated | Username/Password
+Scuttlebutt | Distributed | signing keypair
+---
+
+---
+
 #### Light mode/Dark mode
 
 Toggle between light and dark modes using the brightness emoji in the top right of the navbar.
@@ -45,6 +58,8 @@ Toggle between light and dark modes using the brightness emoji in the top right 
 
 + [old bogbook](http://git.sr.ht/~ev/oldbogbookv1) -- the protocol wasn't as optimized as I wanted, and the replication sucked
 + [ssb](http://scuttlebot.io) -- While I invested 4 years developing ssb apps, ssb was always difficult to install and the data never replicated into browsers
+
+---
 
 ### Run it
 

@@ -34,17 +34,6 @@ The bogbook protocol is secure (no one can modify your posts) and the data exist
 
 ---
 
-### Comparisons to other publishing networks
-
-Network | Typography | Logins
----
-Web2.0 | Centralized | Username/Password
-Mastadon/etc | Federated | Username/Password
-Scuttlebutt | Distributed | signing keypair
----
-
----
-
 #### Light mode/Dark mode
 
 Toggle between light and dark modes using the brightness emoji in the top right of the navbar.

@@ -63,7 +63,7 @@ Navigate to http://localhost:8081/ to view your local bogbook
 
 ### use an alterative .bogbook folder
 
-The first argument passed to node will specify a different directly to save bogs, the server keypair, and used to find config options.
+The first argument passed to node will specify a different folder to save bogs, stats, the server keypair, and config options.
 
 ```
 node bin testbognet
@@ -83,7 +83,7 @@ Save a `config.json` file to your `.bogbookv2` folder in order to configure your
 
 #### fortify your bog
 
-fortify your bogs by only accepting replication requests from existing boggers. Bogbook will only respond to messages from public keys that have already published bogs to the server, this means all lurkers and new boggers will be unable to publish or replicate from the bogbook while the bog is fortified. This could be useful for a private bogging group, or for possible abuse cases.
+fortify your bogs by only accepting replication requests from existing boggers. Bogbook will only respond to messages from public keys that have already published bogs to the server. This means all lurkers and new boggers will be unable to publish or replicate from the bogbook while the bog is fortified. This could be useful for a private bogging group, or for handling possible abuse cases.
 
 ```
 {"fort": "true"}
@@ -91,7 +91,7 @@ fortify your bogs by only accepting replication requests from existing boggers. 
 
 #### customize pub announcements/welcome messages
 
-announcement messages are sent to boggers who have existing feeds on the server. welcome messages are sent to lurkers.
+`announcement` messages are sent to boggers who have existing feeds on the server. `welcome` messages are sent to lurkers.
 
 ```
 {
@@ -112,7 +112,7 @@ you can change your bogbook port with
 
 ## bogbook v2 spec
 
-The aim of bogbook is to be a public gossiped news and photo sharing network where you can apply filters to images. There are no private messages on the log (that became a security issue with ssb), we only encrypt/decrypt messages in transit during replication.
+The aim of bogbook is to be a public gossiped news and photo sharing network where you can apply filters to images. There are no private messages on the log (that became a security issue with ssb). We only encrypt/decrypt messages in transit during replication.
 
 #### keypairs
 
@@ -150,11 +150,7 @@ when opened, it could look this way:
 
 `seq` is not optional, because we need it to sync the log.
 
-Everything else is optional, but we should have at least `text` or an `image`. The reason we crop images to 680x680 pixels is we want the image size to be managable for replication.
-
-if there's an edit field pointing at a post, then we replace the post with the edit.
-
-NOTE: Unlike bogbook and others, we will not have a reply field or a recp field. We can easily search text to discover if it contains publickeys and/or sha2 hashes of messages that may be contained in our log. These can simply be included in the composer field, as in how it worked in news.
+Everything else is optional, but we should have at least `text` or an `image`. The reason we crop images to 680x680 pixels is we want the image size to be manageable for replication.
 
 #### gossip/replication
 

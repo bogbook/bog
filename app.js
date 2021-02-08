@@ -332,8 +332,9 @@ bog.keys().then(keys => {
 	      var counter = 0
 	      log.forEach(msg => {
 	        var search = word.toUpperCase()
-                if (msg.text && msg.text.toUpperCase().split(" ").indexOf(search)!= -1) {
-                  counter++
+                if (msg.text && msg.text.toUpperCase().includes(search)) {
+                //if (msg.text && msg.text.toUpperCase().split(" ").indexOf(search)!= -1) {
+                  ++counter
 		}
 	      })
               var hashtag = "<a href='#?" + word + "'>" + word + "</a><sup>(" + counter + ")</sup>"

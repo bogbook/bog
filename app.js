@@ -325,11 +325,18 @@ bog.keys().then(keys => {
             word = array[i]
             if (word.startsWith('#')) {
               let end
-              if ((word[word.length -1] === '.') || (word[word.length - 1] === ',') || (word[word.length -1] === ':')) {
+              if ((word[word.length -1] === '.') || (word[word.length - 1] === ',') || (word[word.length -1] === ':') || (word[word.length -1] === '?')) {
                 end = word[word.length - 1]
                 word = word.substring(0, word.length - 1)
               }
-              var hashtag = "<a href='#?" + word + "'>" + word + "</a>"
+	      var counter = 0
+	      log.forEach(msg => {
+	        var search = word.toUpperCase()
+                if (msg.text && msg.text.toUpperCase().split(" ").indexOf(search)!= -1) {
+                  counter++
+		}
+	      })
+              var hashtag = "<a href='#?" + word + "'>" + word + "</a><sup>(" + counter + ")</sup>"
               if (end) {
                 hashtag = hashtag + end
               }

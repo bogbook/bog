@@ -266,7 +266,7 @@ bog.keys().then(keys => {
 
 
 
-          var nameInput = h('input', {placeholder: 'Lurker'})
+          var nameInput = h('input', {placeholder: keys.substring(0, 10) + '...'})
           var name = h('div', [
 	    'To continue, please identify yourself:',
 	    h('br'),

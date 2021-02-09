@@ -300,7 +300,7 @@ bog.keys().then(keys => {
 	    h('a', {href: location.href}, [config.title]),
 	    h('br'),
 	    'For more information on this project, visit the ',
-	    h('a', {href: 'https://git.sr.ht/~ev/v2'}, ['git repository']),
+	    h('a', {href: 'https://git.sr.ht/~ev/bogbook'}, ['git repository']),
 	    h('hr'),
 	    name,
 	  ])

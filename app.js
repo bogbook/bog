@@ -233,7 +233,9 @@ bog.keys().then(keys => {
         ])
       ])
 
-      localforage.getItem('name:' + keys.substring(0, 44)).then(name => {
+      /* the UX on this is horrible
+
+        localforage.getItem('name:' + keys.substring(0, 44)).then(name => {
         if (name) { navbar.id = '' }
 	else {
           
@@ -307,7 +309,7 @@ bog.keys().then(keys => {
 
           navbar.appendChild(identify)
         }
-      })
+      })*/
 
       localforage.getItem('theme').then(theme => {
         if (theme === 'dark') {

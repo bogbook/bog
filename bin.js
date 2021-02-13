@@ -80,7 +80,6 @@ async function readBog () {
   return feeds
 }
 
-
 async function makeLog (feeds) {
   if (feeds) {
     console.log('generating log from feeds, this may take a moment to complete...')
@@ -105,10 +104,11 @@ async function makeLog (feeds) {
 readBog().then(feeds => {
   readVisits().then(connects => {
     console.log('There have been ' + counter + ' visits from ' + Object.keys(connects).length + ' visitors.')
+
     makeLog(feeds)
+
     setInterval(function () {
       if (feeds) {
-
         fs.writeFileSync(appdir + 'counter', JSON.stringify(counter), 'UTF-8')
         for (var key in connects) {
           var value = connects[key]
@@ -120,6 +120,7 @@ readBog().then(feeds => {
         }
       } else {console.log('no feeds?', feeds)}
     }, 10000)
+
     bog.keys(appdir).then(keys => {
       console.log(bog.name(log, keys.substring(0, 44)))
       app.ws('/ws', function (ws, req) {

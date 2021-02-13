@@ -228,22 +228,19 @@ bog.keys().then(keys => {
           h('a', {href: '#?' + keys.substring(0, 44)}, ['Mentions']),
           ' ',
           h('a', {href: '#key'}, ['Key']),
+	  h('a', {href: 'https://git.sr.ht/~ev/bogbook', classList: 'right', target: '_blank'}, ['git']),
           bulbon,
           search
         ])
       ])
 
-      /* the UX on this is horrible
+      localforage.getItem('keypair').then(checkkey => {
+        localforage.getItem('name:' + keys.substring(0, 44)).then(checkname => {
 
-        localforage.getItem('name:' + keys.substring(0, 44)).then(name => {
-        if (name) { navbar.id = '' }
-	else {
-          
-          navbar.id = 'full'
-          
+        if (!checkkey || !checkname) {
+	  navbar.id = 'full'
+ 
           var keypair = h('div')
-          //keypair.appendChild(h('span', ['This is your keypair. Save your keypair to use the same identity in the future.']))
-          //keypair.appendChild(h('pre', [keys]))
           var input = h('textarea', {placeholder: 'Import your existing keypair here. If you\'re unable to save, your keypair is not valid.'})
           keypair.appendChild(h('div', [
             input,
@@ -255,22 +252,29 @@ bog.keys().then(keys => {
                   })
                 }
               }
-            }, ['Import Ed25519 Keypair']),
+            }, ['Import keypair']),
+	    h('br'),
+	    'Or, ',
+	    h('a', {href: '', onclick: function (e) {
+	      e.preventDefault()
+              keypair.parentNode.replaceChild(name, keypair)
+	    }}, ['choose a name.'])
+          ]))
+
+          var nameInput = h('input', {placeholder: keys.substring(0, 10) + '...'})
+          var name = h('div', [
+            h('span', [
+	      'This is a new Ed25519 keypair',
+	      h('sup', ['(', h('a', {href: 'https://ed25519.cr.yp.to/', target: '_blank'}, ['?']), ')']),
+	      ', save a copy of it somewhere safe.']),
+            h('pre', [keys]),
             h('button', {onclick: function () {
               localforage.removeItem('keypair').then(function () {
                 location.reload()
               })
-            }}, ['Delete Keypair']),
-	    h('button', {onclick: function () {
-              keypair.parentNode.replaceChild(name, keypair)
-	    }}, ['Identify Keypair'])
-          ]))
-
-
-
-          var nameInput = h('input', {placeholder: keys.substring(0, 10) + '...'})
-          var name = h('div', [
-	    'To continue, please identify yourself:',
+            }}, ['Regenerate']),
+	    h('hr'),
+	    'To begin, please choose a name:',
 	    h('br'),
             nameInput,
             h('button', { onclick: function () {
@@ -289,27 +293,33 @@ bog.keys().then(keys => {
                   obj.previous = null
                   createpost(obj, keys)
                 }
+		localforage.setItem('keypair', keys)
 		identify.parentNode.removeChild(identify)
 		navbar.id = ''
               }
-            }}, ['Identify']),
-	    h('button', {onclick: function () {
+            }}, ['Publish']),
+	    h('br'),
+	    'Or, ',
+	    h('a', {href: '', onclick: function (e) {
+	      e.preventDefault()
               name.parentNode.replaceChild(keypair, name)
-	    }}, ['Import Keypair'])
+	    }}, ['Import an existing keypair'])
           ])
           var identify = h('div', {id: 'welcome', classList: 'message'},[
-	    'Hello! Welcome to ', 
-	    h('a', {href: location.href}, [config.title]),
-	    h('br'),
-	    'For more information on this project, visit the ',
-	    h('a', {href: 'https://git.sr.ht/~ev/bogbook'}, ['git repository']),
-	    h('hr'),
-	    name,
+	    //'Hello! Welcome to ', 
+	    //h('a', {href: location.href}, [config.title]),
+	    //h('br'),
+            name,
 	  ])
 
           navbar.appendChild(identify)
-        }
-      })*/
+	} 
+	if (checkkey && checkname) {
+	  navbar.id = ''
+          //check for name -- if name then gossip
+	}
+	})
+      })
 
       localforage.getItem('theme').then(theme => {
         if (theme === 'dark') {

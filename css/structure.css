@@ -5,6 +5,7 @@ body {
   overflow-wrap: break-word;
   word-wrap: break-word;
   word-break: break-word;
+  transition: all .5s ease-in-out;
 }
 
 p {
@@ -13,7 +14,17 @@ p {
 
 #full {
   height: 100%;
-  background-color: rgba(0,0,0,0.8);
+  background-color: rgba(255,255,255,0.6);
+}
+
+.search input {
+  width: 25px;
+  transition: all .5s ease-in-out;
+}
+
+.search input:focus {
+  transition: all .5s ease-in-out;
+  width: 165px; 
 }
 
 pre, code {
@@ -56,6 +67,7 @@ pre, code {
   z-index: 1000;
   left: 0; right: 0; top: 0;
 }
+
 
 .navbar .internal {
   max-width: 97%;
@@ -171,6 +183,7 @@ textarea {
   #screen { top: 4em; }
   #scroller {max-width: 100%;}
   textarea { height: 200px;}
+  .navbar .message { margin-top: 2em; }
 }
 
 input {

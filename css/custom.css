@@ -5,7 +5,7 @@ body, button, textarea, input {
 }
 
 .navbar {
-  background: #fff;
+  background: #f5f5f5;
 }
 
 .profile, .message {
@@ -14,10 +14,17 @@ body, button, textarea, input {
 }
 
 body {
-  background: #ccc;
+  background: #e0e0e0;
 }
 
 .navbar .message {
-  background: #ccc;
+  background: #fff;
 }
 
+a {
+  color: #008b8b;
+}
+
+pre, code {
+  color: #555;
+}

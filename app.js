@@ -182,17 +182,23 @@ bog.keys().then(keys => {
 
       start()
 
-      var searchInput = h('input', {id: 'searchInput', placeholder: config.searchterm})
-      var searchButton = h('button', {
+      var searchInput = h('input', {
+        id: 'searchInput', 
+	//placeholder: config.searchterm
+	placeholder: '🔍'
+      })
+      var searchButton = h('a', {
+          href: '',
           id: 'searchButton',
-          onclick: function () {
+          onclick: function (e) {
+	    e.preventDefault()
             if (searchInput.value) {
               location.hash = '?' + searchInput.value
             }
           }
-        }, ['Search'])
+        }, [''])
 
-      var search = h('div', {classList: 'right'}, [
+      var search = h('div', {classList: 'right search'}, [
         searchInput,
         searchButton
       ])
@@ -221,14 +227,14 @@ bog.keys().then(keys => {
         h('div', {classList: 'internal'}, [
           h('a', {href: '#' + keys.substring(0, 44)}, [getImage(keys.substring(0, 44)), getName(keys.substring(0, 44))]),
           ' ',
-          h('code', [keys.substring(0, 7)]),
-          ' ',
-          h('a', {href: '#'}, ['Home']),
+          //h('code', [keys.substring(0, 7)]),
+          //' ',
+          h('a', {href: '#'}, ['🏦']),
           ' ',
           h('a', {href: '#?' + keys.substring(0, 44)}, ['Mentions']),
           ' ',
           h('a', {href: '#key'}, ['Key']),
-	  h('a', {href: 'https://git.sr.ht/~ev/bogbook', classList: 'right', target: '_blank'}, ['git']),
+	  h('a', {href: 'https://git.sr.ht/~ev/bogbook', classList: 'right', target: '_blank'}, ['💵']),
           bulbon,
           search
         ])
@@ -268,7 +274,7 @@ bog.keys().then(keys => {
           var name = h('div', [
 	    
 	    h('span', {classList: 'right'}, [h('a', {href: ''}, [human(new Date(ts))])]),
-	    h('span', [h('a', {href: ''}, [location.hostname])]),
+	    h('span', [h('a', {href: ''}, [document.title])]),
 	    h('br'),
 	    h('span', [
 	    'This is a Bogbook',

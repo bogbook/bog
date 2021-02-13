@@ -3,6 +3,10 @@ body {
   color: #f5f5f5;
 }
 
+#full {
+  background-color: rgba(0,0,0,0.6)
+}
+
 pre, code {
   color: #ccc;
 }

@@ -1230,7 +1230,7 @@ bog.keys().then(keys => {
         var header = h('div', [
           h('span', {classList: 'right'}, [
             h('code', [keys.substring(0, 7)]),
-            ' 📝'
+            ' Preview'
           ]),
           h('a', {href: '#' + keys.substring(0, 44)}, [getImage(keys.substring(0, 44)), getName(keys.substring(0, 44))])
         ])

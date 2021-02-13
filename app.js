@@ -258,23 +258,38 @@ bog.keys().then(keys => {
 	    h('a', {href: '', onclick: function (e) {
 	      e.preventDefault()
               keypair.parentNode.replaceChild(name, keypair)
-	    }}, ['choose a name.'])
+	    }}, ['generate a new keypair']),
+	    '.'
           ]))
+ 
+          var ts = Date.now()
 
           var nameInput = h('input', {placeholder: keys.substring(0, 10) + '...'})
           var name = h('div', [
+	    
+	    h('span', {classList: 'right'}, [h('a', {href: ''}, [human(new Date(ts))])]),
+	    h('span', [h('a', {href: ''}, [location.hostname])]),
+	    h('br'),
+	    h('span', [
+	    'This is a Bogbook',
+            h('sup', ['(', h('a', {href: 'https://git.sr.ht/~ev/bogbook', target: '_blank'}, ['?']), ')']),
+	    ' pub.',
+	    h('br'),
+	    'Bogbook is an open source distributed social network of signed feeds replicated between pub servers.'
+	    ]),
+	    h('hr'),
             h('span', [
-	      'This is a new Ed25519 keypair',
+	      '1. Generate a new keypair',
 	      h('sup', ['(', h('a', {href: 'https://ed25519.cr.yp.to/', target: '_blank'}, ['?']), ')']),
-	      ', save a copy of it somewhere safe.']),
+	      '. Save a copy somewhere safe.']),
             h('pre', [keys]),
             h('button', {onclick: function () {
               localforage.removeItem('keypair').then(function () {
                 location.reload()
               })
-            }}, ['Regenerate']),
+            }}, ['Generate']),
 	    h('hr'),
-	    'To begin, please choose a name:',
+	    '2. Choose a name to associate with your keypair:',
 	    h('br'),
             nameInput,
             h('button', { onclick: function () {
@@ -297,13 +312,14 @@ bog.keys().then(keys => {
 		identify.parentNode.removeChild(identify)
 		navbar.id = ''
               }
-            }}, ['Publish']),
+            }}, ['Join']),
 	    h('br'),
 	    'Or, ',
 	    h('a', {href: '', onclick: function (e) {
 	      e.preventDefault()
               name.parentNode.replaceChild(keypair, name)
-	    }}, ['Import an existing keypair'])
+	    }}, ['import an existing keypair']),
+	    '.'
           ])
           var identify = h('div', {id: 'welcome', classList: 'message'},[
 	    //'Hello! Welcome to ', 

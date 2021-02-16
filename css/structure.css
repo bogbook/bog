@@ -8,10 +8,6 @@ body {
   transition: all .5s ease-in-out;
 }
 
-p {
-  margin-bottom: .35ex;
-}
-
 #full {
   height: 100%;
   background-color: rgba(255,255,255,0.6);
@@ -75,8 +71,6 @@ pre, code {
   margin-right: auto;
 }
 
-img {margin-top: .5em;}
-
 .profileImage {
   width: 125px;
   height: 125px;
@@ -91,8 +85,8 @@ img {margin-top: .5em;}
 }
 
 .avatar {
-  width: 25px;
-  height: 25px;
+  width: 24px;
+  height: 24px;
   margin-top: 0;
   margin-right: .25em;
   margin-bottom: 0;
@@ -104,7 +98,7 @@ blockquote {
   padding-left: .5em;
 }
 
-h1, h2, h3, h4, h5, h6 { margin-top: 5px;}
+h1, h2, h3, h4, h5, h6, p { margin-top: .35ex; margin-bottom: .35ex; line-height: 1.35em; }
 
 h1 { font-size: 1.4em; }
 h2 { font-size: 1.3em; }

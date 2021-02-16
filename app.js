@@ -184,7 +184,6 @@ bog.keys().then(keys => {
 
       var searchInput = h('input', {
         id: 'searchInput', 
-	//placeholder: config.searchterm
 	placeholder: '🔍'
       })
       var searchButton = h('a', {

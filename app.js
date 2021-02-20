@@ -29,7 +29,71 @@ async function savefeeds (feeds, log) {
   }
 }
 
-const peers = new Map()
+function getName (id, log) {
+  var name = h('span')
+  name.textContent = id.substring(0, 10) + '...'
+  if (log) { 
+    for (var i = log.length - 1; i >= 0; i--) {
+      if ((log[i].author === id) && (log[i].name)) {
+        localforage.setItem('name:' + id, log[i].name)
+        return name.textContent = log[i].name
+      }
+    }
+  }
+  return name
+}
+
+function getProfileImage (id, log) {
+  var img = h('img')
+  var link = h('a', [
+    img
+  ])
+  var avatar
+
+  if (log) {
+    for (var i = 0; i < log.length; i++) {
+      if ((log[i].author === id) && (log[i].avatar)) {
+        avatar = log[i].avatar
+        log.forEach(msg => {
+          if (msg.raw.includes(avatar)) {
+            img.classList = 'profileImage ' + msg.filter
+            img.src = msg.image
+  	  link.href = '#' + msg.raw.substring(0, 44)
+  	  return link
+          }
+        })
+      }
+    }
+  }
+  return link
+}
+
+function getImage (id, log) {
+  var img = h('img')
+  var avatar
+  
+  if (log) {
+    for (var i = 0; i < log.length; i++) {
+      if ((log[i].author === id) && (log[i].avatar)) {
+        avatar = log[i].avatar
+        log.forEach(msg => {
+          if (msg.raw.includes(avatar)) {
+  	  var image = {image: msg.image}
+  	  if (msg.filter) {
+  	    image.filter = msg.filter
+  	  }
+  	  cache[id] = image
+            img.classList = 'avatar ' + msg.filter
+            return img.src = msg.image
+          }
+        })
+      }
+    }
+  }
+  return img 
+}
+
+/*const peers = new Map()
 var serverId = 0
 
 function dispatch(msg, keys) {
@@ -38,7 +102,7 @@ function dispatch(msg, keys) {
       peer.send(boxed)
     })
   }
-}
+}*/
 
 async function regenerate (feeds) {
   var all = []
@@ -67,6 +131,8 @@ async function sort (log) {
 }
 
 var cache = []
+var feeds = []
+var log = []
 
 bog.keys().then(keys => {
 
@@ -79,9 +145,10 @@ bog.keys().then(keys => {
   document.body.appendChild(screen)
 
 
-  loadfeeds().then(feeds => {
-    loadlog().then(log => {
-
+  loadfeeds().then(gotfeeds => {
+    loadlog().then(gotlog => {
+      feeds = gotfeeds
+      log = gotlog
       setTimeout(function () {
         var gossip = {feed: config.author}
         if (feeds[config.author]) {
@@ -102,71 +169,6 @@ bog.keys().then(keys => {
         }
         dispatch(gossip, keys)
       }, 1500)
-
-      function getName (id) {
-        var name = h('span')
-        name.textContent = id.substring(0, 10) + '...'
-        if (log) { 
-          for (var i = log.length - 1; i >= 0; i--) {
-            if ((log[i].author === id) && (log[i].name)) {
-              localforage.setItem('name:' + id, log[i].name)
-              return name.textContent = log[i].name
-            }
-          }
-        }
-        return name
-      }
-
-      function getProfileImage (id) {
-        var img = h('img')
-        var link = h('a', [
-          img
-        ])
-        var avatar
-
-        if (log) {
-          for (var i = 0; i < log.length; i++) {
-            if ((log[i].author === id) && (log[i].avatar)) {
-              avatar = log[i].avatar
-              log.forEach(msg => {
-                if (msg.raw.includes(avatar)) {
-                  img.classList = 'profileImage ' + msg.filter
-                  img.src = msg.image
-		  link.href = '#' + msg.raw.substring(0, 44)
-		  return link
-                }
-              })
-            }
-          }
-        }
-        return link
-      }
-
-      function getImage (id) {
-
-        var img = h('img')
-        var avatar
-        
-        if (log) {
-          for (var i = 0; i < log.length; i++) {
-            if ((log[i].author === id) && (log[i].avatar)) {
-              avatar = log[i].avatar
-              log.forEach(msg => {
-                if (msg.raw.includes(avatar)) {
-		  var image = {image: msg.image}
-		  if (msg.filter) {
-		    image.filter = msg.filter
-		  }
-		  cache[id] = image
-                  img.classList = 'avatar ' + msg.filter
-                  return img.src = msg.image
-                }
-              })
-            }
-          }
-        }
-        return img 
-      }
 
       var timer
 
@@ -224,7 +226,7 @@ bog.keys().then(keys => {
 
       var navbar = h('div', {classList: 'navbar'}, [
         h('div', {classList: 'internal'}, [
-          h('a', {href: '#' + keys.substring(0, 44)}, [getImage(keys.substring(0, 44)), getName(keys.substring(0, 44))]),
+          h('a', {href: '#' + keys.substring(0, 44)}, [getImage(keys.substring(0, 44), log), getName(keys.substring(0, 44), log)]),
           ' ',
           //h('code', [keys.substring(0, 7)]),
           //' ',
@@ -349,207 +351,6 @@ bog.keys().then(keys => {
         }
       })
 
-      async function render (msg) {
-        var renderer = new marked.Renderer()
-        renderer.paragraph = function (paragraph) {
-          var array = paragraph.split(' ')
-
-          for (i = 0; i < array.length; i++) {
-            word = array[i]
-            if (word.startsWith('#')) {
-              let end
-              if ((word[word.length -1] === '.') || (word[word.length - 1] === ',') || (word[word.length -1] === ':') || (word[word.length -1] === '?')) {
-                end = word[word.length - 1]
-                word = word.substring(0, word.length - 1)
-              }
-	      var counter = 0
-	      log.forEach(msg => {
-	        var search = word.toUpperCase()
-                if (msg.text && msg.text.toUpperCase().includes(search)) {
-                //if (msg.text && msg.text.toUpperCase().split(" ").indexOf(search)!= -1) {
-                  ++counter
-		}
-	      })
-              var hashtag = "<a href='#?" + word + "'>" + word + "</a><sup>(" + counter + ")</sup>"
-              if (end) {
-                hashtag = hashtag + end
-              }
-              array[i] = hashtag
-            }
-          }
-
-          newgraph = array.join(' ')
-
-          return newgraph + '<br /><br />'
-        }
-        renderer.link = function (href, title, text) {
-          if (href.length == 44) {
-	    var image
-	    if (cache[href]) {
-              console.log(cache[href])
-	      image = '<a href="#' + href +'"><img src="' + cache[href].image + '" class="avatar ' + cache[href].filter + '" /></a>'
-              href = '#' + href
-              var link = image + marked.Renderer.prototype.link.call(this, href, title, text);
-              return link
-	    } else {
-              href = '#' + href
-              var link = marked.Renderer.prototype.link.call(this, href, title, text);
-              return link
-	    }
-          } else { 
-            var link = marked.Renderer.prototype.link.call(this, href, title, text);
-            return link
-	  }
-        }
-
-        marked.setOptions({
-          renderer: renderer
-        })
-
-        var messageDiv = h('div', {id: msg.raw.substring(0, 44)})
-
-        var message = h('div', {classList: 'message'})
-
-        messageDiv.appendChild(message)
-      
-        message.appendChild(h('span', {classList: 'right'}, [
-          h('code', [msg.author.substring(0, 7)]),
-          ' ',
-          h('a', {href: '#' + msg.raw.substring(0, 44)}, [
-            human(new Date(msg.timestamp))
-          ])
-        ]))
-        
-        message.appendChild(h('span', [
-          h('a', {href: '#' + msg.author}, [
-            getImage(msg.author),
-            getName(msg.author)
-          ])
-        ]))
-
-        var retractor = h('span', [
-          h('button', {onclick: function () {
-            retractor.parentNode.replaceChild(expander, retractor)
-	  }},['-'])
-	])
-
-        var expander = h('button', {onclick: function () {
-          expander.parentNode.replaceChild(retractor, expander)
-	}}, ['+'])
-
-        if (msg.text) {
-          message.appendChild(h('div', {classList: 'content', innerHTML: marked(msg.text)}))
-          if (msg.author === keys.substring(0, 44)) {
-            makeBio = h('button', {
-              onclick: function (e) {
-                e.preventDefault(),
-                makeBio.parentNode.removeChild(makeBio)
-                var obj = {bio: msg.raw.substring(0, 44)}
-                bog.open(feeds[keys.substring(0,44)][0]).then(opened => {
-                  obj.seq = ++opened.seq
-                  obj.previous = opened.raw.substring(0,44)
-                  createpost(obj, keys)
-                })
-              }
-            }, ['Set as bio'])
-            retractor.appendChild(makeBio)
-          }
-        }
-        if (msg.name) {
-	  if (msg.author == keys.substring(0, 44)) {
-            if (navbar.id) {navbar.id = ''}
-	  }
-          message.appendChild(h('span', [' identified as ' + msg.name]))
-        }
-        if (msg.avatar) {
-          message.appendChild(h('span', [' set profile photo as ', h('a', {href: '#' + msg.avatar}, [msg.avatar.substring(0, 7)])]))
-        }
-        if (msg.background) {
-          message.appendChild(h('span', [' set background photo as ', h('a', {href: '#' + msg.background}, [msg.background.substring(0, 7)])]))
-        }
-        if (msg.bio) {
-          message.appendChild(h('span', [' set bio as ', h('a', {href: '#' + msg.bio}, [msg.bio.substring(0, 7)])]))
-        }
-
-        if (msg.image) {
-          var image = h('img', {
-            src: msg.image,
-            style: 'width: 175px; height: 175px; object-fit: cover; cursor: pointer;',
-            onclick: function () {
-              if (image.style.width === '100%') {
-                image.style = 'width: 175px; height: 175px; object-fit: cover; cursor: pointer;'
-              } else {
-                image.style = 'width: 100%; cursor: pointer;'
-              }
-            }
-          })
-          var div = h('div', [image])
-          if (msg.filter) { image.classList = msg.filter}
-          message.appendChild(div)
-          if (msg.author === keys.substring(0, 44)) {
-            makeProfile = h('button', {
-              onclick: function (e) {
-                e.preventDefault(),
-                makeProfile.parentNode.removeChild(makeProfile) 
-                var obj = {avatar: msg.raw.substring(0, 44)}
-                bog.open(feeds[keys.substring(0,44)][0]).then(opened => {
-                  obj.seq = ++opened.seq
-                  obj.previous = opened.raw.substring(0,44)
-                  createpost(obj, keys)
-                })
-              }
-            }, ['Set as profile photo'])
-            retractor.appendChild(makeProfile)
-            makeBackground = h('button', {
-              onclick: function (e) {
-                e.preventDefault(),
-                makeBackground.parentNode.removeChild(makeBackground)
-                var obj = {background: msg.raw.substring(0, 44)}
-                bog.open(feeds[keys.substring(0,44)][0]).then(opened => {
-                  obj.seq = ++opened.seq
-                  obj.previous = opened.raw.substring(0,44)
-                  createpost(obj, keys)
-                })
-              }
-            }, ['Set as profile background'])
-            retractor.appendChild(makeBackground)
-          }
-        }
-        var reply = composer(keys, msg)
-        var cancel = h('button', {
-          onclick: function () {
-            reply.parentNode.removeChild(reply)
-            cancel.parentNode.removeChild(cancel)
-          }
-        }, ['Cancel'])
-        if (!(msg.name || msg.avatar || msg.background || msg.bio)) {
-          message.appendChild(h('button', {
-            onclick: function () {
-              messageDiv.appendChild(reply)
-              reply.appendChild(cancel)
-            }
-          }, ['Reply']))
-	  if (retractor.childNodes[1]) {
-	    message.appendChild(expander)
-	  }
-        }
-
-        log.forEach(reply => {
-          if (reply.text && reply.text.includes(msg.raw.substring(0, 44))) {
-            setTimeout(function () {
-              var messageExists = (document.getElementById(reply.raw.substring(0, 44)) !== null)
-              if (!messageExists) {
-                render(reply).then(rendered => {
-                  messageDiv.appendChild(h('div', {classList: 'reply'}, [rendered]))
-                })
-              }
-            }, 50)
-          }
-        })
-      
-        return messageDiv
-      }
-
       function route () {
 
         var src = window.location.hash.substring(1)
@@ -565,9 +366,9 @@ bog.keys().then(keys => {
 
           var index = 0
 
-          async function addPosts (posts) {
+          async function addPosts (posts, keys) {
             posts.forEach(msg => {
-              render(msg).then(rendered => {
+              render(msg, keys).then(rendered => {
                 scroller.appendChild(rendered, scroller.firstChild)
               })
             })
@@ -575,13 +376,13 @@ bog.keys().then(keys => {
 
           var reverse = log.slice().reverse()
           var posts = reverse.slice(index, index + 25)
-          addPosts(posts).then(done => {
+          addPosts(posts, keys).then(done => {
             index = index + 25
             window.onscroll = function (ev) {
               if (((window.innerHeight + window.scrollY) >= document.body.scrollHeight - 1000) && src === '') {
                 posts = reverse.slice(index, index + 25)
                 index = index + 25
-                addPosts(posts)
+                addPosts(posts, keys)
               }
             }
           })
@@ -618,7 +419,6 @@ bog.keys().then(keys => {
 
           var add = h('input', {placeholder: 'Add a pub. Ex: ws://bogbook.com/ws'})
 
-          //localforage.getItem('servers').then(servers => {
           pubs.appendChild(h('div', [
             add,
             h('button', {
@@ -655,7 +455,6 @@ bog.keys().then(keys => {
               })
             }
           }, ['Reset pubs']))
-          //})
 
           scroller.appendChild(pubs)
 
@@ -678,7 +477,7 @@ bog.keys().then(keys => {
           var search = src.substring(1).replace(/%20/g, ' ').toUpperCase()
           log.forEach(msg => {
             if (msg.text && msg.text.toUpperCase().includes(search)) {
-              render(msg).then(rendered => {
+              render(msg, keys).then(rendered => {
                 scroller.insertBefore(rendered, scroller.firstChild)
               })
             }
@@ -731,7 +530,7 @@ bog.keys().then(keys => {
                       if (msg.raw.includes(log[i].background)) {
                         banner.classList = 'banner ' + msg.filter
                         banner.style.height = '300px'
-                        return banner.style.background = 'fixed center 3.1em no-repeat url(' + msg.image + ')'
+                        return banner.style.background = 'fixed center 3em no-repeat url(' + msg.image + ')'
                       }
                     })
                   }
@@ -761,9 +560,9 @@ bog.keys().then(keys => {
             profile.appendChild(banner)
             profile.appendChild(h('div', {classList: 'inner-profile'}, [
               h('a', {href: '#' + src}, [
-                getProfileImage(src),
+                getProfileImage(src, log),
                 h('br'),
-                getName(src)
+                getName(src, log)
               ]),
               ' ',
               h('code', [src]),
@@ -838,10 +637,10 @@ bog.keys().then(keys => {
 
             var index = 0
 
-            async function addMorePosts (posts) {
+            async function addMorePosts (posts, keys) {
               posts.forEach(msg => {
                 if (msg.author === src) {
-                  render(msg).then(rendered => {
+                  render(msg, keys).then(rendered => {
                     scroller.appendChild(rendered, scroller.firstChild)
                   })
                 }
@@ -850,13 +649,13 @@ bog.keys().then(keys => {
 
             var reverse = log.slice().reverse()
             var posts = reverse.slice(index, index + 25)
-            addMorePosts(posts).then(done => {
+            addMorePosts(posts, keys).then(done => {
               index = index + 25
               window.onscroll = function (ev) {
                 if ((window.innerHeight + window.scrollY) >= document.body.scrollHeight - 1000) {
                   posts = reverse.slice(index, index + 25)
                   index = index + 25
-                  addMorePosts(posts)
+                  addMorePosts(posts, keys)
                 }
               }
             })
@@ -865,7 +664,7 @@ bog.keys().then(keys => {
             for (var i = 0; i < log.length; i++) {
               if (log[i].raw.substring(0, 44) === src) {
                 haveit = true
-                render(log[i]).then(rendered => {
+                render(log[i], keys).then(rendered => {
                   scroller.insertBefore(rendered, scroller.firstChild)
                 })
               }
@@ -949,7 +748,7 @@ bog.keys().then(keys => {
               if (!document.getElementById(req.permalink.substring(0, 44))) {
                 bog.open(req.permalink).then(opened => {
                   if (window.location.hash.substring(1) === opened.raw.substring(0, 44)) {
-                    render(opened).then(rendered => {
+                    render(opened, keys).then(rendered => {
                       scroller.appendChild(rendered)
                     }) 
                   }
@@ -982,7 +781,7 @@ bog.keys().then(keys => {
                       ws.send(boxed)
                     })
                     if ((window.location.hash.substring(1) == opened.author) || (window.location.hash.substring(1) == '')) {
-                      render(opened).then(rendered => {
+                      render(opened, keys).then(rendered => {
                         scroller.insertBefore(rendered, scroller.childNodes[1])
                       })
                     }
@@ -1000,7 +799,7 @@ bog.keys().then(keys => {
                       var div = h('div')
                       scroller.appendChild(div)
                     }
-                    render(opened).then(rendered => {
+                    render(opened, keys).then(rendered => {
                       scroller.insertBefore(rendered, scroller.childNodes[1])
                     })
                   }
@@ -1042,275 +841,6 @@ bog.keys().then(keys => {
           connect(server)
         })
       })
-    
-      function createpost (obj, keys, compose) {
-        bog.publish(obj, keys).then(msg => {
-          bog.open(msg).then(opened => {
-            if (feeds[keys.substring(0, 44)]) {
-              if (opened.previous === feeds[keys.substring(0,44)][0].substring(0, 44)) {
-                var gossip = {feed: opened.author, seq: opened.seq}
-                dispatch(gossip, keys)
-                feeds[keys.substring(0, 44)].unshift(msg)
-                log.push(opened)
-                savefeeds(feeds, log)
-                render(opened).then(rendered => {
-                  if (compose) {
-                    compose.parentNode.replaceChild(h('div', {classList: 'reply'}, [rendered]), compose)
-                  } else {
-                    scroller.insertBefore(rendered, scroller.childNodes[1])
-                  }
-                })
-              }
-            }
-            if (opened.seq === 1) {
-              feeds[keys.substring(0, 44)] = [msg]
-              log.push(opened)
-              savefeeds(feeds, log)
-              render(opened).then(rendered => {
-                if (compose) {
-                  compose.parentNode.replaceChild(h('div', {classList: 'reply'}, [rendered]), compose)
-                } else {
-                  scroller.insertBefore(rendered, scroller.firstChild)
-                }
-              })
-            }
-          })
-        })
-      }
-      
-      function composer (keys, msg) {
-        var photoURL = {}
-        var croppedURL = {}
-        var uncroppedURL = {}
-        if (msg) {
-          if (msg.raw) {
-            var canvasID = msg.raw.substring(0, 44)
-          } else {
-            var canvasID = msg.author
-          }
-        } else {
-          var canvasID = "composer"
-        }
-
-        var input = h('input', {id: 'input' + canvasID, type: 'file', style: 'display: none',
-          onclick: function () {
-            //var input = document.getElementById('input' + canvasID)
-            input.addEventListener('change', handleFile)
-
-            function handleFile (e) {
-              var img = new Image
-              img.onload = function() {
-
-                var cropped = h('canvas', {width: 680, height: 680})
-                var cctx = cropped.getContext('2d')
-                var scale = Math.max(cropped.width / img.width, cropped.height / img.height)
-                var x = (cropped.width / 2) - (img.width / 2) * scale
-                var y = (cropped.height / 2) - (img.height / 2) * scale
-                cctx.drawImage(img, x, y, img.width * scale, img.height * scale)
-                croppedURL.value = cropped.toDataURL('image/jpeg', 0.8)
-
-                var croppedImg = h('img', {
-                  src: croppedURL.value,
-                  style: 'width: 175px; height: 175px; object-fit: cover; cursor: pointer;',
-                  onclick: function () {
-                    if (this.style.width === '100%') {
-                      this.style = 'width: 175px; height: 175px; object-fit: cover; cursor: pointer;'
-                    } else {
-                      this.style = 'width: 100%; cursor: pointer;'
-                    }
-                  }
-                })
-
-                photoDiv.appendChild(croppedImg)
-
-                photoURL = croppedURL
-
-                if (!(img.width === img.height)) {
-                  var crop = true
-                  var autocrop = h('div', [
-                    h('button', { onclick: function () {
-                      if (crop) { 
-                        croppedImg.parentNode.replaceChild(uncroppedImg, croppedImg)
-                        crop = false
-                        photoURL = uncroppedURL
-                        this.textContent = 'Crop'
-                      } else {
-                        uncroppedImg.parentNode.replaceChild(croppedImg, uncroppedImg)
-                        photoURL = croppedURL
-                        crop = true
-                        this.textContent = 'Uncrop'
-                      }
-                    }}, ['Uncrop']),
-                  ])
-
-                  photoDiv.appendChild(autocrop)
-                  
-                  var aspect = img.width / img.height
-                  var uncropped = h('canvas', {width: 680, height: 680 / aspect}) 
-                  var uctx = uncropped.getContext('2d')
-                  uctx.drawImage(img, 0, 0, uncropped.width, uncropped.height)
-                  uncroppedURL.value = uncropped.toDataURL('image.jpeg', 0.8)
-                  var uncroppedImg = h('img', {
-                    src: uncroppedURL.value,
-                    style: 'width: 175px; cursor: pointer;',
-                    onclick: function () {
-                      if (this.style.width === '100%') {
-                        this.style = 'width: 175px; cursor: pointer;'
-                      } else {
-                        this.style = 'width: 100%; cursor: pointer;'
-                      }
-                    }
-                  })
-                } else { photoURL = croppedURL}
-                img.src = ''
-              }
-              img.src = URL.createObjectURL(e.target.files[0])
-              input.value = ''
-            }
-
-            var buttonsDiv = h('div', {id: 'buttons:'+ canvasID}, [
-              photoDiv,
-              filters,
-              h('button', { onclick: function () {
-                photoURL.value = ''
-                croppedURL.value = ''
-                uncroppedURL.value = ''
-                filter = null
-                photoDiv.parentNode.removeChild(photoDiv)
-                photoDiv = h('div')
-                buttonsDiv.parentNode.removeChild(buttonsDiv)
-                newPhoto.appendChild(uploadButton)                
-              }}, ['Cancel'])
-            ])
-
-            input.parentNode.appendChild(buttonsDiv)
-          }
-        })
-
-        var uploadButton = h('button', {onclick: function () {
-          input.click()
-          uploadButton.parentNode.removeChild(uploadButton)
-        }, innerHTML: '&#128247;'})
-
-        var photoDiv = h('div')
-
-        var newPhoto = h('span', [
-          photoDiv,
-          input,
-          uploadButton
-        ])
-
-        var filters = h('span')
-
-        var filterList = [
-          {name: '#nofilter', filter: null},
-          {name: 'Thoreau', filter: 'thoreau'},
-          {name: 'Melville', filter: 'melville'},
-          {name: 'Hoover', filter: 'hoover'},
-          {name: 'Yeats', filter: 'yeats'}
-        ]
-
-        var filter
-
-        filterList.forEach(f => {
-          filters.appendChild(h('a', {onclick: function () {
-            filter = f.filter
-            photoDiv.classList = filter
-          }}, [f.name]))
-          filters.appendChild(h('span', [' ']))
-        })
-
-        if (msg) {
-          var compose = h('div', {classList: 'message reply'})
-        } else {
-          var compose = h('div', {classList: 'message'})
-        }
-
-        var header = h('div', [
-          h('span', {classList: 'right'}, [
-            h('code', [keys.substring(0, 7)]),
-            ' Preview'
-          ]),
-          h('a', {href: '#' + keys.substring(0, 44)}, [getImage(keys.substring(0, 44)), getName(keys.substring(0, 44))])
-        ])
-
-        var preview = h('div', {classList: 'content'})
-
-        var textarea = h('textarea', {placeholder: 'Write a message here.'})
-
-        textarea.addEventListener('input', function (e) {
-          preview.innerHTML = marked(textarea.value)
-        })
-
-        if (msg) {
-          if (msg.raw) {
-            var thread = '↳ [' + msg.raw.substring(0, 7) + '](' + msg.raw.substring(0, 44) + ')\n\n'
-          } else {
-            var thread = ''
-          }
-          textarea.value = thread
-          localforage.getItem('name:' + msg.author).then(name => {
-            if (name === null) {
-              name = msg.author.substring(0, 10) + '...'
-            }
-            textarea.value = textarea.value + '[' + name + '](' + msg.author + ') '
-          })
-        }
-
-        var publish = h('button', {
-          onclick: function () {
-            if (textarea.value || photoURL.value) {
-              var obj = {}
-              if (textarea.value) {
-                obj.text = textarea.value
-                textarea.value = ''
-              }
-              if (photoURL.value) {
-                obj.image = photoURL.value
-                photoURL.value = ''
-                photoDiv = h('div')
-                var buttonsDiv = document.getElementById('buttons:' + canvasID)
-                buttonsDiv.parentNode.appendChild(uploadButton)
-                buttonsDiv.parentNode.removeChild(buttonsDiv)
-              }
-              if (filter) {
-                obj.filter = filter
-                filter = ''
-              }
-
-              var newpreview = h('div')
-              
-              preview.parentNode.replaceChild(newpreview, preview)
-              preview = newpreview
-              if (feeds[keys.substring(0,44)]) {
-                bog.open(feeds[keys.substring(0,44)][0]).then(opened => {
-                  obj.seq = ++opened.seq
-                  obj.previous = opened.raw.substring(0,44)
-                  if (msg) {
-                    createpost(obj, keys, compose)
-                  } else {
-                    createpost(obj, keys)
-                  }
-                })
-              } else {
-                obj.seq = 1
-                obj.previous = null
-                if (msg) {
-                  createpost(obj, keys, compose)
-                } else {
-                  createpost(obj, keys)
-                }
-              }
-            }
-          }
-        }, ['Publish'])
-        compose.appendChild(header)
-        compose.appendChild(preview)
-        compose.appendChild(newPhoto)
-        compose.appendChild(textarea)
-        compose.appendChild(publish) 
-        return compose
-      }
     })
   })
 })

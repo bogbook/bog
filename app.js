@@ -1,29 +1,23 @@
-localforage.getItem('id').then(id => {
-  if (id) {
-    localforage.clear().then(function () {
-      location.reload()
-    })
-  }
-})
+var kv = new IdbKvStore('bogbook')
 
 async function loadfeeds () {
   let feeds
-  feeds = await localforage.getItem('feeds')
+  feeds = await kv.get('feeds')
   if (!feeds) { feeds = [] } 
   return feeds
 }
 
 async function loadlog () {
   let log
-  log = await localforage.getItem('log')
+  log = await kv.get('log')
   if (!log) { log = []}
   return log
 }
 
 async function savefeeds (feeds, log) {
   try {
-    await localforage.setItem('log', log)
-    await localforage.setItem('feeds', feeds)
+    await kv.set('log', log)
+    await kv.set('feeds', feeds)
   } catch {
     console.log('unable to save feeds')
   }
@@ -35,7 +29,7 @@ function getName (id, log) {
   if (log) { 
     for (var i = log.length - 1; i >= 0; i--) {
       if ((log[i].author === id) && (log[i].name)) {
-        localforage.setItem('name:' + id, log[i].name)
+        kv.set('name:' + id, log[i].name)
         return name.textContent = log[i].name
       }
     }
@@ -93,16 +87,17 @@ function getImage (id, log) {
   return img 
 }
 
-/*const peers = new Map()
+const peers = new Map()
 var serverId = 0
 
 function dispatch(msg, keys) {
+  console.log(msg)
   for (const peer of peers.values()) {
     bog.box(JSON.stringify(msg), peer.pubkey, keys).then(boxed => {
       peer.send(boxed)
     })
   }
-}*/
+}
 
 async function regenerate (feeds) {
   var all = []
@@ -115,7 +110,7 @@ async function regenerate (feeds) {
           //scroller.appendChild(h('div', [opened]))
           log.push(opened)
           if (index === all.length -1) {
-            localforage.setItem('log', log)
+            kv.set('log', log)
           }
         })
       })
@@ -126,7 +121,7 @@ async function regenerate (feeds) {
 async function sort (log) {
   if (log[0]) {
     log.sort((a,b) => a.timestamp - b.timestamp)
-    localforage.setItem('log', log)
+    kv.set('log', log)
   }
 }
 
@@ -149,6 +144,7 @@ bog.keys().then(keys => {
     loadlog().then(gotlog => {
       feeds = gotfeeds
       log = gotlog
+
       setTimeout(function () {
         var gossip = {feed: config.author}
         if (feeds[config.author]) {
@@ -157,7 +153,7 @@ bog.keys().then(keys => {
           gossip.seq = 0
         }
         dispatch(gossip, keys)
-      }, 1500)
+      }, 5000)
 
       setTimeout(function () {
         var me = keys.substring(0, 44)
@@ -168,7 +164,7 @@ bog.keys().then(keys => {
           gossip.seq = 0
         }
         dispatch(gossip, keys)
-      }, 1500)
+      }, 5000)
 
       var timer
 
@@ -215,13 +211,13 @@ bog.keys().then(keys => {
       var bulbon = h('span', {classList: 'right', style: 'cursor:pointer;', innerHTML: '&#128261;', onclick: function () {
         document.head.appendChild(darktheme)
         bulbon.parentNode.replaceChild(bulboff, bulbon)
-        localforage.setItem('theme', 'dark')
+        kv.set('theme', 'dark')
       }})
 
       var bulboff = h('span', {classList: 'right', style: 'cursor:pointer;', innerHTML: '&#128262;', onclick: function () {
         darktheme.parentNode.removeChild(darktheme) 
         bulboff.parentNode.replaceChild(bulbon, bulboff)
-        localforage.setItem('theme', 'light')
+        kv.set('theme', 'light')
       }})
 
       var navbar = h('div', {classList: 'navbar'}, [
@@ -241,8 +237,8 @@ bog.keys().then(keys => {
         ])
       ])
 
-      localforage.getItem('keypair').then(checkkey => {
-        localforage.getItem('name:' + keys.substring(0, 44)).then(checkname => {
+      kv.get('keypair').then(checkkey => {
+        kv.get('name:' + keys.substring(0, 44)).then(checkname => {
 
         if (!checkkey || !checkname) {
 	  navbar.id = 'full'
@@ -254,7 +250,7 @@ bog.keys().then(keys => {
             h('button', {
               onclick: function () {
                 if (input.value && (input.value.length == 132)) {
-                  localforage.setItem('keypair', input.value).then(function () {
+                  kv.set('keypair', input.value).then(function () {
                     location.reload()
                   })
                 }
@@ -291,7 +287,7 @@ bog.keys().then(keys => {
 	      '. Save a copy somewhere safe.']),
             h('pre', [keys]),
             h('button', {onclick: function () {
-              localforage.removeItem('keypair').then(function () {
+              kv.remove('keypair').then(function () {
                 location.reload()
               })
             }}, ['Generate']),
@@ -315,7 +311,7 @@ bog.keys().then(keys => {
                   obj.previous = null
                   createpost(obj, keys)
                 }
-		localforage.setItem('keypair', keys)
+		kv.set('keypair', keys)
 		identify.parentNode.removeChild(identify)
 		navbar.id = ''
               }
@@ -344,7 +340,7 @@ bog.keys().then(keys => {
 	})
       })
 
-      localforage.getItem('theme').then(theme => {
+      kv.get('theme').then(theme => {
         if (theme === 'dark') {
           document.head.appendChild(darktheme)
           bulbon.parentNode.replaceChild(bulboff, bulbon)
@@ -398,14 +394,14 @@ bog.keys().then(keys => {
             h('button', {
               onclick: function () {
                 if (input.value && (input.value.length == 132)) {
-                  localforage.setItem('keypair', input.value).then(function () {
+                  kv.set('keypair', input.value).then(function () {
                     location.reload()
                   })
                 }
               }
             }, ['Import Ed25519 Keypair']),
             h('button', {onclick: function () {
-              localforage.removeItem('keypair').then(function () {
+              kv.remove('keypair').then(function () {
                 location.reload()
               })
             }}, ['Delete Keypair'])
@@ -425,7 +421,7 @@ bog.keys().then(keys => {
               onclick: function () {
                 if (add.value) {
                   servers.push(add.value)
-                  localforage.setItem('servers', servers).then(function () { 
+                  kv.set('servers', servers).then(function () { 
                     location.hash = '' 
                     location.reload()
                   })
@@ -439,7 +435,7 @@ bog.keys().then(keys => {
               h('button', {
                 onclick: function () {
                   var newServers = servers.filter(item => item !== pub)
-                  localforage.setItem('servers', newServers).then(function () { 
+                  kv.set('servers', newServers).then(function () { 
                     location.hash = '' 
                     location.reload()
                   })
@@ -449,7 +445,7 @@ bog.keys().then(keys => {
           })
           pubs.appendChild(h('button', {
             onclick: function () {
-              localforage.removeItem('servers').then(function () {
+              kv.remove('servers').then(function () {
                 location.hash = ''
                 location.reload()
               })
@@ -463,7 +459,7 @@ bog.keys().then(keys => {
           deleteeverything.appendChild(h('div', ['To delete everything, click the button below. This will delete your keypair and the feeds you have replicated into your browser. You will start from scratch with a new keypair.']))
 
           deleteeverything.appendChild(h('button', {onclick: function () {
-            localforage.clear().then(function () {
+            kv.clear().then(function () {
               location.hash = ''
               location.reload()
             })
@@ -610,12 +606,12 @@ bog.keys().then(keys => {
               onclick: function () {
                 clearInterval(timer)
                 var newlog = log.filter(msg => msg.author != src)
-		localforage.removeItem('name:' + src).then(function () {
+		kv.remove('name:' + src).then(function () {
                   delete feeds[src]
                   setTimeout(function () {
-                    localforage.setItem('feeds', feeds)
+                    kv.set('feeds', feeds)
                     window.location.hash = ''
-                    localforage.setItem('log', newlog).then(function () {
+                    kv.set('log', newlog).then(function () {
                       window.location.reload()
                     })
                   }, 200)
@@ -834,7 +830,7 @@ bog.keys().then(keys => {
         }
       }
 
-      localforage.getItem('servers').then(pubs => {
+      kv.get('servers').then(pubs => {
         if (pubs) { servers = pubs}
 
         servers.forEach(server => {

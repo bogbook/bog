@@ -150,6 +150,7 @@ br {
 }
 
 img, canvas {
+  margin-top: .5em;
   margin-bottom: .5em;
   max-width: 100%;
   border-radius: 5px; 

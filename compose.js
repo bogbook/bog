@@ -204,7 +204,7 @@ function composer (keys, msg) {
       var thread = ''
     }
     textarea.value = thread
-    localforage.getItem('name:' + msg.author).then(name => {
+    kv.get('name:' + msg.author).then(name => {
       if (name === null) {
         name = msg.author.substring(0, 10) + '...'
       }

@@ -27,13 +27,18 @@ bog.keys = async function keys (appdir) {
       fs.promises.writeFile(appdir + 'keypair', keypair, 'UTF-8')
     }
   } else {
-    var keypair = await localforage.getItem('keypair')
-    if ((keypair === null) || (keypair.length != 132)) {
-      var keypair = await bog.generate()
-      //localforage.setItem('keypair', keypair)
+    var oldpair = await localforage.getItem('keypair')
+    var keypair = await kv.get('keypair')
+    if ((keypair == null) || (keypair.length != 132)) {
+      if (oldpair) {
+        var keypair = oldpair
+        kv.set('keypair', keypair)
+        localforage.clear()
+      } else {
+        var keypair = await bog.generate()
+      }
     }
   }
-
   return keypair
 }
 

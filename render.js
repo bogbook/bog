@@ -104,9 +104,12 @@ async function render (msg, keys) {
     }
   }
   if (msg.name) {
-    /*if (msg.author == keys.substring(0, 44)) {
-      if (navbar.id) {navbar.id = ''}
-    }*/
+    if (msg.author == keys.substring(0, 44)) {
+      var welcome = document.getElementById('welcome')
+      var navbar = document.getElementById('full')
+      if (navbar) {navbar.id = ''}
+      if (welcome) {welcome.parentNode.removeChild(welcome)}
+    }
     message.appendChild(h('span', [' identified as ' + msg.name]))
   }
   if (msg.avatar) {

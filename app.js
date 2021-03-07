@@ -296,7 +296,7 @@ bog.keys().then(keys => {
 	    h('br'),
             nameInput,
             h('button', { onclick: function () {
-              if (nameInput.value) {
+              if (nameInput.value && (nameInput.value.length != keys.length)) {
                 var obj = {}
                 obj.name = nameInput.value
                 nameInput.value = ''
@@ -481,14 +481,13 @@ bog.keys().then(keys => {
         }
 
         if (src.length === 44) {
-          if (src === keys.substring(0, 44)) {
-	    console.log('this is you')
+          /*if (src === keys.substring(0, 44)) {
 	    if (!feeds[src]) {
               var nameInput = h('input', {placeholder: 'Give yourself a name'})
               var name = h('div', [
                 nameInput,
                 h('button', { onclick: function () {
-                  if (nameInput.value) {
+                  if (nameInput.value && (nameInput.value.length != keys.length)) {
                     var obj = {}
                     obj.name = nameInput.value
                     nameInput.value = ''
@@ -511,7 +510,7 @@ bog.keys().then(keys => {
 		name
               ]))
 	    }
-          }
+          }*/
 
           if (feeds[src]) {
             var profile = h('div', {classList: 'profile'})
@@ -570,7 +569,7 @@ bog.keys().then(keys => {
               var name = h('div', [
                 nameInput,
                 h('button', { onclick: function () {
-                  if (nameInput.value) {
+                  if (nameInput.value && (nameInput.value.length != keys.length)) {
                     var obj = {}
                     obj.name = nameInput.value
                     nameInput.value = ''

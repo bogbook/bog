@@ -249,6 +249,9 @@ bog.keys().then(keys => {
             input,
             h('button', {
               onclick: function () {
+	        if (input.value.length != keys.length) {
+                  alert('Error: invalid keypair.')
+		}
                 if (input.value && (input.value.length == 132)) {
                   kv.set('keypair', input.value).then(function () {
                     location.reload()
@@ -296,6 +299,9 @@ bog.keys().then(keys => {
 	    h('br'),
             nameInput,
             h('button', { onclick: function () {
+	      if (nameInput.value.length == keys.length) {
+                alert('Error: your name cannot be the same length as your keypair.')
+	      }
               if (nameInput.value && (nameInput.value.length != keys.length)) {
                 var obj = {}
                 obj.name = nameInput.value
@@ -393,6 +399,9 @@ bog.keys().then(keys => {
             input,
             h('button', {
               onclick: function () {
+	        if (input.value.length != keys.length) {
+                  alert('Error: invalid keypair.')
+		}
                 if (input.value && (input.value.length == 132)) {
                   kv.set('keypair', input.value).then(function () {
                     location.reload()
@@ -569,6 +578,10 @@ bog.keys().then(keys => {
               var name = h('div', [
                 nameInput,
                 h('button', { onclick: function () {
+
+	          if (nameInput.value.length == keys.length) {
+                    alert('Error: your name cannot be the same length as your keypair.')
+	          }
                   if (nameInput.value && (nameInput.value.length != keys.length)) {
                     var obj = {}
                     obj.name = nameInput.value

@@ -186,7 +186,7 @@ function composer (keys, msg) {
       h('code', [keys.substring(0, 7)]),
       ' Preview'
     ]),
-    h('a', {href: '#' + keys.substring(0, 44)}, [getImage(keys.substring(0, 44)), getName(keys.substring(0, 44), log)])
+    h('a', {href: '#' + keys.substring(0, 44)}, [getImage(keys.substring(0, 44), log), getName(keys.substring(0, 44), log)])
   ])
 
   var preview = h('div', {classList: 'content'})

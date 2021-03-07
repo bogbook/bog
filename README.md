@@ -46,7 +46,7 @@ Toggle between light and dark modes using the brightness emoji in the top right 
 ### Prior art
 
 + [old bogbook](http://git.sr.ht/~ev/oldbogbookv1) -- the protocol wasn't as optimized as I wanted, and the replication sucked
-+ [ssb](http://scuttlebot.io) -- While I invested 4 years developing ssb apps, ssb was always difficult to install and the ~data never replicated into browsers~ actually, some progress has been made with [ssb-browser-demo](https://between-two-worlds.dk/browser.html) [repo](https://github.com/arj03/ssb-browser-demo) by arj
++ [ssb](http://scuttlebot.io) -- While I invested 4 years developing ssb apps, ssb was always difficult to install and the ~~data never replicated into browsers~~ actually, some progress has been made with [ssb-browser-demo](https://between-two-worlds.dk/browser.html) [repo](https://github.com/arj03/ssb-browser-demo) by arj
 
 ---
 

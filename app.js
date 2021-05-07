@@ -271,31 +271,13 @@ bog.keys().then(keys => {
           var ts = Date.now()
 
           var nameInput = h('input', {placeholder: keys.substring(0, 10) + '...'})
-          var name = h('div', [
+
+	  var name = h('div', [
 	    
 	    h('span', {classList: 'right'}, [h('a', {href: ''}, [human(new Date(ts))])]),
 	    h('span', [h('a', {href: ''}, [document.title])]),
-	    h('br'),
-	    h('span', [
-	    'This is a Bogbook',
-            h('sup', ['(', h('a', {href: 'https://git.sr.ht/~ev/bogbook', target: '_blank'}, ['?']), ')']),
-	    ' pub.',
-	    h('br'),
-	    'Bogbook is an open source distributed social network of signed feeds replicated between pub servers.'
-	    ]),
-	    h('hr'),
-            h('span', [
-	      '1. Generate a new keypair',
-	      h('sup', ['(', h('a', {href: 'https://ed25519.cr.yp.to/', target: '_blank'}, ['?']), ')']),
-	      '. Save a copy somewhere safe.']),
-            h('pre', [keys]),
-            h('button', {onclick: function () {
-              kv.remove('keypair').then(function () {
-                location.reload()
-              })
-            }}, ['Generate']),
-	    h('hr'),
-	    '2. Choose a name to associate with your keypair:',
+            h('br'),
+            h('p', ['Type a name into the box below and press "Join".']),
 	    h('br'),
             nameInput,
             h('button', { onclick: function () {
@@ -330,6 +312,9 @@ bog.keys().then(keys => {
 	    }}, ['import an existing keypair']),
 	    '.'
           ])
+
+		
+		
           var identify = h('div', {id: 'welcome', classList: 'message'},[
 	    //'Hello! Welcome to ', 
 	    //h('a', {href: location.href}, [config.title]),

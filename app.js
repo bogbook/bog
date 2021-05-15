@@ -14,10 +14,13 @@ async function loadlog () {
   return log
 }
 
+var delay = false
+
 async function savefeeds (feeds, log) {
   try {
     await kv.set('log', log)
     await kv.set('feeds', feeds)
+    console.log('saving feeds')
   } catch {
     console.log('unable to save feeds')
   }
@@ -90,9 +93,19 @@ function getImage (id, log) {
 const peers = new Map()
 var serverId = 0
 
-function dispatch(msg, keys) {
-  console.log(msg)
+function blast(msg, keys) {
+  console.log('ask all peers for ' + msg.feed)
   for (const peer of peers.values()) {
+    bog.box(JSON.stringify(msg), peer.pubkey, keys).then(boxed => {
+      peer.send(boxed)
+    })
+  }
+}
+
+function dispatch(msg, keys) {
+  var peer = peers.get(Math.ceil(Math.random() * peers.size))
+  if (peer) {
+    console.log('ask ' + peer.url + ' for ' + msg.feed)
     bog.box(JSON.stringify(msg), peer.pubkey, keys).then(boxed => {
       peer.send(boxed)
     })
@@ -145,37 +158,45 @@ bog.keys().then(keys => {
       feeds = gotfeeds
       log = gotlog
 
-      setTimeout(function () {
-        var gossip = {feed: config.author}
-        if (feeds[config.author]) {
-          gossip.seq = feeds[config.author].length
-        } else {
-          gossip.seq = 0
-        }
-        dispatch(gossip, keys)
-      }, 5000)
-
-      setTimeout(function () {
-        var me = keys.substring(0, 44)
-        var gossip = {feed: me}
-        if (feeds[me]) {
-          gossip.seq = feeds[me].length
-        } else {
-          gossip.seq = 0
-        }
-        dispatch(gossip, keys)
-      }, 5000)
+      if (!feeds[config.author]) {
+        console.log('gossip default log')
+        setTimeout(function () {
+          var gossip = {feed: config.author}
+          if (feeds[config.author]) {
+            gossip.seq = feeds[config.author].length
+          } else {
+            gossip.seq = 0
+          }
+          dispatch(gossip, keys)
+        }, 5000)
+      }
+      if (!feeds[keys.substring(0, 44)]) {
+        console.log('gossip my feed')
+        setTimeout(function () {
+          var me = keys.substring(0, 44)
+          var gossip = {feed: me}
+          if (feeds[me]) {
+            gossip.seq = feeds[me].length
+          } else {
+            gossip.seq = 0
+          }
+          dispatch(gossip, keys)
+        }, 5000)
+      }
 
       var timer
 
       function start () {
+        var num = 10000
         setInterval(function () {
           Object.keys(feeds).forEach(function(key,index) {
             var gossip = {feed: key}
             gossip.seq = feeds[key].length
             dispatch(gossip, keys)
           })
-        }, 10000)
+          //num = Math.floor(Math.random() * 10000)
+          console.log(num) 
+        }, num)
       }
 
       start()
@@ -622,11 +643,11 @@ bog.keys().then(keys => {
 
             if (feeds[src]) {
               gossip.seq = feeds[src].length
+              dispatch(gossip, keys)
             } else {
               gossip.seq = 0
+              blast(gossip, keys)
             }
-
-            dispatch(gossip, keys)
 
             var index = 0
 
@@ -664,7 +685,7 @@ bog.keys().then(keys => {
               if ((i === (log.length - 1)) && !haveit) {
                 var gossip = {feed: src, seq: 0}
                 setTimeout(function () {
-                  dispatch(gossip, keys)
+                  blast(gossip, keys)
                 }, 1000)
               }
             }
@@ -689,8 +710,24 @@ bog.keys().then(keys => {
       //regenerate(feeds)
 
       setInterval(function () {
-        savefeeds(feeds, log)
+         if (delay) {
+           delay = false
+           savefeeds(feeds, log)
+           //console.log('saving feeds one last time')
+         } 
+         if (!delay) { 
+           //console.log('do not save feeds, there is nothing new')
+         }
       }, 10000)
+      /*setInterval(function () {
+        savefeeds(feeds, log)
+      }, 10000)*/
+      /*document.addEventListener('visibilitychange', function() {
+        if (document.visibilityState == 'hidden') { 
+          savefeeds(feeds, log)
+          console.log('Saving feeds.')
+        }
+      })*/
 
       function connect (server) {
         var ws = new WebSocket(server)
@@ -769,6 +806,10 @@ bog.keys().then(keys => {
                   if (feeds[opened.author][0].substring(0, 44) === opened.previous) {
                     feeds[opened.author].unshift(req.msg)
                     log.push(opened)
+                    if (!delay) {
+                      delay = true
+                      savefeeds(feeds, log)
+                    }
                     var gossip = {feed: opened.author, seq: opened.seq}
                     bog.box(JSON.stringify(gossip), ws.pubkey, keys).then(boxed => {
                       ws.send(boxed)
@@ -782,6 +823,10 @@ bog.keys().then(keys => {
                 } else {
                   feeds[opened.author] = [req.msg]
                   log.push(opened)
+                  if (!delay) {
+                    delay = true
+                    savefeeds(feeds, log)
+                  }
                   var gossip = {feed: opened.author, seq: opened.seq}
                   bog.box(JSON.stringify(gossip), ws.pubkey, keys).then(boxed => {
                     ws.send(boxed)

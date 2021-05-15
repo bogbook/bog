@@ -20,7 +20,7 @@ async function savefeeds (feeds, log) {
   try {
     await kv.set('log', log)
     await kv.set('feeds', feeds)
-    console.log('saving feeds')
+    //console.log('saving feeds')
   } catch {
     console.log('unable to save feeds')
   }
@@ -144,14 +144,11 @@ var log = []
 
 bog.keys().then(keys => {
 
-  if (config.title) {
-    document.title = config.title
-  }
+  if (config.title) { document.title = config.title }
 
   var servers = ['ws://' + window.location.host + '/ws']
   var screen = h('screen', {id: 'screen'})
   document.body.appendChild(screen)
-
 
   loadfeeds().then(gotfeeds => {
     loadlog().then(gotlog => {
@@ -187,16 +184,13 @@ bog.keys().then(keys => {
       var timer
 
       function start () {
-        var num = 10000
-        setInterval(function () {
+        timer = setInterval(function () {
           Object.keys(feeds).forEach(function(key,index) {
             var gossip = {feed: key}
             gossip.seq = feeds[key].length
             dispatch(gossip, keys)
           })
-          //num = Math.floor(Math.random() * 10000)
-          console.log(num) 
-        }, num)
+        }, 10000)
       }
 
       start()
@@ -205,6 +199,7 @@ bog.keys().then(keys => {
         id: 'searchInput', 
 	placeholder: '🔍'
       })
+
       var searchButton = h('a', {
           href: '',
           id: 'searchButton',
@@ -333,22 +328,12 @@ bog.keys().then(keys => {
 	    }}, ['import an existing keypair']),
 	    '.'
           ])
-
-		
-		
-          var identify = h('div', {id: 'welcome', classList: 'message'},[
-	    //'Hello! Welcome to ', 
-	    //h('a', {href: location.href}, [config.title]),
-	    //h('br'),
-            name,
-	  ])
+          
+          var identify = h('div', {id: 'welcome', classList: 'message'}, [name])
 
           navbar.appendChild(identify)
-	} 
-	if (checkkey && checkname) {
-	  navbar.id = ''
-          //check for name -- if name then gossip
-	}
+	  } 
+	  if (checkkey && checkname) { navbar.id = '' }
 	})
       })
 
@@ -496,37 +481,6 @@ bog.keys().then(keys => {
         }
 
         if (src.length === 44) {
-          /*if (src === keys.substring(0, 44)) {
-	    if (!feeds[src]) {
-              var nameInput = h('input', {placeholder: 'Give yourself a name'})
-              var name = h('div', [
-                nameInput,
-                h('button', { onclick: function () {
-                  if (nameInput.value && (nameInput.value.length != keys.length)) {
-                    var obj = {}
-                    obj.name = nameInput.value
-                    nameInput.value = ''
-                    if (feeds[keys.substring(0,44)]) {
-                      bog.open(feeds[keys.substring(0,44)][0]).then(opened => {
-                        obj.seq = ++opened.seq
-                        obj.previous = opened.raw.substring(0,44)
-                        createpost(obj, keys)
-                      })
-                    } else {
-                      obj.seq = 1
-                      obj.previous = null
-                      createpost(obj, keys)
-                    }
-                  }
-                }}, ['Identify'])
-              ])
-	      scroller.appendChild(h('div', {classList: 'profile'}, [
-	        h('a', {href: keys.substring(0, 44)}, [keys.substring(0, 10) + '...']),
-		name
-              ]))
-	    }
-          }*/
-
           if (feeds[src]) {
             var profile = h('div', {classList: 'profile'})
             scroller.appendChild(profile)
@@ -710,24 +664,15 @@ bog.keys().then(keys => {
       //regenerate(feeds)
 
       setInterval(function () {
-         if (delay) {
+         if (delay) { 
            delay = false
            savefeeds(feeds, log)
            //console.log('saving feeds one last time')
          } 
-         if (!delay) { 
+         //if (!delay) { 
            //console.log('do not save feeds, there is nothing new')
-         }
+         //}
       }, 10000)
-      /*setInterval(function () {
-        savefeeds(feeds, log)
-      }, 10000)*/
-      /*document.addEventListener('visibilitychange', function() {
-        if (document.visibilityState == 'hidden') { 
-          savefeeds(feeds, log)
-          console.log('Saving feeds.')
-        }
-      })*/
 
       function connect (server) {
         var ws = new WebSocket(server)
@@ -873,8 +818,7 @@ bog.keys().then(keys => {
       }
 
       kv.get('servers').then(pubs => {
-        if (pubs) { servers = pubs}
-
+        if (pubs) { servers = pubs }
         servers.forEach(server => {
           connect(server)
         })
@@ -882,4 +826,3 @@ bog.keys().then(keys => {
     })
   })
 })
-

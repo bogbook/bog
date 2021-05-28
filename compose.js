@@ -199,7 +199,7 @@ function composer (keys, msg) {
 
   if (msg) {
     if (msg.raw) {
-      var thread = '↳ [' + msg.raw.substring(0, 7) + '](' + msg.raw.substring(0, 44) + ')\n\n'
+      var thread = '↳ [' + msg.raw.substring(0, 7) + '](' + msg.raw.substring(0, 44) + ')'
     } else {
       var thread = ''
     }
@@ -208,7 +208,7 @@ function composer (keys, msg) {
       if (name === null) {
         name = msg.author.substring(0, 10) + '...'
       }
-      textarea.value = textarea.value + '[' + name + '](' + msg.author + ') '
+      textarea.value = textarea.value + ' ← [' + name + '](' + msg.author + ')\n\n'
     })
   }
 

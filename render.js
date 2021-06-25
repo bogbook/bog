@@ -173,6 +173,26 @@ async function render (msg, keys) {
       cancel.parentNode.removeChild(cancel)
     }
   }, ['Cancel'])
+  var raw = h('div', [
+    h('pre', [JSON.stringify(msg)]),
+    h('button', {
+      onclick: function () {
+        raw.parentNode.appendChild(rawButton)
+        raw.parentNode.removeChild(raw)
+        
+      }
+    }, ['Hide'])
+  ])
+
+  var rawButton = h('button', {
+    onclick: function () {
+      rawButton.parentNode.removeChild(rawButton)
+      retractor.appendChild(raw)
+    }
+  },['Raw'])
+
+  retractor.appendChild(rawButton)
+
   if (!(msg.name || msg.avatar || msg.background || msg.bio)) {
     message.appendChild(h('button', {
       onclick: function () {

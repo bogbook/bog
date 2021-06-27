@@ -677,6 +677,7 @@ bog.keys().then(keys => {
 
       function connect (server) {
         var ws = new WebSocket(server)
+        ws.binaryType = 'arraybuffer'
 
         var id = ++serverId
 
@@ -710,11 +711,18 @@ bog.keys().then(keys => {
         }
 
         ws.onmessage = (msg) => {
-          ws.pubkey = msg.data.substring(0, 44)
-          peers.set(id, ws)
-
-          bog.unbox(msg.data, keys).then(unboxed => {
+          //ws.pubkey = msg.data.substring(0, 44)
+          //peers.set(id, ws)
+          console.log(msg.data)
+          var data = new Uint8Array(msg.data)
+          console.log(data)
+          bog.unbox(data, keys).then(unboxed => {
+            console.log(unboxed)
             var req = JSON.parse(unboxed)
+            if (req.pubkey) {
+              ws.pubkey = req.pubkey
+              peers.set(id, ws)
+            }
             if (req.permalink) {
               var nofeed = h('div', {id: 'nofeed', classList: 'message', innerHTML: 'You are not syncing <a href=#' + req.permalink.substring(44,88) + '>' + req.permalink.substring(44,54) + '</a>\'s feed. <a href=#' + req.permalink.substring(44,88) + '>Sync Now</a>.'
               })

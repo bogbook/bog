@@ -57,21 +57,31 @@ bog.open = async function open (msg) {
   }
 }
 
-bog.box = async function (msg, recp, keys) {
+bog.box = async function box (msg, recp, keys) {
+  var receiver = ed2curve.convertPublicKey(nacl.util.decodeBase64(recp))
+  var sender = ed2curve.convertPublicKey(nacl.util.decodeBase64(keys.substring(0, 44)))
+  var privatekey = ed2curve.convertSecretKey(nacl.util.decodeBase64(keys.substring(44)))
   var nonce = nacl.randomBytes(nacl.box.nonceLength)
   var message = nacl.util.decodeUTF8(msg)
-  var encrypted = nacl.box(message, nonce, ed2curve.convertPublicKey(nacl.util.decodeBase64(recp)), ed2curve.convertSecretKey(nacl.util.decodeBase64(keys.substring(44))))
-  var nonceMsg = keys.substring(0, 44) + nacl.util.encodeBase64(nonce) + nacl.util.encodeBase64(encrypted)
-  return nonceMsg 
+  var boxed = nacl.box(message, nonce, receiver, privatekey)
+  var nonceMsg = new Uint8Array(sender.length + nonce.length + boxed.length)
+
+  nonceMsg.set(sender)
+  nonceMsg.set(nonce, sender.length)
+  nonceMsg.set(boxed, sender.length + nonce.length)
+
+  return nonceMsg
 }
 
 //bog.unbox -- decrypts a message sent to our pubkey
-bog.unbox = async function (boxed, keys) {
-  var sender = boxed.substring(0, 44)
-  var nonceMsg = nacl.util.decodeBase64(boxed.substring(44))
-  var nonce = nonceMsg.slice(0, nacl.box.nonceLength)
-  var msg = nonceMsg.slice(nacl.box.nonceLength, nonceMsg.length)
-  var message = nacl.util.encodeUTF8(nacl.box.open(msg, nonce, ed2curve.convertPublicKey(nacl.util.decodeBase64(sender)), ed2curve.convertSecretKey(nacl.util.decodeBase64(keys.substring(44)))))
+bog.unbox = async function unbox (boxed, keys) {
+  var privatekey = ed2curve.convertSecretKey(nacl.util.decodeBase64(keys.substring(44)))
+
+  var senderkey = boxed.slice(0, 32)
+  var nonce = boxed.slice(32, 32 + 24)
+  var msg = boxed.slice(32 + 24)
+  var unboxed = nacl.box.open(msg, nonce, senderkey, privatekey)
+  var message = nacl.util.encodeUTF8(unboxed)
   return message
 }
 

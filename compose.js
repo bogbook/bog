@@ -33,6 +33,23 @@ function createpost (obj, keys, compose) {
   })
 }
 
+function getContacts (textarea, preview) {
+  var span = h('span')
+
+  var button = h('button', {onclick: function () {
+    Object.keys(feeds).forEach(function (key, index) {
+      span.appendChild(h('button', {onclick: function () {
+        textarea.value = textarea.value + ' [' + getName(key, log) + '](' + key + ')'
+        preview.innerHTML = marked(textarea.value)
+      }}, [getImage(key, log), getName(key, log)]))
+    })
+  }}, ['📇'])
+
+  span.appendChild(button)
+
+  return span
+}
+
 function composer (keys, msg) {
   var photoURL = {}
   var croppedURL = {}
@@ -262,6 +279,7 @@ function composer (keys, msg) {
   compose.appendChild(header)
   compose.appendChild(preview)
   compose.appendChild(newPhoto)
+  compose.appendChild(getContacts(textarea, preview))
   compose.appendChild(textarea)
   compose.appendChild(publish) 
   return compose

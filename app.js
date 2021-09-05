@@ -739,6 +739,12 @@ bog.keys().then(keys => {
                 })
               }
             }
+            if (req.denied) { 
+              var denied = h('div', {classList: 'message'}, [
+                h('div', {innerHTML: marked(req.denied)})
+              ])
+              scroller.insertBefore(denied, scroller.childNodes[1])
+            }
             if (req.welcome && (window.location.hash.substring(1) === '')) {
               var connections = ' along with ' + (req.connected - 1) + ' peers.'
               if (req.connected === 2) {

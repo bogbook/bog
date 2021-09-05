@@ -142,6 +142,10 @@ readBog().then(feeds => {
               if (!feeds[req.connected]) {
                 if (fortified) {
                   console.log(chalk.red('access denied') + ' to ' + chalk.grey(req.connected)  + ' at ' + time)
+                  var resp = {denied: config.denied || 'Hey Bud, your access is denied.'}
+                  bog.box(JSON.stringify(resp), req.connected, keys).then(boxed => {
+                    ws.send(boxed)
+                  })
                 } else {
                   var resp = {pubkey: keys.substring(0, 44), url: url, welcome: welcome, connected: ews.getWss().clients.size}
                   ws.pubkey = req.connected

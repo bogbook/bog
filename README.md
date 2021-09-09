@@ -61,7 +61,7 @@ node bin
 
 Navigate to http://localhost:8081/ to view your local bogbook
 
-### use an alterative .bogbook folder
+### use an alternative .bogbook folder
 
 The first argument passed to node will specify a different folder to save bogs, stats, the server keypair, and config options.
 

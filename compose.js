@@ -51,6 +51,7 @@ function getContacts (textarea, preview) {
 }
 
 function composer (keys, msg) {
+
   var photoURL = {}
   var croppedURL = {}
   var uncroppedURL = {}
@@ -216,7 +217,8 @@ function composer (keys, msg) {
 
   if (msg) {
     if (msg.raw) {
-      var thread = '↳ [' + msg.raw.substring(0, 7) + '](' + msg.raw.substring(0, 44) + ')'
+      var select = window.getSelection().toString()
+      var thread = '↳ [' + (select || msg.raw.substring(0, 7)) + '](' + msg.raw.substring(0, 44) + ')'
     } else {
       var thread = ''
     }

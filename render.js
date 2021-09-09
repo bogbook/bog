@@ -166,7 +166,6 @@ async function render (msg, keys) {
       retractor.appendChild(makeBackground)
     }
   }
-  var reply = composer(keys, msg)
   var cancel = h('button', {
     onclick: function () {
       reply.parentNode.removeChild(reply)
@@ -196,6 +195,7 @@ async function render (msg, keys) {
   if (!(msg.name || msg.avatar || msg.background || msg.bio)) {
     message.appendChild(h('button', {
       onclick: function () {
+        var reply = composer(keys, msg)
         messageDiv.appendChild(reply)
         reply.appendChild(cancel)
       }

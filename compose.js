@@ -42,7 +42,13 @@ function getContacts (textarea, preview) {
       span.appendChild(addrs)
       Object.keys(feeds).forEach(function (key, index) {
         addrs.appendChild(h('button', {onclick: function () {
-          textarea.value = textarea.value + ' [' + getName(key, log) + '](' + key + ')'
+          if (textarea.selectionStart || textarea.selectionEnd) {
+            textarea.value = textarea.value.substring(0, textarea.selectionStart) 
+              + ' [' + getName(key, log) + '](' + key + ') ' +
+              textarea.value.substring(textarea.selectionEnd, textarea.value.length)
+          } else {
+            textarea.value = textarea.value + ' [' + getName(key, log) + '](' + key + ')'
+          }
           preview.innerHTML = marked(textarea.value)
         }}, [getImage(key, log), getName(key, log)]))
       })

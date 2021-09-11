@@ -22,7 +22,7 @@ async function savefeeds (feeds, log) {
     await kv.set('feeds', feeds)
     //console.log('saving feeds')
   } catch {
-    console.log('unable to save feeds')
+    //console.log('unable to save feeds')
   }
 }
 
@@ -94,7 +94,7 @@ const peers = new Map()
 var serverId = 0
 
 function blast(msg, keys) {
-  console.log('ask all peers for ' + msg.feed)
+  //console.log('ask all peers for ' + msg.feed)
   for (const peer of peers.values()) {
     bog.box(JSON.stringify(msg), peer.pubkey, keys).then(boxed => {
       peer.send(boxed)
@@ -105,7 +105,7 @@ function blast(msg, keys) {
 function dispatch(msg, keys) {
   var peer = peers.get(Math.ceil(Math.random() * peers.size))
   if (peer) {
-    console.log('ask ' + peer.url + ' for ' + msg.feed)
+    //console.log('ask ' + peer.url + ' for ' + msg.feed)
     bog.box(JSON.stringify(msg), peer.pubkey, keys).then(boxed => {
       peer.send(boxed)
     })
@@ -157,7 +157,7 @@ bog.keys().then(keys => {
       log = gotlog
 
       if (!feeds[config.author]) {
-        console.log('gossip default log')
+        //console.log('gossip default log')
         setTimeout(function () {
           var gossip = {feed: config.author}
           if (feeds[config.author]) {
@@ -169,7 +169,7 @@ bog.keys().then(keys => {
         }, 5000)
       }
       if (!feeds[keys.substring(0, 44)]) {
-        console.log('gossip my feed')
+        //console.log('gossip my feed')
         setTimeout(function () {
           var me = keys.substring(0, 44)
           var gossip = {feed: me}
@@ -687,7 +687,7 @@ bog.keys().then(keys => {
 
         ws.onclose = (e) => {
           setTimeout(function () {
-            console.log('connection to ' + server + ' closed, reconnecting')
+            //console.log('connection to ' + server + ' closed, reconnecting')
             connect(server)
           }, 1000)
         }
@@ -703,7 +703,7 @@ bog.keys().then(keys => {
           } 
           scroller.insertBefore(disconnected, scroller.childNodes[1])
 
-          console.log('unable to connect, closing connection to ' + server)
+          //console.log('unable to connect, closing connection to ' + server)
           setTimeout(function () {
             ws.close()
             retryCount++
@@ -713,11 +713,11 @@ bog.keys().then(keys => {
         ws.onmessage = (msg) => {
           //ws.pubkey = msg.data.substring(0, 44)
           //peers.set(id, ws)
-          console.log(msg.data)
+          //console.log(msg.data)
           var data = new Uint8Array(msg.data)
-          console.log(data)
+          //console.log(data)
           bog.unbox(data, keys).then(unboxed => {
-            console.log(unboxed)
+            //console.log(unboxed)
             var req = JSON.parse(unboxed)
             if (req.pubkey) {
               ws.pubkey = req.pubkey

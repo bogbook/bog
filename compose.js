@@ -37,14 +37,20 @@ function getContacts (textarea, preview) {
   var span = h('span')
 
   var button = h('button', {onclick: function () {
-    Object.keys(feeds).forEach(function (key, index) {
-      span.appendChild(h('button', {onclick: function () {
-        textarea.value = textarea.value + ' [' + getName(key, log) + '](' + key + ')'
-        preview.innerHTML = marked(textarea.value)
-      }}, [getImage(key, log), getName(key, log)]))
-    })
+    if (!span.childNodes[1]) {
+      var addrs = h('span')
+      span.appendChild(addrs)
+      Object.keys(feeds).forEach(function (key, index) {
+        addrs.appendChild(h('button', {onclick: function () {
+          textarea.value = textarea.value + ' [' + getName(key, log) + '](' + key + ')'
+          preview.innerHTML = marked(textarea.value)
+        }}, [getImage(key, log), getName(key, log)]))
+      })
+    } else {
+      span.removeChild(span.childNodes[1])
+    }
   }}, ['📇'])
-
+  
   span.appendChild(button)
 
   return span

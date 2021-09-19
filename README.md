@@ -13,7 +13,6 @@ The bogbook protocol is secure (no one can modify your posts) and the data exist
 + Try it: [bogbook.com](http://bogbook.com/)
 + Electronic Mail: [ev@evbogue.com](mailto:ev@evbogue.com)
 + Public Inbox: https://lists.sr.ht/~ev/public-inbox [~ev/public-inbox@lists.sr.ht](mailto:~ev/public-inbox@lists.sr.ht)
-+ IRC: irc.freenode.net #bogbook
 
 ---
 

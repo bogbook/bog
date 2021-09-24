@@ -63,6 +63,11 @@ function getContacts (textarea, preview) {
 }
 
 function composer (keys, msg) {
+  var src = window.location.hash.substring(1)
+
+  if (!src) {
+    src = 'home'
+  }
 
   var photoURL = {}
   var croppedURL = {}
@@ -224,6 +229,8 @@ function composer (keys, msg) {
   var textarea = h('textarea', {placeholder: 'Write a message here.'})
 
   textarea.addEventListener('input', function (e) {
+    kv.set(src, textarea.value)
+    console.log('saving draft')
     preview.innerHTML = marked(textarea.value)
   })
 
@@ -242,6 +249,12 @@ function composer (keys, msg) {
       textarea.value = textarea.value + ' ← [' + name + '](' + msg.author + ')\n\n'
     })
   }
+
+  kv.get(src).then(got => {
+    if (got) {
+      textarea.value = got
+    }
+  })
 
   var publish = h('button', {
     onclick: function () {

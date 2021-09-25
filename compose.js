@@ -259,6 +259,7 @@ function composer (keys, msg) {
   var publish = h('button', {
     onclick: function () {
       if (textarea.value || photoURL.value) {
+        kv.remove(src)
         var obj = {}
         if (textarea.value) {
           obj.text = textarea.value

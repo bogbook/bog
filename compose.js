@@ -229,8 +229,11 @@ function composer (keys, msg) {
   var textarea = h('textarea', {placeholder: 'Write a message here.'})
 
   textarea.addEventListener('input', function (e) {
-    kv.set(src, textarea.value)
-    console.log('saving draft')
+    if (textarea.value) {
+      kv.set(src, textarea.value)
+    } else {
+      kv.remove(src)
+    }
     preview.innerHTML = marked(textarea.value)
   })
 

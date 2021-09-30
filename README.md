@@ -4,6 +4,8 @@
 
 ![bogbook](bogbook.png)
 
+*Please note that the only topic banned on Bogbook is COVID (pro and anti). I am currently working on a way to ban people who talk about COVID, including myself. Pull-requests needed.
+
 Bogbook is a distributed news network made up of feeds signed by ed25519 keypairs, and then replicated between bogbook clients in the browser and bogbook pubs. 
 
 On bogbook you can post images with filters and posts that are rendered in markdown. You can identify your ed25519 pubkey with a name, an image, a bio, and a background.

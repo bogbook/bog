@@ -63,11 +63,10 @@ function getContacts (textarea, preview) {
 }
 
 function composer (keys, msg) {
-  var src = window.location.hash.substring(1)
 
-  if (!src) {
-    src = 'home'
-  }
+  if (msg) {
+    var src = msg.raw.substring(0, 44)
+  } else { var src = 'home'} 
 
   var photoURL = {}
   var croppedURL = {}

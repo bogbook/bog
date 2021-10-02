@@ -210,7 +210,7 @@ function composer (keys, msg) {
   })
 
   if (msg) {
-    var compose = h('div', {classList: 'message reply'})
+    var compose = h('div', {id: 'reply' + msg.raw.substring(0, 44), classList: 'message reply'})
   } else {
     var compose = h('div', {classList: 'message'})
   }

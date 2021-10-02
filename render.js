@@ -168,8 +168,9 @@ async function render (msg, keys) {
   }
   var cancel = h('button', {
     onclick: function () {
-      reply.parentNode.removeChild(reply)
-      cancel.parentNode.removeChild(cancel)
+      var check = document.getElementById('reply' + msg.raw.substring(0, 44))
+      check.parentNode.removeChild(check)
+      //cancel.parentNode.removeChild(cancel)
     }
   }, ['Cancel'])
   var raw = h('div', [
@@ -195,9 +196,17 @@ async function render (msg, keys) {
   if (!(msg.name || msg.avatar || msg.background || msg.bio)) {
     message.appendChild(h('button', {
       onclick: function () {
-        var reply = composer(keys, msg)
-        messageDiv.appendChild(reply)
-        reply.appendChild(cancel)
+        var check = document.getElementById('reply' + msg.raw.substring(0, 44))
+        if (!check) {
+          var reply = composer(keys, msg)
+          console.log(messageDiv)
+          if (messageDiv.childNodes[1]) {
+            messageDiv.insertBefore(reply, messageDiv.childNodes[1])
+          } else {
+            messageDiv.appendChild(reply)
+          }
+          reply.appendChild(cancel)
+        }
       }
     }, ['Reply']))
     if (retractor.childNodes[1]) {

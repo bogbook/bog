@@ -754,10 +754,44 @@ bog.keys().then(keys => {
                 connections = ''
               }
               var welcome = h('div', {classList: 'message'}, [
-                h('div', {innerHTML: marked(
-                  'You\'ve connected to [' + req.url + '](http://' + req.url + ').' + req.welcome
-                )})
+                h('span', {style: 'float: right;'}, [
+                  h('code', [req.pubkey.substring(0, 7)]),
+                  ' Connected'
+                ]),
+                h('a', {href: req.url}, [req.url]),
               ])
+              welcome.appendChild(
+                h('div', {innerHTML: marked(req.welcome)})
+              )
+              if (req.chart) {
+                const chart = LightweightCharts.createChart(welcome, {
+                  width: 475, 
+                  height: 200,
+                  layout: {backgroundColor: '#f5f5f5'},
+                  watermark: {
+		    visible: true,
+	     	    fontSize: 18,
+		    horzAlign: 'center',
+		    vertAlign: 'center',
+		    color: '#999',
+		    text: 'Visits',
+	          },
+                })
+                kv.get('theme').then(theme => {
+                  if (theme == 'dark') {
+                    chart.applyOptions({
+                      layout: {backgroundColor: '#333', textColor: '#ccc;'}
+                    })
+                  }
+                })
+                const lineSeries = chart.addLineSeries({
+                  title: req.url, 
+                  color: '#008b8b',
+                  priceLineColor: '#008b8b'
+                })
+                lineSeries.setData(JSON.parse(req.chart))
+                console.log(JSON.parse(req.chart))
+              }
               scroller.insertBefore(welcome, scroller.childNodes[1])
             }
             if (req.msg) {

@@ -22,7 +22,6 @@ var log = []
 
 if (!fs.existsSync(appdir)) { fs.mkdirSync(appdir) }
 if (!fs.existsSync(appdir + 'bogs/')) { fs.mkdirSync(appdir + 'bogs/') }
-if (!fs.existsSync(appdir + 'stats/')) { fs.mkdirSync(appdir + 'stats/') }
 
 var counter = 0
 
@@ -52,13 +51,7 @@ if (fs.existsSync(appdir + 'config.json')) {
 
 async function readVisits () {
   try {
-    var connects = []
-    var files = await fs.promises.readdir(appdir + 'stats/')
-    for (const file of files) {
-      const data = await fs.promises.readFile(appdir + 'stats/' + file, 'UTF-8')
-      const visit = JSON.parse(data)
-      connects[file] = visit
-    }
+    var connects = JSON.parse(await fs.promises.readFile(appdir + 'visits', 'UTF-8'))
   } catch {
     connects = []
   }
@@ -103,17 +96,12 @@ async function makeLog (feeds) {
 
 readBog().then(feeds => {
   readVisits().then(connects => {
-    console.log('There have been ' + counter + ' visits from ' + Object.keys(connects).length + ' visitors.')
 
     makeLog(feeds)
 
     setInterval(function () {
       if (feeds) {
-        fs.writeFileSync(appdir + 'counter', JSON.stringify(counter), 'UTF-8')
-        for (var key in connects) {
-          var value = connects[key]
-  	fs.writeFileSync(appdir + 'stats/' + key, JSON.stringify(value), 'UTF-8')
-        }
+  	fs.writeFileSync(appdir + 'visits', JSON.stringify(connects), 'UTF-8')
         for (var key in feeds) {
           var value = feeds[key]
           fs.writeFileSync(appdir + 'bogs/' + key, JSON.stringify(value), 'UTF-8')
@@ -128,17 +116,30 @@ readBog().then(feeds => {
           if (msg[0] === '{') {
             var req = JSON.parse(msg)
             if (req.connected) {
-  	    counter++
-  	    if (connects[req.connected]) {
-  	      connects[req.connected].counter++
-  	    } else {
-                connects[req.connected] = {counter: 1} 
-  	    }
-  	    if (config && config.welcome) {
-  	      ad = config.welcome
-  	    }
-  	    var welcome = ' There have been ' + counter + ' visits from ' + Object.keys(connects).length + ' visitors. \n\n' + ad
+  	      counter++
+  	      if (config && config.welcome) {
+  	        ad = config.welcome
+  	      }
+  	      var welcome = ad
               var time = new Date().toLocaleString()
+              var visitdate = new Date().toISOString().split('T')[0];
+              if (connects.length) {
+                for (i = 0; i < connects.length; i++) {
+                  if (connects[i].time === visitdate) {
+                    connects[i].value++
+                  }
+                  else if (i === connects.length -1) {
+                    connects.push({time: visitdate, value: 1})
+                  }
+                }
+              } else {
+                connects.push({time: visitdate, value: 1})
+              }
+              /*if (connects[visitdate]) {
+                connects[visitdate] = {'date': visitdate, 'value': connects[visitdate].value + 1}
+              } else {
+                connects[visitdate] = {'date': visitdate, 'value': 1}
+              }*/
               if (!feeds[req.connected]) {
                 if (fortified) {
                   console.log(chalk.red('access denied') + ' to ' + chalk.grey(req.connected)  + ' at ' + time)
@@ -156,7 +157,7 @@ readBog().then(feeds => {
                 }
               }
               if (feeds[req.connected]) {
-                var resp = {pubkey: keys.substring(0, 44), url: url, welcome: welcome, connected: ews.getWss().clients.size}
+                var resp = {pubkey: keys.substring(0, 44), url: url, welcome: welcome, connected: ews.getWss().clients.size, chart: JSON.stringify(connects)}
                 ws.pubkey = req.connected
                 bog.box(JSON.stringify(resp), req.connected, keys).then(boxed => {
                   ws.send(boxed)

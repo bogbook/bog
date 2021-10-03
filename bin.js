@@ -148,7 +148,7 @@ readBog().then(feeds => {
                     ws.send(boxed)
                   })
                 } else {
-                  var resp = {pubkey: keys.substring(0, 44), url: url, welcome: welcome, connected: ews.getWss().clients.size}
+                  var resp = {pubkey: keys.substring(0, 44), url: url, welcome: welcome, chart: JSON.stringify(connects), connected: ews.getWss().clients.size}
                   ws.pubkey = req.connected
                   bog.box(JSON.stringify(resp), req.connected, keys).then(boxed => {
                     ws.send(boxed)

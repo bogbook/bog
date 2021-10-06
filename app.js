@@ -746,13 +746,6 @@ bog.keys().then(keys => {
               scroller.insertBefore(denied, scroller.childNodes[1])
             }
             if (req.welcome && (window.location.hash.substring(1) === '')) {
-              var connections = ' along with ' + (req.connected - 1) + ' peers.'
-              if (req.connected === 2) {
-                var connections = ' along with one peer.'
-              }
-              if (req.connected === 1) {
-                connections = ''
-              }
               var welcome = h('div', {classList: 'message'}, [
                 h('span', {style: 'float: right;'}, [
                   h('code', [req.pubkey.substring(0, 7)]),
@@ -760,12 +753,14 @@ bog.keys().then(keys => {
                 ]),
                 h('a', {href: req.url}, [req.url]),
               ])
+              
+              scroller.insertBefore(welcome, scroller.childNodes[1])
               welcome.appendChild(
                 h('div', {innerHTML: marked(req.welcome)})
               )
               if (req.chart) {
                 const chart = LightweightCharts.createChart(welcome, {
-                  width: 475, 
+                  width: (welcome.offsetWidth - 20), 
                   height: 200,
                   layout: {backgroundColor: '#f5f5f5'},
                   watermark: {
@@ -792,7 +787,6 @@ bog.keys().then(keys => {
                 lineSeries.setData(JSON.parse(req.chart))
                 console.log(JSON.parse(req.chart))
               }
-              scroller.insertBefore(welcome, scroller.childNodes[1])
             }
             if (req.msg) {
               bog.open(req.msg).then(opened => {

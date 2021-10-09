@@ -571,8 +571,8 @@ bog.keys().then(keys => {
                 var check = document.getElementById(src)
                 if (!check) {
                   var messageDiv = h('div', {id: 'reply' + src, classList: 'reply'})
-                  var compose = composer(keys, msg)
                   var msg = {author: src}
+                  var compose = composer(keys, msg)
                   var cancel = h('button', {
                     onclick: function () {
                       var check = document.getElementById('reply' + src)

@@ -64,8 +64,10 @@ function getContacts (textarea, preview) {
 
 function composer (keys, msg) {
 
-  if (msg) {
+  if (msg && msg.raw) {
     var src = msg.raw.substring(0, 44)
+  } else if (msg && msg.author && !msg.raw) {
+    var src = msg.author
   } else { var src = 'home'} 
 
   var photoURL = {}
@@ -209,7 +211,7 @@ function composer (keys, msg) {
     filters.appendChild(h('span', [' ']))
   })
 
-  if (msg) {
+  if (msg && msg.raw) {
     var compose = h('div', {id: 'reply' + msg.raw.substring(0, 44), classList: 'message reply'})
   } else {
     var compose = h('div', {classList: 'message'})

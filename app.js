@@ -568,10 +568,24 @@ bog.keys().then(keys => {
 
             var replyto = h('button', {
               onclick: function () {
-                var msg = {author: src}
-                profile.parentNode.insertBefore(composer(keys, msg), profile.parentNode.childNodes[1])
+                var check = document.getElementById(src)
+                if (!check) {
+                  var messageDiv = h('div', {id: 'reply' + src, classList: 'reply'})
+                  var compose = composer(keys, msg)
+                  var msg = {author: src}
+                  var cancel = h('button', {
+                    onclick: function () {
+                      var check = document.getElementById('reply' + src)
+                      check.parentNode.removeChild(check)
+                    }
+                  }, ['Cancel'])
+
+                  messageDiv.appendChild(compose)
+                  compose.appendChild(cancel)
+                  profile.parentNode.insertBefore(messageDiv, profile.parentNode.childNodes[1])
+                }
               }
-            }, ['Compose'])
+            }, ['← Compose'])
 
             buttons.appendChild(replyto)
 

@@ -25,7 +25,7 @@ function createpost (obj, keys, compose) {
           if (compose) {
             compose.parentNode.replaceChild(h('div', {classList: 'reply'}, [rendered]), compose)
           } else {
-            scroller.insertBefore(rendered, scroller.firstChild)
+            scroller.insertBefore(rendered, scroller.childNodes[1])
           }
         })
       }

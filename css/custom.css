@@ -21,6 +21,10 @@ body {
   background: #fff;
 }
 
+blockquote {
+  border-left: 2px solid #008b8b;
+}
+
 a {
   color: #008b8b;
 }

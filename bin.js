@@ -212,8 +212,15 @@ readBog().then(feeds => {
           }
         })
       }
-      else if (req.seq || (req.seq === 0)) {
-        if (!feeds[req.feed]) {
+      else if (req.seq === -1) {
+        if (feeds[req.feed]) {
+          var latest = feeds[req.feed][0]
+          var message = {permalink: latest}
+          bog.box(JSON.stringify(message), ws.pubkey, keys).then(boxed => {
+            console.log('sent permalink http://' + url + '/#' + latest.substring(0, 44) + ' to ' +  bog.name(log, ws.pubkey) + ' ' + ws.pubkey)
+            ws.send(boxed)
+          })
+        } else {
           log.forEach(msg => {
             if (msg.raw.substring(0, 44) === req.feed) {
               var message = {permalink: msg.raw}
@@ -222,7 +229,11 @@ readBog().then(feeds => {
                 ws.send(boxed)
               })
             }
-          }) 
+          })
+        }
+      }
+      else if (req.seq || (req.seq === 0)) {
+        if (!feeds[req.feed]) {
           var gossip = {feed: req.feed, seq: 0}
           bog.box(JSON.stringify(gossip), ws.pubkey, keys).then(boxed => {
             ws.send(boxed)

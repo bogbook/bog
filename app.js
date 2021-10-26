@@ -156,19 +156,7 @@ bog.keys().then(keys => {
       feeds = gotfeeds
       log = gotlog
 
-      if (!feeds[config.author]) {
-        //console.log('gossip default log')
-        setTimeout(function () {
-          var gossip = {feed: config.author}
-          if (feeds[config.author]) {
-            gossip.seq = feeds[config.author].length
-          } else {
-            gossip.seq = 0
-          }
-          dispatch(gossip, keys)
-        }, 5000)
-      }
-      if (!feeds[keys.substring(0, 44)]) {
+     if (!feeds[keys.substring(0, 44)]) {
         //console.log('gossip my feed')
         setTimeout(function () {
           var me = keys.substring(0, 44)
@@ -357,7 +345,19 @@ bog.keys().then(keys => {
 
         if (src === '') {
           scroller.insertBefore(composer(keys), scroller.childNodes[1])
-
+          if (!feeds[config.author]) {
+            //console.log('gossip default log')
+            setTimeout(function () {
+              var gossip = {feed: config.author}
+              if (feeds[config.author]) {
+                gossip.seq = feeds[config.author].length
+              } else {
+                gossip.seq = -1
+              }
+              dispatch(gossip, keys)
+            }, 5000)
+          }
+ 
           var index = 0
 
           async function addPosts (posts, keys) {
@@ -614,7 +614,7 @@ bog.keys().then(keys => {
               gossip.seq = feeds[src].length
               dispatch(gossip, keys)
             } else {
-              gossip.seq = 0
+              gossip.seq = -1
               blast(gossip, keys)
             }
 
@@ -643,19 +643,27 @@ bog.keys().then(keys => {
               }
             })
           } else {
-            var haveit = false
-            for (var i = 0; i < log.length; i++) {
-              if (log[i].raw.substring(0, 44) === src) {
-                haveit = true
-                render(log[i], keys).then(rendered => {
-                  scroller.insertBefore(rendered, scroller.firstChild)
-                })
-              }
-              if ((i === (log.length - 1)) && !haveit) {
-                var gossip = {feed: src, seq: 0}
-                setTimeout(function () {
-                  blast(gossip, keys)
-                }, 1000)
+            if (log.length < 1) {
+              console.log('NO LOG')
+              var gossip = {feed: src, seq: -1}
+              setTimeout(function () {
+                blast(gossip, keys)
+              }, 1000)
+            } else {
+              var haveit = false
+              for (var i = 0; i < log.length; i++) {
+                if (log[i].raw.substring(0, 44) === src) {
+                  haveit = true
+                  render(log[i], keys).then(rendered => {
+                    scroller.insertBefore(rendered, scroller.firstChild)
+                  })
+                }
+                if ((i === (log.length - 1)) && !haveit) {
+                  var gossip = {feed: src, seq: -1}
+                  setTimeout(function () {
+                    blast(gossip, keys)
+                  }, 1000)
+                }
               }
             }
           }
@@ -738,16 +746,38 @@ bog.keys().then(keys => {
               peers.set(id, ws)
             }
             if (req.permalink) {
-              var nofeed = h('div', {id: 'nofeed', classList: 'message', innerHTML: 'You are not syncing <a href=#' + req.permalink.substring(44,88) + '>' + req.permalink.substring(44,54) + '</a>\'s feed. <a href=#' + req.permalink.substring(44,88) + '>Sync Now</a>.'
-              })
-              if (!document.getElementById('nofeed')) { 
-                scroller.appendChild(nofeed)
+              src = req.permalink.substring(44,88)
+              var permalink = h('div', {id: src})
+
+              if (scroller.firstChild) {
+                scroller.insertBefore(permalink, scroller.childNodes[1])
+              } else {
+                scroller.appendChild(permalink)
               }
+              
+              var nofeed = h('div', {classList: 'message'}, [
+                  'You are not syncing ',
+                  h('a', {href: '#' + src}, [req.permalink.substring(44,54) + '\'s feed. ']),
+                h('button', {
+                  onclick: function () {
+                    
+                    var gossip = {feed: src, seq: 0}
+                    blast(gossip, keys)
+                    if (window.location.hash.substring(1) != src) {
+                      window.location.hash = src
+                    }
+                    var gotit = document.getElementById(src)
+                    gotit.parentNode.removeChild(gotit)
+
+                  }
+                }, ['Sync Now'])
+              ])
+              permalink.appendChild(nofeed)
               if (!document.getElementById(req.permalink.substring(0, 44))) {
                 bog.open(req.permalink).then(opened => {
-                  if (window.location.hash.substring(1) === opened.raw.substring(0, 44)) {
+                  if (!window.location.hash.substring(1) || (window.location.hash.substring(1) === opened.raw.substring(0, 44)) || (window.location.hash.substring(1) === opened.author)) {
                     render(opened, keys).then(rendered => {
-                      scroller.appendChild(rendered)
+                      permalink.appendChild(rendered)
                     }) 
                   }
                 })

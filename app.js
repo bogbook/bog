@@ -738,6 +738,7 @@ bog.keys().then(keys => {
           //console.log(msg.data)
           var data = new Uint8Array(msg.data)
           //console.log(data)
+          console.log(msg.data)
           bog.unbox(data, keys).then(unboxed => {
             //console.log(unboxed)
             var req = JSON.parse(unboxed)

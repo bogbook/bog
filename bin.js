@@ -1,267 +1,138 @@
-var fs = require('fs')
-var chalk = require('chalk')
+import { keys, unbox, box, publish, open } from './denoutil.js'
 
-var homedir = require('os').homedir()
+const server = Deno.listen({ port: 8080 })
 
-var bog = require('./util')
+const appdir = 'denobog'
+const key = await keys(appdir)
 
-var root = 'bogbook'
+const feeds = []
+const log = []
 
-if (process.argv[2]) {
-  root = process.argv[2]
-}
-
-var appdir = homedir + '/.' + root + '/'
-console.log('saving bogs to ' + appdir)
-
-var PORT = 8081
-var url = 'localhost'
-var fortified = false
-
-var log = []
-
-if (!fs.existsSync(appdir)) { fs.mkdirSync(appdir) }
-if (!fs.existsSync(appdir + 'bogs/')) { fs.mkdirSync(appdir + 'bogs/') }
-
-var counter = 0
-
-if (fs.existsSync(appdir + 'counter')) {
-  counter = JSON.parse(fs.readFileSync(appdir + 'counter', 'UTF-8'))
-}
-
-var express = require('express')
-var app = express()
-var ews = require('express-ws')(app)
-
-var ad = 'Hello World!'
-
-if (fs.existsSync(appdir + 'config.json')) {
-  var config = JSON.parse(fs.readFileSync(appdir + 'config.json' , 'UTF-8'))
-  if (config.url) {
-    url = config.url
-  }
-  if (config.fort) {
-    fortified = true
-    console.log('this bogbook is fortified')
-  }
-  if (config.port) {
-    PORT = config.port
-  }
-}
-
-async function readVisits () {
-  try {
-    var connects = JSON.parse(await fs.promises.readFile(appdir + 'visits', 'UTF-8'))
-  } catch {
-    connects = []
-  }
-  return connects
-}
-
-async function readBog () {
-  try {
-    var feeds = []
-    var files = await fs.promises.readdir(appdir + 'bogs/')
-    for (const file of files) {
-      const data = await fs.promises.readFile(appdir + 'bogs/' + file, 'UTF-8')
-      const feed = JSON.parse(data)
-      feeds[file] = feed
-    }
-  } catch {
-    feeds = []
-  }
-  return feeds
-}
-
-async function makeLog (feeds) {
-  if (feeds) {
-    console.log('generating log from feeds, this may take a moment to complete...')
-    var all = []
-    Object.keys(feeds).forEach(function(key,index) {
-      all = all.concat(feeds[key])
-      if (Object.keys(feeds).length -1 === index) {
-        all.forEach((msg, index) => {
-          bog.open(msg).then(opened => {
-            log.push(opened)
-            if (index === all.length -1) {
-              console.log(log.length + ' posts from ' + (Object.keys(feeds).length) + ' authors')
-            }
+function processReq (req, ws, keys) {
+  console.log(req)
+  if (req.msg) {
+    open(req.msg).then(opened => {
+      console.log(opened)
+      if (feeds[opened.author]) {
+        if (feeds[opened.author][0].substring(0, 44) === opened.previous) {
+          feeds[opened.author].unshift(req.msg)
+          log.push(opened)
+        var via = ''
+        if (opened.author != ws.pubkey) {
+            via = ' via ' + ws.pubkey 
+        }
+          console.log('post ' + opened.seq + ' from ' + opened.author + ' ' + via)
+          var gossip = {feed: opened.author, seq: opened.seq}
+          box(JSON.stringify(gossip), ws.pubkey, keys).then(boxed => {
+            ws.send(boxed)
           })
+        }
+      } else {
+        feeds[opened.author] = [req.msg]
+        log.push(opened)
+      var via = ''
+      if (opened.author != ws.pubkey) {
+          via = ' via ' + ws.pubkey
+      }
+        console.log('post ' + opened.seq + ' from ' + opened.author + ' ' + via)
+        var gossip = {feed: opened.author, seq: opened.seq}
+        box(JSON.stringify(gossip), ws.pubkey, keys).then(boxed => {
+          ws.send(boxed)
         })
       }
     })
   }
-}
-
-
-readBog().then(feeds => {
-  readVisits().then(connects => {
-
-    makeLog(feeds)
-
-    setInterval(function () {
-      if (feeds) {
-  	fs.writeFileSync(appdir + 'visits', JSON.stringify(connects), 'UTF-8')
-        for (var key in feeds) {
-          var value = feeds[key]
-          fs.writeFileSync(appdir + 'bogs/' + key, JSON.stringify(value), 'UTF-8')
-        }
-      } else {console.log('no feeds?', feeds)}
-    }, 10000)
-
-    bog.keys(appdir).then(keys => {
-      console.log(bog.name(log, keys.substring(0, 44)))
-      app.ws('/ws', function (ws, req) {
-        ws.on('message', function (msg) {
-          if (msg[0] === '{') {
-            var req = JSON.parse(msg)
-            if (req.connected) {
-  	      counter++
-  	      if (config && config.welcome) {
-  	        ad = config.welcome
-  	      }
-  	      var welcome = ad
-              var time = new Date().toLocaleString()
-              var visitdate = new Date().toISOString().split('T')[0];
-              if (connects.length) {
-                for (i = 0; i < connects.length; i++) {
-                  if (connects[i].time === visitdate) {
-                    connects[i].value++
-                  }
-                  else if (i === connects.length -1) {
-                    connects.push({time: visitdate, value: 1})
-                  }
-                }
-              } else {
-                connects.push({time: visitdate, value: 1})
-              }
-              /*if (connects[visitdate]) {
-                connects[visitdate] = {'date': visitdate, 'value': connects[visitdate].value + 1}
-              } else {
-                connects[visitdate] = {'date': visitdate, 'value': 1}
-              }*/
-              if (!feeds[req.connected]) {
-                if (fortified) {
-                  console.log(chalk.red('access denied') + ' to ' + chalk.grey(req.connected)  + ' at ' + time)
-                  var resp = {denied: config.denied || 'Hey Bud, your access is denied.'}
-                  bog.box(JSON.stringify(resp), req.connected, keys).then(boxed => {
-                    ws.send(boxed)
-                  })
-                } else {
-                  var resp = {pubkey: keys.substring(0, 44), url: url, welcome: welcome, chart: JSON.stringify(connects), connected: ews.getWss().clients.size}
-                  ws.pubkey = req.connected
-                  bog.box(JSON.stringify(resp), req.connected, keys).then(boxed => {
-                    ws.send(boxed)
-                  })
-                  console.log(chalk.green('connect ') + chalk.cyan(bog.name(log, req.connected)) + ' ' + chalk.grey(req.connected) + ' at ' + time)
-                }
-              }
-              if (feeds[req.connected]) {
-                var resp = {pubkey: keys.substring(0, 44), url: url, welcome: welcome, connected: ews.getWss().clients.size, chart: JSON.stringify(connects)}
-                ws.pubkey = req.connected
-                bog.box(JSON.stringify(resp), req.connected, keys).then(boxed => {
-                  ws.send(boxed)
-                })
-                console.log(chalk.green('connect ') + chalk.cyan(bog.name(log, req.connected)) + ' ' + chalk.grey(req.connected) + ' at ' + time)
-              }
-            }
-          } else {
-            bog.unbox(msg, keys).then(unboxed => {
-              var req = JSON.parse(unboxed)
-              processReq(req, ws, keys)
-            })
-          }
-        })
+  else if (req.seq === -1) {
+    if (feeds[req.feed]) {
+      var latest = feeds[req.feed][0]
+      var message = {permalink: latest}
+      box(JSON.stringify(message), ws.pubkey, keys).then(boxed => {
+        console.log('sent permalink ' + latest.substring(0, 44) + ' to ' +   ws.pubkey)
+        ws.send(boxed)
       })
-    })
+    } else {
+      log.forEach(msg => {
+        if (msg.raw.substring(0, 44) === req.feed) {
+          var message = {permalink: msg.raw}
+          box(JSON.stringify(message), ws.pubkey, keys).then(boxed => {
+            console.log('sent permalink ' + msg.raw.substring(0, 44) + ' to ' + ws.pubkey)
+            ws.send(boxed)
+          })
+        }
+      })
+    }
+  }
+  else if (req.seq || (req.seq === 0)) {
+    if (!feeds[req.feed]) {
+      var gossip = {feed: req.feed, seq: 0}
+      box(JSON.stringify(gossip), ws.pubkey, keys).then(boxed => {
+        ws.send(boxed)
+      })
+    }
+    else if (feeds[req.feed]) {
+      if (req.seq < feeds[req.feed].length) {
+      if ((req.seq == 0) && feeds[req.feed].length) {
+          console.log('sync ' + req.feed + ' to ' + ws.pubkey + ' at ' + new Date().toLocaleString())
+        }
+      if (req.seq == (feeds[req.feed].length - 1)) {
+          console.log('done ' + req.feed + ' to ' + ws.pubkey + ' at ' + new Date().toLocaleString())
   
-    app.use(express.static('.'))
-    
-    app.listen(PORT)
-    console.log('http://' + url + ':' + PORT + '/')
-  
-    function processReq (req, ws, keys) {
-      if (req.msg) {
-        bog.open(req.msg).then(opened => {
-          if (feeds[opened.author]) {
-            if (feeds[opened.author][0].substring(0, 44) === opened.previous) {
-              feeds[opened.author].unshift(req.msg)
-              log.push(opened)
-  	    var via = ''
-  	    if (opened.author != ws.pubkey) {
-                via = ' via ' + chalk.cyan(bog.name(log, ws.pubkey)) + ' ' +  chalk.grey(ws.pubkey)
-  	    }
-              console.log(chalk.magenta('post ' + opened.seq) + ' from ' + chalk.cyan(bog.name(log, opened.author)) + ' ' + chalk.grey(opened.author) + via)
-              var gossip = {feed: opened.author, seq: opened.seq}
-              bog.box(JSON.stringify(gossip), ws.pubkey, keys).then(boxed => {
-                ws.send(boxed)
-              })
-            }
-          } else {
-            feeds[opened.author] = [req.msg]
-            log.push(opened)
-  	  var via = ''
-  	  if (opened.author != ws.pubkey) {
-              via = ' via ' + chalk.cyan(bog.name(log, ws.pubkey)) + ' ' +  chalk.grey(ws.pubkey)
-  	  }
-            console.log(chalk.magenta('post ' + opened.seq) + ' from ' + chalk.cyan(bog.name(log, opened.author)) + ' '  + chalk.grey(opened.author) + via)
-            var gossip = {feed: opened.author, seq: opened.seq}
-            bog.box(JSON.stringify(gossip), ws.pubkey, keys).then(boxed => {
-              ws.send(boxed)
-            })
-          }
+      }
+        var resp = {}
+        resp.msg = feeds[req.feed][feeds[req.feed].length - req.seq - 1]
+        box(JSON.stringify(resp), ws.pubkey, keys).then(boxed => {
+          ws.send(boxed)
         })
       }
-      else if (req.seq === -1) {
-        if (feeds[req.feed]) {
-          var latest = feeds[req.feed][0]
-          var message = {permalink: latest}
-          bog.box(JSON.stringify(message), ws.pubkey, keys).then(boxed => {
-            console.log('sent permalink http://' + url + '/#' + latest.substring(0, 44) + ' to ' +  bog.name(log, ws.pubkey) + ' ' + ws.pubkey)
-            ws.send(boxed)
-          })
-        } else {
-          log.forEach(msg => {
-            if (msg.raw.substring(0, 44) === req.feed) {
-              var message = {permalink: msg.raw}
-              bog.box(JSON.stringify(message), ws.pubkey, keys).then(boxed => {
-                console.log('sent permalink http://' + url + '/#' + msg.raw.substring(0, 44) + ' to ' +  bog.name(log, ws.pubkey) + ' ' + ws.pubkey)
-                ws.send(boxed)
-              })
-            }
-          })
-        }
+      if (req.seq > [feeds[req.feed].length]){
+        var gossip = {feed: req.feed, seq: feeds[req.feed].length}
+        box(JSON.stringify(gossip), ws.pubkey, keys).then(boxed => {
+          ws.send(boxed)
+        })
       }
-      else if (req.seq || (req.seq === 0)) {
-        if (!feeds[req.feed]) {
-          var gossip = {feed: req.feed, seq: 0}
-          bog.box(JSON.stringify(gossip), ws.pubkey, keys).then(boxed => {
-            ws.send(boxed)
-          })
-        }
-        else if (feeds[req.feed]) {
-          if (req.seq < feeds[req.feed].length) {
-  	  if ((req.seq == 0) && feeds[req.feed].length) {
-              console.log(chalk.yellow('sync ') + chalk.cyan(bog.name(log, req.feed)) + ' ' + chalk.grey(req.feed) + ' to ' + chalk.cyan(bog.name(log, ws.pubkey)) + ' ' + chalk.grey(ws.pubkey) + ' at ' + new Date().toLocaleString())
-            } 
-  	  if (req.seq == (feeds[req.feed].length - 1)) {
-              console.log(chalk.yellow('done ') + chalk.cyan(bog.name(log, req.feed)) + ' ' + chalk.grey(req.feed) + ' to ' + chalk.cyan(bog.name(log, ws.pubkey)) + ' '+ chalk.grey(ws.pubkey) + ' at ' + new Date().toLocaleString())
-  
-  	  }
-            var resp = {}
-            resp.msg = feeds[req.feed][feeds[req.feed].length - req.seq - 1]
-            bog.box(JSON.stringify(resp), ws.pubkey, keys).then(boxed => {
-              ws.send(boxed)
-            })
-          }
-          if (req.seq > [feeds[req.feed].length]){
-            var gossip = {feed: req.feed, seq: feeds[req.feed].length}
-            bog.box(JSON.stringify(gossip), ws.pubkey, keys).then(boxed => {
-              ws.send(boxed)
-            })
-          }
-        } 
-      } 
     }
-  })
-})
+  }
+}
+
+
+async function serveHttp (conn) {
+  const httpConn = Deno.serveHttp(conn)
+
+  for await (const e of httpConn) {
+    const { socket, response } = Deno.upgradeWebSocket(e.request);
+    socket.binaryType = 'arraybuffer'
+    socket.onopen = () => {
+      //socket.send("Hello World!")
+    }
+    socket.onmessage = (e) => {
+      var msg = e.data
+      if (msg[0] === '{') {
+        var req = JSON.parse(msg)
+        console.log(req)
+        var resp = { pubkey: key.substring(0, 44) } 
+        socket.pubkey = req.connected
+        box(JSON.stringify(resp), req.connected, key).then(boxed => {
+          console.log(boxed)
+          socket.send(boxed)
+        })
+      } else {
+        unbox(new Uint8Array(msg), key).then(unboxed => {
+          var req = JSON.parse(unboxed)
+          console.log(req)
+          processReq(req, socket, key)
+        })
+      } 
+      //socket.close();
+    }
+    socket.onclose = () => console.log("WebSocket has been closed.")
+    socket.onerror = (e) => console.error("WebSocket error:", e)
+    e.respondWith(response);
+
+  }
+}
+
+console.log(key.substring(0, 44))
+
+for await ( const conn of server) {
+  serveHttp(conn) 
+}

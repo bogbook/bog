@@ -1,8 +1,8 @@
-import nacl from './nacl-fast-es.js'
+import nacl from 'https://git.sr.ht/~ev/bogbook/blob/deno/nacl-fast-es.js'
 import { decode, encode } from 'https://deno.land/std@0.97.0/encoding/base64.ts'
 import { exists, ensureDir } from 'https://deno.land/std@0.97.0/fs/mod.ts'
 import { createHash } from "https://deno.land/std@0.97.0/hash/mod.ts"
-import { convertPublicKey, convertSecretKey } from './ed2curve.js'
+import { convertPublicKey, convertSecretKey } from 'https://git.sr.ht/~ev/bogbook/blob/deno/ed2curve.js'
 
 export async function box (msg, recp, keys) {
   var receiver = convertPublicKey(decode(recp))

@@ -9,10 +9,8 @@ const feeds = []
 const log = []
 
 function processReq (req, ws, keys) {
-  console.log(req)
   if (req.msg) {
     open(req.msg).then(opened => {
-      console.log(opened)
       if (feeds[opened.author]) {
         if (feeds[opened.author][0].substring(0, 44) === opened.previous) {
           feeds[opened.author].unshift(req.msg)
@@ -21,7 +19,7 @@ function processReq (req, ws, keys) {
         if (opened.author != ws.pubkey) {
             via = ' via ' + ws.pubkey 
         }
-          console.log('post ' + opened.seq + ' from ' + opened.author + ' ' + via)
+          console.log('post ' + opened.seq + ' from ' + opened.author + via)
           var gossip = {feed: opened.author, seq: opened.seq}
           box(JSON.stringify(gossip), ws.pubkey, keys).then(boxed => {
             ws.send(boxed)
@@ -34,7 +32,7 @@ function processReq (req, ws, keys) {
       if (opened.author != ws.pubkey) {
           via = ' via ' + ws.pubkey
       }
-        console.log('post ' + opened.seq + ' from ' + opened.author + ' ' + via)
+        console.log('post ' + opened.seq + ' from ' + opened.author + via)
         var gossip = {feed: opened.author, seq: opened.seq}
         box(JSON.stringify(gossip), ws.pubkey, keys).then(boxed => {
           ws.send(boxed)
@@ -108,17 +106,14 @@ async function serveHttp (conn) {
       var msg = e.data
       if (msg[0] === '{') {
         var req = JSON.parse(msg)
-        console.log(req)
         var resp = { pubkey: key.substring(0, 44) } 
         socket.pubkey = req.connected
         box(JSON.stringify(resp), req.connected, key).then(boxed => {
-          console.log(boxed)
           socket.send(boxed)
         })
       } else {
         unbox(new Uint8Array(msg), key).then(unboxed => {
           var req = JSON.parse(unboxed)
-          console.log(req)
           processReq(req, socket, key)
         })
       } 

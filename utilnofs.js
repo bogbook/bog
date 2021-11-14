@@ -88,3 +88,20 @@ export async function publish (obj, keys) {
 
   return done
 }
+
+export function name (log, id) {
+  if (log.length) {
+    for (var i = log.length - 1; i >= 0; i--) {
+      if ((log[i].author === id) && (log[i].name)) {
+        return log[i].name
+      }
+      if (i === 0) {
+        var name = id.substring(0, 10) + '...'
+        return name
+      }
+    }
+  } else {
+    var name = id.substring(0, 10) + '...'
+    return name
+  }
+}

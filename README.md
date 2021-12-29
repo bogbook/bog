@@ -141,6 +141,7 @@ when opened, it could look this way:
 {
   text: <text>,
   seq: <sequence number>,
+  previous: <hash of author's previous post>,
   author: <ed25519 public key>,
   timestamp: <Date.now()>,
   raw: <unopened message>
@@ -150,6 +151,8 @@ when opened, it could look this way:
 `timestamp` is not optional, because we need it to sort the log. 
 
 `seq` is not optional, because we need it to sync the log.
+
+`previous` is not optional, because we need it to verify the log is correct before adding new posts.
 
 Everything else is optional, but we should have at least `text` or an `image`. The reason we crop images to 680x680 pixels is we want the image size to be manageable for replication.
 

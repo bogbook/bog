@@ -1,9 +1,15 @@
-import { keys, unbox, box, publish, open } from './denoutil.js'
+import { keys, getConfig, unbox, box, publish, open, name } from './denoutil.js'
 
-const server = Deno.listen({ port: 8080 })
+const appdir = Deno.args[0] || 'denobog'
 
-const appdir = 'denobog'
 const key = await keys(appdir)
+const config = await getConfig(appdir)
+
+console.log(config)
+
+const server = Deno.listen({ port: config.port })
+
+const sockets = new Set()
 
 const feeds = []
 const log = []
@@ -19,7 +25,7 @@ function processReq (req, ws, keys) {
         if (opened.author != ws.pubkey) {
             via = ' via ' + ws.pubkey 
         }
-          console.log('post ' + opened.seq + ' from ' + opened.author + via)
+          console.log('post ' + opened.seq + ' from ' + name(log, opened.author) + ' ' + opened.author + via)
           var gossip = {feed: opened.author, seq: opened.seq}
           box(JSON.stringify(gossip), ws.pubkey, keys).then(boxed => {
             ws.send(boxed)
@@ -92,42 +98,67 @@ function processReq (req, ws, keys) {
   }
 }
 
+console.log(key.substring(0, 44))
+
 
 async function serveHttp (conn) {
   const httpConn = Deno.serveHttp(conn)
 
   for await (const e of httpConn) {
-    const { socket, response } = Deno.upgradeWebSocket(e.request);
-    socket.binaryType = 'arraybuffer'
-    socket.onopen = () => {
-      //socket.send("Hello World!")
-    }
-    socket.onmessage = (e) => {
-      var msg = e.data
-      if (msg[0] === '{') {
-        var req = JSON.parse(msg)
-        var resp = { pubkey: key.substring(0, 44) } 
-        socket.pubkey = req.connected
-        box(JSON.stringify(resp), req.connected, key).then(boxed => {
-          socket.send(boxed)
-        })
-      } else {
-        unbox(new Uint8Array(msg), key).then(unboxed => {
-          var req = JSON.parse(unboxed)
-          processReq(req, socket, key)
-        })
-      } 
-      //socket.close();
-    }
-    socket.onclose = () => console.log("WebSocket has been closed.")
-    socket.onerror = (e) => console.error("WebSocket error:", e)
-    e.respondWith(response);
+    if (e.request.url.endsWith('ws')) {
 
+      console.log('trying ws')
+      const { socket, response } = Deno.upgradeWebSocket(e.request);
+      socket.binaryType = 'arraybuffer'
+      socket.onopen = () => {
+        //socket.send("Hello World!")
+      }
+      socket.onmessage = (e) => {
+        var msg = e.data
+        if (msg[0] === '{') {
+          var req = JSON.parse(msg)
+          var resp = { pubkey: key.substring(0, 44), welcome: 'Hello World!' } 
+          socket.pubkey = req.connected
+          console.log(name(log, req.connected) + ' connected.')
+          sockets.add(socket)
+          var connected = ' are connected.'
+          sockets.forEach(sock => {
+            console.log(sock.pubkey)
+            connected = '[' + name(log, sock.pubkey) + '](' + sock.pubkey + '), ' + connected
+            resp.welcome = connected
+          })
+          
+          box(JSON.stringify(resp), req.connected, key).then(boxed => {
+            socket.send(boxed)
+          })
+        } else {
+          unbox(new Uint8Array(msg), key).then(unboxed => {
+            var req = JSON.parse(unboxed)
+            processReq(req, socket, key)
+          })
+        } 
+        //socket.close();
+      }
+      socket.onclose = function () { 
+        sockets.delete(socket)
+        console.log(socket.pubkey + " has disconnected")
+      }
+      socket.onerror = (e) => console.error("WebSocket error:", e)
+      e.respondWith(response);
+    } /*else {
+      console.log('sending webpage')
+      //e.respondWith(new Response(`Hello WOrld`))
+      e.respondWith(new Response(html, {
+        headers: new Headers({'Content-Type': 'text/html; charset=utf-8'}),
+        body: html
+      }))
+      //return new Response(html, {headers})
+    }*/
   }
 }
 
-console.log(key.substring(0, 44))
-
 for await ( const conn of server) {
-  serveHttp(conn) 
+  serveHttp(conn)
 }
+
+

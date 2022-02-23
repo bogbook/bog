@@ -4,8 +4,6 @@
 
 ![bogbook](bogbook.png)
 
-*Please note that the only topic banned on Bogbook is COVID (pro and anti). I am currently working on a way to ban people who talk about COVID, including myself. Pull-requests needed.
-
 Bogbook is a distributed news network made up of feeds signed by ed25519 keypairs, and then replicated between bogbook clients in the browser and bogbook pubs. 
 
 On bogbook you can post images with filters and posts that are rendered in markdown. You can identify your ed25519 pubkey with a name, an image, a bio, and a background.
@@ -15,6 +13,16 @@ The bogbook protocol is secure (no one can modify your posts) and the data exist
 + Try it: [bogbook.com](http://bogbook.com/)
 + Electronic Mail: [ev@evbogue.com](mailto:ev@evbogue.com)
 + Public Inbox: https://lists.sr.ht/~ev/public-inbox [~ev/public-inbox@lists.sr.ht](mailto:~ev/public-inbox@lists.sr.ht)
+
+---
+
+### Roadmap to V3 aka "Denobook"
+
+[ ] **port server to Deno** We want to move off Node.js. WIP. Open question: how to serve a static website and a websocket server at the same address using Deno?
+[ ] **invite system** If a bogbook is invite only then the pubs should send them a message asking for them to provide some information (pubkey, email address, phone number in the extreme?) before they are allowed to sync with it. Then we either immediately send them an invite or we manually send them an invite if a pub is invite-only. The invite is a message signed by the pub asking the client to sign a message with the same keypair as the original pubkey that requested the invite. 
+[ ] **gossip upgrades** if a pub is disconnected, the gossip schedule should stop and then restart upon reconnect. This is currently a bug where you need to reload the page to reconnect. 
+[ ] **feed imports/exports** import/export a feed from the profile page for backups and sneakernets 
+[ ] **blobs** instead of putting a signed object on the feed we can instead sign the hash of an object and sync that seperately upon render to improve sync time.
 
 ---
 

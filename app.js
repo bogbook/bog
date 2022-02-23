@@ -147,7 +147,7 @@ bog.keys().then(keys => {
   if (config.title) { document.title = config.title }
 
   var proto = window.location.protocol === 'https:' ? 'wss://' : 'ws://'
-  var servers = [proto + window.location.host + '/ws']
+  var servers = [config.pub || proto + window.location.host + '/ws']
   var screen = h('screen', {id: 'screen'})
   document.body.appendChild(screen)
 

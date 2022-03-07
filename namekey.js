@@ -1,18 +1,19 @@
+// deno run --unstable namekey.js to generate a vanity pubkey
 
-var nacl = require('./lib/nacl.min.js')
-    nacl.util = require('./lib/nacl-util.min.js')
+import nacl from './lib/nacl-fast-es.js'
+import { decode, encode} from 'https://deno.land/std@0.97.0/encoding/base64.ts'
 
-var name = process.argv[2]
+var name = Deno.args[0].substring(0, 2)
+console.log('Trying to find a key that starts with ' + name)
 
-var keypair = 'blah'
+var keypair = 'arbitrary'
 
 while (keypair.substring(0, 2) != name) {
   var genkey = nacl.sign.keyPair()
-  var base64 = nacl.util.encodeBase64(genkey.publicKey) + nacl.util.encodeBase64(genkey.secretKey)
+  var base64 = encode(genkey.publicKey) + encode(genkey.secretKey)
+
   if (!base64.includes('/')) {
-    keypair = base64 
+    keypair = base64
     console.log(keypair)
   }
 }
-
-

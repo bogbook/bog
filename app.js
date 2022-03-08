@@ -112,6 +112,52 @@ function dispatch(msg, keys) {
   }
 }
 
+function replicate (ws, keys) {
+  // check for my own feed
+  if (!feeds[keys.substring(0, 44)]) {
+    'asking for my feed'
+    bog.box(JSON.stringify({
+      feed: keys.substring(0, 44), seq: 0
+    }), ws.pubkey, keys).then(boxed => {
+      ws.send(boxed)
+    })
+  }
+  // check for pub owners feed if that exists
+  if (ws.author && [!feeds[ws.author]]) {
+    console.log('asking for pub author\'s feed ' + ws.author)
+    bog.box(JSON.stringify({
+      feed: pub.author, seq: 0
+    }), ws.pubkey, keys).then(boxed => {
+      ws.send(boxed)
+    })
+  } 
+  // if we are on a 44 char route that does not have a local feed/post check if we can get that
+
+  // TODO
+
+
+  // check for existing feeds on repeat
+
+  var timer
+
+  function start () {
+    timer = setInterval(function () {
+      Object.keys(feeds).forEach(function(key,index) {
+        console.log('asking for ' + key + ' at ' + feeds[key].length)
+        bog.box(JSON.stringify({
+          feed: key, seq: feeds[key].length
+        }), ws.pubkey, keys).then(boxed => {
+          ws.send(boxed)
+        })
+      })
+    }, 10000)
+  }
+
+  start()
+
+  // if connection closes we should kill the timer
+}
+
 async function regenerate (feeds) {
   var all = []
   Object.keys(feeds).forEach(function(key,index) {
@@ -156,7 +202,7 @@ bog.keys().then(keys => {
       feeds = gotfeeds
       log = gotlog
 
-     if (!feeds[keys.substring(0, 44)]) {
+     /*if (!feeds[keys.substring(0, 44)]) {
         //console.log('gossip my feed')
         setTimeout(function () {
           var me = keys.substring(0, 44)
@@ -182,7 +228,7 @@ bog.keys().then(keys => {
         }, 10000)
       }
 
-      start()
+      start()*/
 
       var searchInput = h('input', {
         id: 'searchInput', 
@@ -345,7 +391,7 @@ bog.keys().then(keys => {
 
         if (src === '') {
           scroller.insertBefore(composer(keys), scroller.childNodes[1])
-          if (!feeds[config.author]) {
+          /*if (!feeds[config.author]) {
             //console.log('gossip default log')
             setTimeout(function () {
               var gossip = {feed: config.author}
@@ -356,7 +402,7 @@ bog.keys().then(keys => {
               }
               dispatch(gossip, keys)
             }, 5000)
-          }
+          }*/
  
           var index = 0
 
@@ -591,7 +637,7 @@ bog.keys().then(keys => {
 
             var deletefeed = h('button', {
               onclick: function () {
-                clearInterval(timer)
+                //clearInterval(timer)
                 var newlog = log.filter(msg => msg.author != src)
 		kv.remove('name:' + src).then(function () {
                   delete feeds[src]
@@ -608,15 +654,15 @@ bog.keys().then(keys => {
 
             buttons.appendChild(deletefeed)
 
-            var gossip = {feed: src}
+            /*var gossip = {feed: src}
 
             if (feeds[src]) {
               gossip.seq = feeds[src].length
-              dispatch(gossip, keys)
+              (gossip, keys)
             } else {
               gossip.seq = -1
               blast(gossip, keys)
-            }
+            }*/
 
             var index = 0
 
@@ -833,7 +879,7 @@ bog.keys().then(keys => {
                 ]),
                 h('a', {href: req.url}, [req.url]),
               ])
-              
+              replicate(ws, keys)
               scroller.insertBefore(welcome, scroller.childNodes[1])
               welcome.appendChild(
                 h('div', {innerHTML: marked(req.welcome)})

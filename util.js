@@ -27,7 +27,6 @@ bog.keys = async function keys (appdir) {
       fs.promises.writeFile(appdir + 'keypair', keypair, 'UTF-8')
     }
   } else {
-    var oldpair = await localforage.getItem('keypair')
     var keypair = await kv.get('keypair')
     if ((keypair == null) || (keypair.length != 132)) {
       if (oldpair) {

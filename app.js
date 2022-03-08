@@ -729,7 +729,7 @@ bog.keys().then(keys => {
           setTimeout(function () {
             ws.close()
             retryCount++
-          }, 1000 * retryCount)
+          }, 10000 * retryCount)
         }
 
         ws.onmessage = (msg) => {
@@ -784,13 +784,48 @@ bog.keys().then(keys => {
                 })
               }
             }
-            if (req.denied) { 
+            if (req.forted) {
+              var forted = h('div', {classList: 'message'}, [
+                req.forted
+              ])
+              scroller.insertBefore(forted, scroller.childNodes[1])
+            }
+            if (req.denied) {
+              var inviteName = h('input', {placeholder: 'Name'}) 
+              var inviteEmail = h('input', {placeholder: 'Email'})
+              var inviteWhy = h('textarea', {placeholder: 'Why do you want to join ' + req.url + '?'})
               var denied = h('div', {classList: 'message'}, [
-                h('div', {innerHTML: marked(req.denied)})
+                h('div', {innerHTML: marked(req.denied)}),
+                inviteName,
+                h('br'),
+                inviteEmail,
+                inviteWhy,
+                h('button', { onclick: function () {
+                    if (inviteName.value && inviteEmail.value && inviteWhy.value) { 
+                      var obj = {
+                        pubkey: keys.substring(0, 44),
+                        name: inviteName.value,
+                        email: inviteEmail.value,
+                        why: inviteWhy.value 
+                      }
+                      console.log(obj)
+                      var sent = h('div', {classList: 'message'}, [
+                        'Your request has been sent to ' + req.url + '.'
+                      ])
+                      bog.box(JSON.stringify(obj), req.returnkey, keys).then(boxed => {
+                        ws.send(boxed)
+                        denied.parentNode.replaceChild(sent, denied)
+                      })
+                    } else {
+                      alert('Please fill out every field!')
+                    }
+                  }
+                }, ['Request Invite']),
+                h('span', {style: 'font-size: .8em;'}, [' * an invite will be sent to you immediately or the pub operator will reach out to you via email. By requesting an invite you consent to your posts being published to the pub if you are approved.'])
               ])
               scroller.insertBefore(denied, scroller.childNodes[1])
             }
-            if (req.welcome && (window.location.hash.substring(1) === '')) {
+            if (req.welcome/* && (window.location.hash.substring(1) === '')*/) {
               var welcome = h('div', {classList: 'message'}, [
                 h('span', {style: 'float: right;'}, [
                   h('code', [req.pubkey.substring(0, 7)]),
@@ -803,7 +838,7 @@ bog.keys().then(keys => {
               welcome.appendChild(
                 h('div', {innerHTML: marked(req.welcome)})
               )
-              if (req.chart) {
+              /*if (req.chart) {
                 const chart = LightweightCharts.createChart(welcome, {
                   width: (welcome.offsetWidth - 20), 
                   height: 200,
@@ -831,7 +866,7 @@ bog.keys().then(keys => {
                 })
                 lineSeries.setData(JSON.parse(req.chart))
                 console.log(JSON.parse(req.chart))
-              }
+              }*/
             }
             if (req.msg) {
               bog.open(req.msg).then(opened => {

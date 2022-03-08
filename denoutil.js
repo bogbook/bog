@@ -1,8 +1,8 @@
-import nacl from 'https://git.sr.ht/~ev/bogbook/blob/deno/nacl-fast-es.js'
+import nacl from './lib/nacl-fast-es.js'
 import { decode, encode } from 'https://deno.land/std@0.97.0/encoding/base64.ts'
 import { exists, ensureDir } from 'https://deno.land/std@0.97.0/fs/mod.ts'
 import { createHash } from "https://deno.land/std@0.97.0/hash/mod.ts"
-import { convertPublicKey, convertSecretKey } from 'https://git.sr.ht/~ev/bogbook/blob/deno/ed2curve.js'
+import { convertPublicKey, convertSecretKey } from './ed2curve.js'
 
 export async function box (msg, recp, keys) {
   var receiver = convertPublicKey(decode(recp))
@@ -40,6 +40,30 @@ export async function generate () {
   return keypair
 }
 
+export async function getConfig (appdir) {
+  const home = Deno.env.get("HOME")
+  const path = home + '/.' + appdir
+  const configPath = path + '/config.json'
+
+  ensureDir(path)
+
+  if (await exists(configPath)) {
+    const gotconfig = await Deno.readTextFile(configPath)
+    const config = JSON.parse(gotconfig)
+    return config
+  } else {
+    const config = {
+      url: "localhost",
+      welcome: "This is a welcome message, to configure visit " + configPath + '.',
+      port: 8080,
+      fort: false,
+      allowed: ["evS+fPu6UGYfcmG5s4X18ORNHyNVrBgOJJZ2uJas+oE="]
+    }
+    Deno.writeTextFile(configPath, JSON.stringify(config))
+    return config
+  }
+}
+
 export async function keys (appdir) {
   var home = Deno.env.get("HOME")
   var path = home + '/.' + appdir
@@ -71,6 +95,16 @@ export async function open (msg) {
   }
 }
 
+export async function getHash (file) {
+  var hash = createHash("sha256")
+
+  hash.update(file)
+
+  // and then we need a quick program to fetch assets by their hashes.
+
+  return hash
+}
+
 export async function publish (obj, keys) {
   var pubkey = keys.substring(0, 44)
   var privatekey = decode(keys.substring(44))
@@ -88,3 +122,21 @@ export async function publish (obj, keys) {
 
   return done
 }
+
+export function name (log, id) {
+  if (log.length) {
+    for (var i = log.length - 1; i >= 0; i--) {
+      if ((log[i].author === id) && (log[i].name)) {
+        return log[i].name
+      }
+      if (i === 0) {
+        var name = id.substring(0, 10) + '...'
+        return name
+      }
+    }
+  } else {
+    var name = id.substring(0, 10) + '...'
+    return name
+  }
+}
+

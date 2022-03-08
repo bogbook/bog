@@ -6,6 +6,8 @@ const key = await keys(appdir)
 const config = await getConfig(appdir)
 
 console.log(config)
+console.log('Your public key is: ' + key.substring(0, 44))
+console.log(config.url + ' started at http://' + config.url + ':' + config.port + '/')
 
 const server = Deno.listen({ port: config.port })
 
@@ -14,6 +16,32 @@ const sockets = new Set()
 const feeds = []
 const log = []
 
+function inviteFlow(req, ws, keys) {
+  console.log(req.name + ' ' + req.pubkey + ' ' + req.email + ' wants to join ' + config.url + ' Why? ' + req.why)
+  //console.log(req)
+  if (config.fort) {
+    console.log('FORTED, manually approve invite')
+    var obj = {
+      forted: config.url + '\'s owner will approve your invite soon and/or will reach out for more information, please be patient.'
+    }
+    box(JSON.stringify(obj), req.pubkey, keys).then(boxed => {
+      ws.send(boxed)
+    })
+  } 
+  if (!config.fort) {
+    console.log('SENDING INVITE')
+    var obj = {
+      pubkey: key.substring(0, 44), 
+      welcome: 'Congrats! You\'ve been invited to ' + config.url + '.'
+    }
+    box(JSON.stringify(obj), req.pubkey, keys).then(boxed => {
+      ws.send(boxed)
+    })
+    config.allowed.push(req.pubkey)
+    console.log(config)
+  } 
+}
+
 function processReq (req, ws, keys) {
   if (req.msg) {
     open(req.msg).then(opened => {
@@ -21,10 +49,10 @@ function processReq (req, ws, keys) {
         if (feeds[opened.author][0].substring(0, 44) === opened.previous) {
           feeds[opened.author].unshift(req.msg)
           log.push(opened)
-        var via = ''
-        if (opened.author != ws.pubkey) {
+          var via = ''
+          if (opened.author != ws.pubkey) {
             via = ' via ' + ws.pubkey 
-        }
+          }
           console.log('post ' + opened.seq + ' from ' + name(log, opened.author) + ' ' + opened.author + via)
           var gossip = {feed: opened.author, seq: opened.seq}
           box(JSON.stringify(gossip), ws.pubkey, keys).then(boxed => {
@@ -98,7 +126,6 @@ function processReq (req, ws, keys) {
   }
 }
 
-console.log(key.substring(0, 44))
 
 
 async function serveHttp (conn) {
@@ -117,27 +144,39 @@ async function serveHttp (conn) {
         var msg = e.data
         if (msg[0] === '{') {
           var req = JSON.parse(msg)
-          var resp = { pubkey: key.substring(0, 44), welcome: 'Hello World!' } 
-          socket.pubkey = req.connected
-          console.log(name(log, req.connected) + ' connected.')
-          sockets.add(socket)
-          var connected = ' are connected.'
-          sockets.forEach(sock => {
-            console.log(sock.pubkey)
-            connected = '[' + name(log, sock.pubkey) + '](' + sock.pubkey + '), ' + connected
-            resp.welcome = connected
-          })
-          
-          box(JSON.stringify(resp), req.connected, key).then(boxed => {
-            socket.send(boxed)
-          })
+          if (!config.allowed.includes(req.connected)) {
+            socket.pubkey = req.connected
+            console.log(req.connected + ' is not invited to this pub.')
+            var resp = {url: config.url, denied: 'You need an invite to sync with ' + config.url + '. Please request an invite below:', returnkey: key.substring(0, 44)}
+            box(JSON.stringify(resp), req.connected, key).then(boxed => {
+              socket.send(boxed)
+            })
+            // socket.close()
+          } else if (config.allowed.includes(req.connected)) {
+            var resp = { pubkey: key.substring(0, 44), welcome: 'Hello World!' }
+            socket.pubkey = req.connected
+            console.log(name(log, req.connected) + ' ' + req.connected + ' connected.')
+            sockets.add(socket)
+            var connected = ' are connected.'
+            sockets.forEach(sock => {
+              connected = '[' + name(log, sock.pubkey) + '](' + sock.pubkey + '), ' + connected
+              resp.welcome = connected
+            })
+            
+            box(JSON.stringify(resp), req.connected, key).then(boxed => {
+              socket.send(boxed)
+            })
+          } 
         } else {
           unbox(new Uint8Array(msg), key).then(unboxed => {
             var req = JSON.parse(unboxed)
-            processReq(req, socket, key)
+            if (req.name) {
+              inviteFlow(req, socket, key)
+            } else {
+              processReq(req, socket, key)
+            }
           })
         } 
-        //socket.close();
       }
       socket.onclose = function () { 
         sockets.delete(socket)
@@ -160,5 +199,3 @@ async function serveHttp (conn) {
 for await ( const conn of server) {
   serveHttp(conn)
 }
-
-

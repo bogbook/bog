@@ -36,7 +36,7 @@ pre, code {
 
 #screen {
   position: absolute;
-  top: 40px;
+  top: 31px;
   left: 0;
   right: 0;
   bottom: 0;
@@ -57,8 +57,8 @@ pre, code {
   width: 100%;
   height: 25px;
   position: fixed;
-  padding-top: .4em;
-  padding-bottom: .3em;
+  padding-top: .2em;
+  padding-bottom: .2em;
   top: 0;
   z-index: 1000;
   left: 0; right: 0; top: 0;
@@ -127,8 +127,8 @@ br {
 }
 
 .message {
-  margin-top: .5em;
-  padding: .5em;
+  margin-top: .3em;
+  padding: .4em;
   border-radius: 5px;
 }
 
@@ -146,7 +146,7 @@ br {
 }
 
 .content {
-  margin-top: .5em;
+  margin-top: .2em;
 }
 
 img, canvas {
@@ -171,7 +171,7 @@ textarea {
   font-size: 1em;
   border: 1px solid #ccc;
   border-radius: 5px;
-  height: 100px;
+  height: 65px;
 }
 
 iframe {
@@ -183,10 +183,10 @@ iframe {
 }
 
 @media only screen and (max-width: 680px) {
-  #screen { top: 2.1em; }
+  #screen { top: 1.8em; }
   #scroller {max-width: 100%;}
-  textarea { height: 200px;}
-  .navbar .message { margin-top: 2em; }
+  textarea { height: 125px;}
+  .navbar .message { margin-top: 1.7em; }
 }
 
 input {

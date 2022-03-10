@@ -134,7 +134,19 @@ function replicate (ws, keys) {
   // if we are on a 44 char route that does not have a local feed/post check if we can get that
 
   // TODO
-
+  var src = window.location.hash.substring(1)
+  if (src.length === 44 && !feeds[src]) {
+    var haveit = false
+    for (var i=0; i < log.length; i++) {
+      if (log[i].raw.substring(0, 44) === src) {
+        haveit = true
+      }
+      if ((i === (log.length - 1)) && !haveit) {
+        console.log('asking for ' + src + ' that we do not have')
+        blast(src, keys)
+      } 
+    }
+  }
 
   // check for existing feeds on repeat
 

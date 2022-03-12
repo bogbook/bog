@@ -29,13 +29,7 @@ bog.keys = async function keys (appdir) {
   } else {
     var keypair = await kv.get('keypair')
     if ((keypair == null) || (keypair.length != 132)) {
-      if (oldpair) {
-        var keypair = oldpair
-        kv.set('keypair', keypair)
-        localforage.clear()
-      } else {
-        var keypair = await bog.generate()
-      }
+      var keypair = await bog.generate()
     }
   }
   return keypair

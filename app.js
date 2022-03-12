@@ -133,7 +133,6 @@ function replicate (ws, keys) {
   } 
   // if we are on a 44 char route that does not have a local feed/post check if we can get that
 
-  // TODO
   var src = window.location.hash.substring(1)
   if (src.length === 44 && !feeds[src]) {
     var haveit = false
@@ -168,6 +167,14 @@ function replicate (ws, keys) {
   start()
 
   // if connection closes we should kill the timer
+  ws.onclose = (e) => {
+    console.log('killing timer')
+    clearInterval(timer)
+    setTimeout(function () {
+      console.log('connection to ' + ws.url + ' closed, reconnecting')
+      connect(ws.url, keys)
+    }, 1000)
+  }
 }
 
 async function regenerate (feeds) {
@@ -199,6 +206,248 @@ async function sort (log) {
 var cache = []
 var feeds = []
 var log = []
+
+function connect (server, keys) {
+  var ws = new WebSocket(server)
+  ws.binaryType = 'arraybuffer'
+
+  var id = ++serverId
+
+  ws.onopen = () => {
+    ws.send(JSON.stringify({connected: keys.substring(0, 44)}))
+  } 
+
+  ws.onclose = (e) => {
+    setTimeout(function () {
+      console.log('connection to ' + server + ' closed, reconnecting')
+      connect(server, keys)
+    }, 1000)
+  }
+
+  var retryCount = 1
+
+  ws.onerror = (err) => {
+    var disconnected = h('div', {classList: 'message', id: 'unable:' + server, innerHTML: 'Unable to connect to <code> ' + server + '</code>.'})
+
+    var unable = document.getElementById('unable:' + server)
+    if (unable) {
+      unable.parentNode.removeChild(unable)
+    } 
+    scroller.insertBefore(disconnected, scroller.childNodes[1])
+
+    //console.log('unable to connect, closing connection to ' + server)
+    setTimeout(function () {
+      ws.close()
+      retryCount++
+    }, 10000 * retryCount)
+  }
+
+  ws.onmessage = (msg) => {
+    //ws.pubkey = msg.data.substring(0, 44)
+    //peers.set(id, ws)
+    //console.log(msg.data)
+    var data = new Uint8Array(msg.data)
+    //console.log(data)
+    bog.unbox(data, keys).then(unboxed => {
+      //console.log(unboxed)
+      var req = JSON.parse(unboxed)
+      if (req.pubkey) {
+        ws.pubkey = req.pubkey
+        peers.set(id, ws)
+      }
+      if (req.permalink) {
+        src = req.permalink.substring(44,88)
+        var permalink = h('div', {id: src})
+
+        if (scroller.firstChild) {
+          scroller.insertBefore(permalink, scroller.childNodes[1])
+        } else {
+          scroller.appendChild(permalink)
+        }
+        
+        var nofeed = h('div', {classList: 'message'}, [
+            'You are not syncing ',
+            h('a', {href: '#' + src}, [req.permalink.substring(44,54) + '\'s feed. ']),
+          h('button', {
+            onclick: function () {
+              
+              var gossip = {feed: src, seq: 0}
+              blast(gossip, keys)
+              if (window.location.hash.substring(1) != src) {
+                window.location.hash = src
+              }
+              var gotit = document.getElementById(src)
+              gotit.parentNode.removeChild(gotit)
+
+            }
+          }, ['Sync Now'])
+        ])
+        permalink.appendChild(nofeed)
+        if (!document.getElementById(req.permalink.substring(0, 44))) {
+          bog.open(req.permalink).then(opened => {
+            if (!window.location.hash.substring(1) || (window.location.hash.substring(1) === opened.raw.substring(0, 44)) || (window.location.hash.substring(1) === opened.author)) {
+              render(opened, keys).then(rendered => {
+                permalink.appendChild(rendered)
+              }) 
+            }
+          })
+        }
+      }
+      if (req.forted) {
+        var forted = h('div', {classList: 'message'}, [
+          req.forted
+        ])
+        scroller.insertBefore(forted, scroller.childNodes[1])
+      }
+      if (req.denied) {
+        var inviteName = h('input', {placeholder: 'Name'}) 
+        var inviteEmail = h('input', {placeholder: 'Email'})
+        var inviteWhy = h('textarea', {placeholder: 'Why do you want to join ' + req.url + '?'})
+        var denied = h('div', {classList: 'message'}, [
+          h('div', {innerHTML: marked(req.denied)}),
+          inviteName,
+          h('br'),
+          inviteEmail,
+          inviteWhy,
+          h('button', { onclick: function () {
+              if (inviteName.value && inviteEmail.value && inviteWhy.value) { 
+                var obj = {
+                  pubkey: keys.substring(0, 44),
+                  name: inviteName.value,
+                  email: inviteEmail.value,
+                  why: inviteWhy.value 
+                }
+                console.log(obj)
+                var sent = h('div', {classList: 'message'}, [
+                  'Your request has been sent to ' + req.url + '.'
+                ])
+                bog.box(JSON.stringify(obj), req.returnkey, keys).then(boxed => {
+                  ws.send(boxed)
+                  denied.parentNode.replaceChild(sent, denied)
+                })
+              } else {
+                alert('Please fill out every field!')
+              }
+            }
+          }, ['Request Invite']),
+          h('span', {style: 'font-size: .8em;'}, [' * an invite will be sent to you immediately or the pub operator will reach out to you via email. By requesting an invite you consent to your posts being published to the pub if you are approved.'])
+        ])
+        scroller.insertBefore(denied, scroller.childNodes[1])
+      }
+      if (req.welcome/* && (window.location.hash.substring(1) === '')*/) {
+        var welcome = h('div', {classList: 'message'}, [
+          h('span', {style: 'float: right;'}, [
+            h('code', [req.pubkey.substring(0, 7)]),
+            ' Connected'
+          ]),
+          h('a', {href: req.url}, [req.url]),
+        ])
+        replicate(ws, keys)
+        scroller.insertBefore(welcome, scroller.childNodes[1])
+        welcome.appendChild(
+          h('span', {innerHTML: marked(req.welcome)})
+        )
+        /*if (req.chart) {
+          const chart = LightweightCharts.createChart(welcome, {
+            width: (welcome.offsetWidth - 20), 
+            height: 200,
+            layout: {backgroundColor: '#f5f5f5'},
+            watermark: {
+  	    visible: true,
+       	    fontSize: 18,
+  	    horzAlign: 'center',
+  	    vertAlign: 'center',
+  	    color: '#999',
+  	    text: 'Visits',
+            },
+          })
+          kv.get('theme').then(theme => {
+            if (theme == 'dark') {
+              chart.applyOptions({
+                layout: {backgroundColor: '#333', textColor: '#ccc;'}
+              })
+            }
+          })
+          const lineSeries = chart.addLineSeries({
+            title: req.url, 
+            color: '#008b8b',
+            priceLineColor: '#008b8b'
+          })
+          lineSeries.setData(JSON.parse(req.chart))
+          console.log(JSON.parse(req.chart))
+        }*/
+      }
+      if (req.msg) {
+        bog.open(req.msg).then(opened => {
+          if (feeds[opened.author]) {
+            if (feeds[opened.author][0].substring(0, 44) === opened.previous) {
+              feeds[opened.author].unshift(req.msg)
+              log.push(opened)
+              if (!delay) {
+                delay = true
+                savefeeds(feeds, log)
+              }
+              var gossip = {feed: opened.author, seq: opened.seq}
+              bog.box(JSON.stringify(gossip), ws.pubkey, keys).then(boxed => {
+                ws.send(boxed)
+              })
+              if ((window.location.hash.substring(1) == opened.author) || (window.location.hash.substring(1) == '')) {
+                render(opened, keys).then(rendered => {
+                  scroller.insertBefore(rendered, scroller.childNodes[1])
+                })
+              }
+            }
+          } else {
+            feeds[opened.author] = [req.msg]
+            log.push(opened)
+            if (!delay) {
+              delay = true
+              savefeeds(feeds, log)
+            }
+            var gossip = {feed: opened.author, seq: opened.seq}
+            bog.box(JSON.stringify(gossip), ws.pubkey, keys).then(boxed => {
+              ws.send(boxed)
+            })
+            if ((window.location.hash.substring(1) == opened.author) || (window.location.hash.substring(1) == '')) {
+              if (!scroller.firstChild) {
+                // quick fix if no profile can be generated yet
+                var div = h('div')
+                scroller.appendChild(div)
+              }
+              render(opened, keys).then(rendered => {
+                scroller.insertBefore(rendered, scroller.childNodes[1])
+              })
+            }
+          }
+        })
+      }
+
+      else if (req.seq || (req.seq === 0)) {
+        if ((!feeds[req.feed]) && (req.seq != 0)) { 
+          var gossip = {feed: req.feed, seq: 0}
+          bog.box(JSON.stringify(gossip), ws.pubkey, keys).then(boxed => {
+            ws.send(boxed)
+          })
+        }
+        else if (feeds[req.feed]) {
+          if (req.seq < feeds[req.feed].length) {
+            var resp = {}
+            resp.msg = feeds[req.feed][feeds[req.feed].length - req.seq - 1]
+            bog.box(JSON.stringify(resp), ws.pubkey, keys).then(boxed => {
+              ws.send(boxed)
+            })
+          }
+          else if (req.seq > feeds[req.feed].length){
+            var gossip = {feed: req.feed, seq: feeds[req.feed].length}
+            bog.box(JSON.stringify(gossip), ws.pubkey, keys).then(boxed => {
+              ws.send(boxed)
+            })
+          }
+        } 
+      }
+    })
+  }
+}
 
 bog.keys().then(keys => {
 
@@ -755,253 +1004,12 @@ bog.keys().then(keys => {
          //}
       }, 10000)
 
-      function connect (server) {
-        var ws = new WebSocket(server)
-        ws.binaryType = 'arraybuffer'
 
-        var id = ++serverId
-
-        ws.onopen = () => {
-          ws.send(JSON.stringify({connected: keys.substring(0, 44)}))
-        } 
-
-        ws.onclose = (e) => {
-          setTimeout(function () {
-            //console.log('connection to ' + server + ' closed, reconnecting')
-            connect(server)
-          }, 1000)
-        }
- 
-        var retryCount = 1
-
-        ws.onerror = (err) => {
-          var disconnected = h('div', {classList: 'message', id: 'unable:' + server, innerHTML: 'Unable to connect to <code> ' + server + '</code>.'})
-
-          var unable = document.getElementById('unable:' + server)
-          if (unable) {
-            unable.parentNode.removeChild(unable)
-          } 
-          scroller.insertBefore(disconnected, scroller.childNodes[1])
-
-          //console.log('unable to connect, closing connection to ' + server)
-          setTimeout(function () {
-            ws.close()
-            retryCount++
-          }, 10000 * retryCount)
-        }
-
-        ws.onmessage = (msg) => {
-          //ws.pubkey = msg.data.substring(0, 44)
-          //peers.set(id, ws)
-          //console.log(msg.data)
-          var data = new Uint8Array(msg.data)
-          //console.log(data)
-          console.log(msg.data)
-          bog.unbox(data, keys).then(unboxed => {
-            //console.log(unboxed)
-            var req = JSON.parse(unboxed)
-            if (req.pubkey) {
-              ws.pubkey = req.pubkey
-              peers.set(id, ws)
-            }
-            if (req.permalink) {
-              src = req.permalink.substring(44,88)
-              var permalink = h('div', {id: src})
-
-              if (scroller.firstChild) {
-                scroller.insertBefore(permalink, scroller.childNodes[1])
-              } else {
-                scroller.appendChild(permalink)
-              }
-              
-              var nofeed = h('div', {classList: 'message'}, [
-                  'You are not syncing ',
-                  h('a', {href: '#' + src}, [req.permalink.substring(44,54) + '\'s feed. ']),
-                h('button', {
-                  onclick: function () {
-                    
-                    var gossip = {feed: src, seq: 0}
-                    blast(gossip, keys)
-                    if (window.location.hash.substring(1) != src) {
-                      window.location.hash = src
-                    }
-                    var gotit = document.getElementById(src)
-                    gotit.parentNode.removeChild(gotit)
-
-                  }
-                }, ['Sync Now'])
-              ])
-              permalink.appendChild(nofeed)
-              if (!document.getElementById(req.permalink.substring(0, 44))) {
-                bog.open(req.permalink).then(opened => {
-                  if (!window.location.hash.substring(1) || (window.location.hash.substring(1) === opened.raw.substring(0, 44)) || (window.location.hash.substring(1) === opened.author)) {
-                    render(opened, keys).then(rendered => {
-                      permalink.appendChild(rendered)
-                    }) 
-                  }
-                })
-              }
-            }
-            if (req.forted) {
-              var forted = h('div', {classList: 'message'}, [
-                req.forted
-              ])
-              scroller.insertBefore(forted, scroller.childNodes[1])
-            }
-            if (req.denied) {
-              var inviteName = h('input', {placeholder: 'Name'}) 
-              var inviteEmail = h('input', {placeholder: 'Email'})
-              var inviteWhy = h('textarea', {placeholder: 'Why do you want to join ' + req.url + '?'})
-              var denied = h('div', {classList: 'message'}, [
-                h('div', {innerHTML: marked(req.denied)}),
-                inviteName,
-                h('br'),
-                inviteEmail,
-                inviteWhy,
-                h('button', { onclick: function () {
-                    if (inviteName.value && inviteEmail.value && inviteWhy.value) { 
-                      var obj = {
-                        pubkey: keys.substring(0, 44),
-                        name: inviteName.value,
-                        email: inviteEmail.value,
-                        why: inviteWhy.value 
-                      }
-                      console.log(obj)
-                      var sent = h('div', {classList: 'message'}, [
-                        'Your request has been sent to ' + req.url + '.'
-                      ])
-                      bog.box(JSON.stringify(obj), req.returnkey, keys).then(boxed => {
-                        ws.send(boxed)
-                        denied.parentNode.replaceChild(sent, denied)
-                      })
-                    } else {
-                      alert('Please fill out every field!')
-                    }
-                  }
-                }, ['Request Invite']),
-                h('span', {style: 'font-size: .8em;'}, [' * an invite will be sent to you immediately or the pub operator will reach out to you via email. By requesting an invite you consent to your posts being published to the pub if you are approved.'])
-              ])
-              scroller.insertBefore(denied, scroller.childNodes[1])
-            }
-            if (req.welcome/* && (window.location.hash.substring(1) === '')*/) {
-              var welcome = h('div', {classList: 'message'}, [
-                h('span', {style: 'float: right;'}, [
-                  h('code', [req.pubkey.substring(0, 7)]),
-                  ' Connected'
-                ]),
-                h('a', {href: req.url}, [req.url]),
-              ])
-              replicate(ws, keys)
-              scroller.insertBefore(welcome, scroller.childNodes[1])
-              welcome.appendChild(
-                h('div', {innerHTML: marked(req.welcome)})
-              )
-              /*if (req.chart) {
-                const chart = LightweightCharts.createChart(welcome, {
-                  width: (welcome.offsetWidth - 20), 
-                  height: 200,
-                  layout: {backgroundColor: '#f5f5f5'},
-                  watermark: {
-		    visible: true,
-	     	    fontSize: 18,
-		    horzAlign: 'center',
-		    vertAlign: 'center',
-		    color: '#999',
-		    text: 'Visits',
-	          },
-                })
-                kv.get('theme').then(theme => {
-                  if (theme == 'dark') {
-                    chart.applyOptions({
-                      layout: {backgroundColor: '#333', textColor: '#ccc;'}
-                    })
-                  }
-                })
-                const lineSeries = chart.addLineSeries({
-                  title: req.url, 
-                  color: '#008b8b',
-                  priceLineColor: '#008b8b'
-                })
-                lineSeries.setData(JSON.parse(req.chart))
-                console.log(JSON.parse(req.chart))
-              }*/
-            }
-            if (req.msg) {
-              bog.open(req.msg).then(opened => {
-                if (feeds[opened.author]) {
-                  if (feeds[opened.author][0].substring(0, 44) === opened.previous) {
-                    feeds[opened.author].unshift(req.msg)
-                    log.push(opened)
-                    if (!delay) {
-                      delay = true
-                      savefeeds(feeds, log)
-                    }
-                    var gossip = {feed: opened.author, seq: opened.seq}
-                    bog.box(JSON.stringify(gossip), ws.pubkey, keys).then(boxed => {
-                      ws.send(boxed)
-                    })
-                    if ((window.location.hash.substring(1) == opened.author) || (window.location.hash.substring(1) == '')) {
-                      render(opened, keys).then(rendered => {
-                        scroller.insertBefore(rendered, scroller.childNodes[1])
-                      })
-                    }
-                  }
-                } else {
-                  feeds[opened.author] = [req.msg]
-                  log.push(opened)
-                  if (!delay) {
-                    delay = true
-                    savefeeds(feeds, log)
-                  }
-                  var gossip = {feed: opened.author, seq: opened.seq}
-                  bog.box(JSON.stringify(gossip), ws.pubkey, keys).then(boxed => {
-                    ws.send(boxed)
-                  })
-                  if ((window.location.hash.substring(1) == opened.author) || (window.location.hash.substring(1) == '')) {
-                    if (!scroller.firstChild) {
-                      // quick fix if no profile can be generated yet
-                      var div = h('div')
-                      scroller.appendChild(div)
-                    }
-                    render(opened, keys).then(rendered => {
-                      scroller.insertBefore(rendered, scroller.childNodes[1])
-                    })
-                  }
-                }
-              })
-            }
-
-            else if (req.seq || (req.seq === 0)) {
-              if ((!feeds[req.feed]) && (req.seq != 0)) { 
-                var gossip = {feed: req.feed, seq: 0}
-                bog.box(JSON.stringify(gossip), ws.pubkey, keys).then(boxed => {
-                  ws.send(boxed)
-                })
-              }
-              else if (feeds[req.feed]) {
-                if (req.seq < feeds[req.feed].length) {
-                  var resp = {}
-                  resp.msg = feeds[req.feed][feeds[req.feed].length - req.seq - 1]
-                  bog.box(JSON.stringify(resp), ws.pubkey, keys).then(boxed => {
-                    ws.send(boxed)
-                  })
-                }
-                else if (req.seq > feeds[req.feed].length){
-                  var gossip = {feed: req.feed, seq: feeds[req.feed].length}
-                  bog.box(JSON.stringify(gossip), ws.pubkey, keys).then(boxed => {
-                    ws.send(boxed)
-                  })
-                }
-              } 
-            }
-          })
-        }
-      }
 
       kv.get('servers').then(pubs => {
         if (pubs) { servers = pubs }
         servers.forEach(server => {
-          connect(server)
+          connect(server, keys)
         })
       })
     })

@@ -31,12 +31,24 @@ if (await exists(path + 'log')) {
 
 var feeds = []
 
+var feedlist = []
+
 if (ensureDir(path + 'bogs/')) {
   for await (const dirEntry of Deno.readDir(path + 'bogs/')) {
     console.log('Loading: ' + dirEntry.name)
+    feedlist.push(dirEntry.name)
     feeds[dirEntry.name] = JSON.parse(await Deno.readTextFile(path + 'bogs/' + dirEntry.name))
   }
 }
+
+console.log(feedlist)
+setTimeout(function () {
+
+  if (log.length) {
+    var newlog = log.filter(msg => feedlist.includes(msg.author))
+    log = newlog
+  }
+}, 10000)
 
 let newdata = false
 
@@ -172,8 +184,6 @@ async function serveHttp (conn) {
 
   for await (const e of httpConn) {
     if (e.request.url.endsWith('ws')) {
-
-      console.log('trying ws')
       const { socket, response } = Deno.upgradeWebSocket(e.request);
       socket.binaryType = 'arraybuffer'
       socket.onopen = () => {
@@ -196,9 +206,9 @@ async function serveHttp (conn) {
             socket.pubkey = req.connected
             console.log(name(log, req.connected) + ' ' + req.connected + ' connected.')
             sockets.add(socket)
-            var connected = ' are connected.'
+            var connected = ' connected.'
             sockets.forEach(sock => {
-              connected = '[' + name(log, sock.pubkey) + '](' + sock.pubkey + '), ' + connected
+              connected = '[' + name(log, sock.pubkey) + '](' + sock.pubkey + ') ' + connected
               resp.welcome = connected
             })
             

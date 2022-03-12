@@ -183,7 +183,7 @@ iframe {
 }
 
 @media only screen and (max-width: 680px) {
-  #screen { top: 1.8em; }
+  #screen { top: 31px; }
   #scroller {max-width: 100%;}
   textarea { height: 125px;}
   .navbar .message { margin-top: 1.7em; }

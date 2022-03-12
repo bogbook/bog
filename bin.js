@@ -1,6 +1,13 @@
 import { keys, getConfig, unbox, box, publish, open, name } from './denoutil.js'
+import { exists, ensureDir } from 'https://deno.land/std@0.97.0/fs/mod.ts'
+
 
 const appdir = Deno.args[0] || 'denobog'
+
+const home = Deno.env.get("HOME")
+const path = home + '/.' + appdir + '/'
+
+ensureDir(path + 'bogs/')
 
 const key = await keys(appdir)
 const config = await getConfig(appdir)
@@ -13,8 +20,40 @@ const server = Deno.listen({ port: config.port })
 
 const sockets = new Set()
 
-const feeds = []
-const log = []
+var log = []
+
+if (await exists(path + 'log')) {
+  console.log('reading log')
+  log = JSON.parse(await Deno.readTextFile(path + 'log'))
+} else {
+  console.log('no log, empty array')
+}
+
+var feeds = []
+
+if (ensureDir(path + 'bogs/')) {
+  for await (const dirEntry of Deno.readDir(path + 'bogs/')) {
+    console.log('Loading: ' + dirEntry.name)
+    feeds[dirEntry.name] = JSON.parse(await Deno.readTextFile(path + 'bogs/' + dirEntry.name))
+  }
+}
+
+let newdata = false
+
+setInterval(function () {
+  if (newdata) {
+    console.log('Writing log')
+    Deno.writeTextFile(path + 'log', JSON.stringify(log))
+    Deno.writeTextFile(path + 'config.json', JSON.stringify(config))
+    for (var key in feeds) {
+      var value = feeds[key]
+      Deno.writeTextFile(path + 'bogs/' + key, JSON.stringify(value))
+    }
+    newdata = false
+  } else {
+    //console.log('No new data')
+  }
+}, 10000)
 
 function inviteFlow(req, ws, keys) {
   console.log(req.name + ' ' + req.pubkey + ' ' + req.email + ' wants to join ' + config.url + ' Why? ' + req.why)
@@ -38,7 +77,7 @@ function inviteFlow(req, ws, keys) {
       ws.send(boxed)
     })
     config.allowed.push(req.pubkey)
-    console.log(config)
+    newdata = true
   } 
 }
 
@@ -49,6 +88,7 @@ function processReq (req, ws, keys) {
         if (feeds[opened.author][0].substring(0, 44) === opened.previous) {
           feeds[opened.author].unshift(req.msg)
           log.push(opened)
+          newdata = true
           var via = ''
           if (opened.author != ws.pubkey) {
             via = ' via ' + ws.pubkey 
@@ -62,6 +102,7 @@ function processReq (req, ws, keys) {
       } else {
         feeds[opened.author] = [req.msg]
         log.push(opened)
+        newdata = true
       var via = ''
       if (opened.author != ws.pubkey) {
           via = ' via ' + ws.pubkey
@@ -125,8 +166,6 @@ function processReq (req, ws, keys) {
     }
   }
 }
-
-
 
 async function serveHttp (conn) {
   const httpConn = Deno.serveHttp(conn)

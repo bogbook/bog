@@ -1,7 +1,7 @@
 import nacl from './lib/nacl-fast-es.js'
-import { decode, encode } from 'https://deno.land/std@0.97.0/encoding/base64.ts'
-import { exists, ensureDir } from 'https://deno.land/std@0.97.0/fs/mod.ts'
-import { createHash } from "https://deno.land/std@0.97.0/hash/mod.ts"
+import { decode, encode } from 'https://deno.land/std@0.129.0/encoding/base64.ts'
+import { exists, ensureDir } from 'https://deno.land/std@0.129.0/fs/mod.ts'
+import { createHash } from "https://deno.land/std@0.129.0/hash/mod.ts"
 import { convertPublicKey, convertSecretKey } from './ed2curve.js'
 
 export async function box (msg, recp, keys) {

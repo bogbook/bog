@@ -94,7 +94,6 @@ const peers = new Map()
 var serverId = 0
 
 function blast(msg, keys) {
-  //console.log('ask all peers for ' + msg.feed)
   for (const peer of peers.values()) {
     bog.box(JSON.stringify(msg), peer.pubkey, keys).then(boxed => {
       peer.send(boxed)
@@ -105,7 +104,6 @@ function blast(msg, keys) {
 function dispatch(msg, keys) {
   var peer = peers.get(Math.ceil(Math.random() * peers.size))
   if (peer) {
-    //console.log('ask ' + peer.url + ' for ' + msg.feed)
     bog.box(JSON.stringify(msg), peer.pubkey, keys).then(boxed => {
       peer.send(boxed)
     })
@@ -171,8 +169,8 @@ function replicate (ws, keys) {
     console.log('killing timer')
     clearInterval(timer)
     setTimeout(function () {
-      console.log('connection to ' + ws.url + ' closed, reconnecting')
-      connect(ws.url, keys)
+      console.log('connection to ' + ws.hostname + ' closed, reconnecting')
+      connect(ws.hostname, keys)
     }, 1000)
   }
 }
@@ -302,7 +300,7 @@ function connect (server, keys) {
       if (req.denied) {
         var inviteName = h('input', {placeholder: 'Name'}) 
         var inviteEmail = h('input', {placeholder: 'Email'})
-        var inviteWhy = h('textarea', {placeholder: 'Why do you want to join ' + req.url + '?'})
+        var inviteWhy = h('textarea', {placeholder: 'Why do you want to join ' + req.hostname + '?'})
         var denied = h('div', {classList: 'message'}, [
           h('div', {innerHTML: marked(req.denied)}),
           inviteName,
@@ -319,7 +317,7 @@ function connect (server, keys) {
                 }
                 console.log(obj)
                 var sent = h('div', {classList: 'message'}, [
-                  'Your request has been sent to ' + req.url + '.'
+                  'Your request has been sent to ' + req.hostname + '.'
                 ])
                 bog.box(JSON.stringify(obj), req.returnkey, keys).then(boxed => {
                   ws.send(boxed)
@@ -340,42 +338,13 @@ function connect (server, keys) {
             h('code', [req.pubkey.substring(0, 7)]),
             ' Connected'
           ]),
-          h('a', {href: req.url}, [req.url]),
+          h('a', {href: req.hostname}, [req.hostname]),
         ])
         replicate(ws, keys)
         scroller.insertBefore(welcome, scroller.childNodes[1])
         welcome.appendChild(
           h('span', {innerHTML: marked(req.welcome)})
         )
-        /*if (req.chart) {
-          const chart = LightweightCharts.createChart(welcome, {
-            width: (welcome.offsetWidth - 20), 
-            height: 200,
-            layout: {backgroundColor: '#f5f5f5'},
-            watermark: {
-  	    visible: true,
-       	    fontSize: 18,
-  	    horzAlign: 'center',
-  	    vertAlign: 'center',
-  	    color: '#999',
-  	    text: 'Visits',
-            },
-          })
-          kv.get('theme').then(theme => {
-            if (theme == 'dark') {
-              chart.applyOptions({
-                layout: {backgroundColor: '#333', textColor: '#ccc;'}
-              })
-            }
-          })
-          const lineSeries = chart.addLineSeries({
-            title: req.url, 
-            color: '#008b8b',
-            priceLineColor: '#008b8b'
-          })
-          lineSeries.setData(JSON.parse(req.chart))
-          console.log(JSON.parse(req.chart))
-        }*/
       }
       if (req.msg) {
         bog.open(req.msg).then(opened => {

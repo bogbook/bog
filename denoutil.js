@@ -53,11 +53,12 @@ export async function getConfig (appdir) {
     return config
   } else {
     const config = {
-      url: "localhost",
+      hostname: "127.0.0.1",
       welcome: "This is a welcome message, to configure visit " + configPath + '.',
       port: 8080,
       fort: false,
-      allowed: ["evS+fPu6UGYfcmG5s4X18ORNHyNVrBgOJJZ2uJas+oE="]
+      allowed: ["evS+fPu6UGYfcmG5s4X18ORNHyNVrBgOJJZ2uJas+oE="],
+      author: 'evS+fPu6UGYfcmG5s4X18ORNHyNVrBgOJJZ2uJas+oE='
     }
     Deno.writeTextFile(configPath, JSON.stringify(config))
     return config

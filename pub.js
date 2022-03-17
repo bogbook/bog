@@ -59,12 +59,13 @@ setInterval(function () {
 }, 10000)
 
 function inviteFlow(req, ws, keys) {
-  console.log(magenta(req.name) + ' ' + cyan(req.pubkey) + ' ' + magenta(req.email) + ' wants to join ' + config.url + ' Why? ' + magenta(req.why))
+  console.log(magenta(req.name) + ' ' + cyan(req.pubkey) + ' ' + magenta(req.email) + ' wants to join ' + config.hostname + ' Why? ' + magenta(req.why))
+
   //console.log(req)
   if (config.fort) {
     console.log(red('FORTED') + ', manually approve invite at ' + new Date().toLocaleString())
     var obj = {
-      forted: config.url + '\'s owner will approve your invite soon and/or will reach out for more information, please be patient.'
+      forted: config.hostname + '\'s owner will approve your invite soon and/or will reach out for more information, please be patient.'
     }
     box(JSON.stringify(obj), req.pubkey, keys).then(boxed => {
       ws.send(boxed)
@@ -74,7 +75,7 @@ function inviteFlow(req, ws, keys) {
     console.log(green('Added ') + cyan(req.pubkey) + 'to allowed list at ' + new Date().toLocaleString())
     var obj = {
       pubkey: key.substring(0, 44),
-      welcome: 'Congrats! You\'ve been invited to ' + config.url + '.'
+      welcome: 'Congrats! You\'ve been invited to ' + config.hostname + '.'
     }
     box(JSON.stringify(obj), req.pubkey, keys).then(boxed => {
       ws.send(boxed)
@@ -184,7 +185,7 @@ export async function servePub (e) {
       if (!config.allowed.includes(req.connected)) {
         socket.pubkey = req.connected
         console.log(cyan(req.connected) + ' is ' + red('not invited') + ' to this pub. ' +  green(' Invite prompt sent.'))
-        var resp = {url: config.url, denied: 'You need an invite to sync with ' + config.url + '. Please request an invite below:', returnkey: key.substring(0, 44)}
+        var resp = {url: config.hostname, denied: 'You need an invite to sync with ' + config.hostname + '. Please request an invite below:', returnkey: key.substring(0, 44)}
         box(JSON.stringify(resp), req.connected, key).then(boxed => {
           socket.send(boxed)
         })
@@ -216,10 +217,15 @@ export async function servePub (e) {
     }
   }
   socket.onclose = function () {
-    var pubkey = socket.pubkey
-    console.log(magenta(name(log, pubkey)), cyan(pubkey) + ' disconnected.')
+    if (socket.pubkey) {
+      var pubkey = socket.pubkey
+      console.log(magenta(name(log, pubkey)), cyan(pubkey) + ' disconnected.')
+    } else {
+      console.log('someone disconnected')
+    }
     sockets.delete(socket)
   }
   socket.onerror = (e) => console.error("WebSocket error:", e)
   e.respondWith(response)
+  
 }

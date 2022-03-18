@@ -10,32 +10,20 @@ const config = await getConfig(appdir)
 async function serveHttp (conn) {
   const httpConn = Deno.serveHttp(conn)
   for await (const e of httpConn) {
-    // how to catch on this error
-    //error: Uncaught (in promise) Http: connection closed before message completed
-    //at Object.respondWith (deno:ext/http/01_http.js:211:21)
-    // how to catch an error in await loop
     if (e.request.url.endsWith('ws')) {
       servePub(e)
     } else {
       e.respondWith(serveDir(e.request, {fsRoot: './', showDirListing: true, quiet: true})).catch(() => {
         try {
-          conn.close();
+          conn.close() // coverup for a bug in Deno's http module that errors on connection close
         } catch {}
       })
     }
-    
-    /*if (e.request.url.endsWith('ws')) {
-      servePub(e)
-    } else {
-      e.respondWith(serveDir(e.request, {fsRoot: './', showDirListing: true, quiet: true})) 
-    }*/
   }
 }
 
 console.log(green('Bogbook listening on http://' + config.hostname + ':' + config.port + '/'))
 
-try {
-  for await (const conn of Deno.listen({hostname: config.hostname, port: config.port})) {
-    serveHttp(conn)
-  }
-} catch (error) {}
+for await (const conn of Deno.listen({hostname: config.hostname, port: config.port})) {
+  serveHttp(conn)
+}

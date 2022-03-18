@@ -101,15 +101,6 @@ function blast(msg, keys) {
   }
 }
 
-function dispatch(msg, keys) {
-  var peer = peers.get(Math.ceil(Math.random() * peers.size))
-  if (peer) {
-    bog.box(JSON.stringify(msg), peer.pubkey, keys).then(boxed => {
-      peer.send(boxed)
-    })
-  }
-}
-
 function replicate (ws, keys) {
   // check for my own feed
   if (!feeds[keys.substring(0, 44)]) {
@@ -152,7 +143,7 @@ function replicate (ws, keys) {
   function start () {
     timer = setInterval(function () {
       Object.keys(feeds).forEach(function(key,index) {
-        console.log('asking for ' + key + ' at ' + feeds[key].length)
+        //console.log('asking for ' + key + ' at ' + feeds[key].length)
         bog.box(JSON.stringify({
           feed: key, seq: feeds[key].length
         }), ws.pubkey, keys).then(boxed => {
@@ -241,13 +232,8 @@ function connect (server, keys) {
   }
 
   ws.onmessage = (msg) => {
-    //ws.pubkey = msg.data.substring(0, 44)
-    //peers.set(id, ws)
-    //console.log(msg.data)
     var data = new Uint8Array(msg.data)
-    //console.log(data)
     bog.unbox(data, keys).then(unboxed => {
-      //console.log(unboxed)
       var req = JSON.parse(unboxed)
       if (req.pubkey) {
         ws.pubkey = req.pubkey
@@ -432,34 +418,6 @@ bog.keys().then(keys => {
       feeds = gotfeeds
       log = gotlog
 
-     /*if (!feeds[keys.substring(0, 44)]) {
-        //console.log('gossip my feed')
-        setTimeout(function () {
-          var me = keys.substring(0, 44)
-          var gossip = {feed: me}
-          if (feeds[me]) {
-            gossip.seq = feeds[me].length
-          } else {
-            gossip.seq = 0
-          }
-          dispatch(gossip, keys)
-        }, 5000)
-      }
-
-      var timer
-
-      function start () {
-        timer = setInterval(function () {
-          Object.keys(feeds).forEach(function(key,index) {
-            var gossip = {feed: key}
-            gossip.seq = feeds[key].length
-            dispatch(gossip, keys)
-          })
-        }, 10000)
-      }
-
-      start()*/
-
       var searchInput = h('input', {
         id: 'searchInput', 
 	placeholder: '🔍'
@@ -621,18 +579,6 @@ bog.keys().then(keys => {
 
         if (src === '') {
           scroller.insertBefore(composer(keys), scroller.childNodes[1])
-          /*if (!feeds[config.author]) {
-            //console.log('gossip default log')
-            setTimeout(function () {
-              var gossip = {feed: config.author}
-              if (feeds[config.author]) {
-                gossip.seq = feeds[config.author].length
-              } else {
-                gossip.seq = -1
-              }
-              dispatch(gossip, keys)
-            }, 5000)
-          }*/
  
           var index = 0
 
@@ -867,7 +813,6 @@ bog.keys().then(keys => {
 
             var deletefeed = h('button', {
               onclick: function () {
-                //clearInterval(timer)
                 var newlog = log.filter(msg => msg.author != src)
 		kv.remove('name:' + src).then(function () {
                   delete feeds[src]
@@ -884,9 +829,9 @@ bog.keys().then(keys => {
 
             buttons.appendChild(deletefeed)
 
-            /*var gossip = {feed: src}
+            var gossip = {feed: src}
 
-            if (feeds[src]) {
+            /*if (feeds[src]) {
               gossip.seq = feeds[src].length
               (gossip, keys)
             } else {
@@ -966,14 +911,11 @@ bog.keys().then(keys => {
          if (delay) { 
            delay = false
            savefeeds(feeds, log)
-           //console.log('saving feeds one last time')
          } 
          //if (!delay) { 
            //console.log('do not save feeds, there is nothing new')
          //}
       }, 10000)
-
-
 
       kv.get('servers').then(pubs => {
         if (pubs) { servers = pubs }

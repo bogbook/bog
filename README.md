@@ -18,9 +18,9 @@ The bogbook protocol is secure (no one can modify your posts) and the data exist
 
 ### Roadmap to V3 aka "Denobook"
 
-[ ] **port server to Deno** We want to move off Node.js. WIP. Open question: how to serve a static website and a websocket server at the same address using Deno?
-[ ] **invite system** If a bogbook is invite only then the pubs should send them a message asking for them to provide some information (pubkey, email address, phone number in the extreme?) before they are allowed to sync with it. Then we either immediately send them an invite or we manually send them an invite if a pub is invite-only. The invite is a message signed by the pub asking the client to sign a message with the same keypair as the original pubkey that requested the invite. 
-[ ] **gossip upgrades** if a pub is disconnected, the gossip schedule should stop and then restart upon reconnect. This is currently a bug where you need to reload the page to reconnect. 
+[*] **port server to Deno** We want to move off Node.js. WIP. Open question: how to serve a static website and a websocket server at the same address using Deno?
+[*] **invite system** If a bogbook is invite only then the pubs should send them a message asking for them to provide some information (pubkey, email address, phone number in the extreme?) before they are allowed to sync with it. Then we either immediately send them an invite or we manually send them an invite if a pub is invite-only. The invite is a message signed by the pub asking the client to sign a message with the same keypair as the original pubkey that requested the invite. 
+[*] **gossip upgrades** if a pub is disconnected, the gossip schedule should stop and then restart upon reconnect. This is currently a bug where you need to reload the page to reconnect. 
 [ ] **feed imports/exports** import/export a feed from the profile page for backups and sneakernets 
 [ ] **blobs** instead of putting a signed object on the feed we can instead sign the hash of an object and sync that seperately upon render to improve sync time.
 
@@ -48,27 +48,28 @@ The bogbook protocol is secure (no one can modify your posts) and the data exist
 Toggle between light and dark modes using the brightness emoji in the top right of the navbar.
 
 ![Light mode](lightmode.png)
-![Dark dode](darkmode.png)
+![Dark mode](darkmode.png)
 
 ---
 
 ### Prior art
 
 + [old bogbook](http://git.sr.ht/~ev/oldbogbookv1) -- the protocol wasn't as optimized as I wanted, and the replication sucked
-+ [ssb](http://scuttlebot.io) -- While I invested 4 years developing ssb apps, ssb was always difficult to install and the ~~`<del>`data never replicated into browsers`</del>`~~ -- actually, some progress has been made with [ssb-browser-demo](https://between-two-worlds.dk/browser.html) [repo](https://github.com/arj03/ssb-browser-demo) by arj
++ [ssb](http://scuttlebot.io) -- While I invested 4 years developing ssb apps, ssb was always difficult to install and the ~~`<del>`data never replicated into browsers`</del>`~~ -- actually, some progress has been made with [ssb-browser-demo](https://between-two-worlds.dk/browser.html) [repo](https://github.com/arj03/ssb-browser-demo) by arj <-- but this link doesn't work anymore.
 
 ---
 
 ### Run it
 
+First install [Deno](https://deno.land/)
+
 ```
 git clone https://git.sr.ht/~ev/bogbook
 cd bogbook
-npm install
-node bin
+deno run --allow-net --allow-fs bin.js
 ```
 
-Navigate to http://localhost:8081/ to view your local bogbook
+Navigate to http://localhost:8080/ to view your local bogbook
 
 ### use an alternative .bogbook folder
 
@@ -82,12 +83,12 @@ Will use the `.testbognet/` folder instead of the default.
 
 ### config options
 
-Save a `config.json` file to your `.bogbookv2` folder in order to configure your local bogbook.
+Save a `config.json` file to your `.bogbook` folder in order to configure your local bogbook.
 
 #### specify your url
 
 ```
-{"url": "yoururl.com"}
+{"hostname": "yoururl.com"}
 ```
 
 #### fortify your bog
@@ -95,17 +96,14 @@ Save a `config.json` file to your `.bogbookv2` folder in order to configure your
 fortify your bogs by only accepting replication requests from existing boggers. Bogbook will only respond to messages from public keys that have already published bogs to the server. This means all lurkers and new boggers will be unable to publish or replicate from the bogbook while the bog is fortified. This could be useful for a private bogging group, or for handling possible abuse cases.
 
 ```
-{"fort": "true"}
+{"fort": true}
 ```
 
-#### customize pub announcements/welcome messages
-
-`announcement` messages are sent to boggers who have existing feeds on the server. `welcome` messages are sent to lurkers.
+#### customize welcome messages
 
 ```
 {
   "welcome": "Hey, thanks for lurking on Bogbook",
-  "announcement": "Hey, thanks for syncing your bogs to this bogbook server!"
 }
 ```
 
@@ -114,7 +112,7 @@ fortify your bogs by only accepting replication requests from existing boggers. 
 you can change your bogbook port with
 
 ```
-{"port": "1337"}
+{"port": 1337}
 ```
 
 ---

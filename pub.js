@@ -128,8 +128,18 @@ function processReq (req, ws, keys) {
         ws.send(boxed)
       })
     } else {
+      for (var key in feeds) {
+        if (key.substring(0, req.feed.length) === req.feed) {
+          var latest = feeds[key][0]
+          var message = {permalink: latest}
+          box(JSON.stringify(message), ws.pubkey, keys).then(boxed => {
+            console.log('sent permalink ' + latest.substring(0, 44) + ' to ' +   ws.pubkey)
+            ws.send(boxed)
+          })
+        }
+      }
       log.forEach(msg => {
-        if (msg.raw.substring(0, 44) === req.feed) {
+        if (msg.raw.substring(0, req.feed.length) === req.feed) {
           var message = {permalink: msg.raw}
           box(JSON.stringify(message), ws.pubkey, keys).then(boxed => {
             console.log('sent permalink ' + msg.raw.substring(0, 44) + ' to ' + ws.pubkey)

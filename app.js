@@ -266,15 +266,15 @@ function connect (server, keys) {
           }, ['Sync Now'])
         ])
         permalink.appendChild(nofeed)
-        if (!document.getElementById(req.permalink.substring(0, 44))) {
+        //if (!document.getElementById(req.permalink.substring(0, 44))) {
           bog.open(req.permalink).then(opened => {
-            if (!window.location.hash.substring(1) || (window.location.hash.substring(1) === opened.raw.substring(0, 44)) || (window.location.hash.substring(1) === opened.author)) {
+            //if (!window.location.hash.substring(1) || (window.location.hash.substring(1) === opened.raw.substring(0, 44)) || (window.location.hash.substring(1) === opened.author)) {
               render(opened, keys).then(rendered => {
                 permalink.appendChild(rendered)
               }) 
-            }
+            //}
           })
-        }
+        //}
       }
       if (req.forted) {
         var forted = h('div', {classList: 'message'}, [
@@ -888,6 +888,26 @@ bog.keys().then(keys => {
                   }, 1000)
                 }
               }
+            }
+          }
+        } else if (src != '') {
+          var gotit = false
+          for (var key in feeds) {
+            if (key.substring(0, src.length) == src) {
+              window.location.hash = key
+              gotit = true
+            }
+          }
+          for (var i = 0; i < log.length; i++) {
+            if (log[i].raw.substring(0, src.length) == src) {
+              window.location.hash = log[i].raw.substring(0, 44)
+              gotit = true
+            }
+            if (i === (log.length - 1) && gotit === false) {
+              var gossip = {feed: src, seq: -1}
+              setTimeout(function () {
+                blast(gossip, keys)
+              }, 1000)
             }
           }
         }

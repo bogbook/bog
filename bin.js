@@ -13,7 +13,8 @@ async function serveHttp (conn) {
     if (e.request.url.endsWith('ws')) {
       servePub(e)
     } else {
-      e.respondWith(serveDir(e.request, {fsRoot: './', showDirListing: true, quiet: true})).catch(() => {
+      e.respondWith(serveDir(e.request, {fsRoot: './', showDirListing: true, quiet: true})).catch((error) => {
+        //console.log(error)
         try {
           conn.close() // coverup for a bug in Deno's http module that errors on connection close
         } catch {}

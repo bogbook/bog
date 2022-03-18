@@ -66,7 +66,7 @@ First install [Deno](https://deno.land/)
 ```
 git clone https://git.sr.ht/~ev/bogbook
 cd bogbook
-deno run --allow-net --allow-fs bin.js
+deno run --allow-net --allow-read --allow-env bin.js
 ```
 
 Navigate to http://localhost:8080/ to view your local bogbook

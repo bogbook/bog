@@ -160,8 +160,8 @@ function replicate (ws, keys) {
     console.log('killing timer')
     clearInterval(timer)
     setTimeout(function () {
-      console.log('connection to ' + ws.hostname + ' closed, reconnecting')
-      connect(ws.hostname, keys)
+      console.log('connection to ' + ws.url + ' closed, reconnecting')
+      connect(ws.url, keys)
     }, 1000)
   }
 }

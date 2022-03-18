@@ -157,7 +157,6 @@ function replicate (ws, keys) {
 
   // if connection closes we should kill the timer
   ws.onclose = (e) => {
-    console.log('killing timer')
     clearInterval(timer)
     setTimeout(function () {
       console.log('connection to ' + ws.url + ' closed, reconnecting')
@@ -208,7 +207,7 @@ function connect (server, keys) {
 
   ws.onclose = (e) => {
     setTimeout(function () {
-      console.log('connection to ' + server + ' closed, reconnecting')
+      //console.log('connection to ' + server + ' closed, reconnecting')
       connect(server, keys)
     }, 1000)
   }
@@ -326,7 +325,10 @@ function connect (server, keys) {
           ]),
           h('a', {href: req.hostname}, [req.hostname]),
         ])
-        replicate(ws, keys)
+        setTimeout(function () {
+          // give it some time to connect
+          replicate(ws, keys)
+        }, 1000)
         scroller.insertBefore(welcome, scroller.childNodes[1])
         welcome.appendChild(
           h('span', {innerHTML: marked(req.welcome)})
@@ -828,12 +830,12 @@ bog.keys().then(keys => {
             }, ['Delete Feed'])
 
             buttons.appendChild(deletefeed)
+           
+            /*var gossip = {feed: src}
 
-            var gossip = {feed: src}
-
-            /*if (feeds[src]) {
+            if (feeds[src]) {
               gossip.seq = feeds[src].length
-              (gossip, keys)
+              blast(gossip, keys)
             } else {
               gossip.seq = -1
               blast(gossip, keys)

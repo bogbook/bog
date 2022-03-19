@@ -124,7 +124,7 @@ function processReq (req, ws, keys) {
       var latest = feeds[req.feed][0]
       var message = {permalink: latest}
       box(JSON.stringify(message), ws.pubkey, keys).then(boxed => {
-        console.log('sent permalink ' + latest.substring(0, 44) + ' to ' +   ws.pubkey)
+        console.log('sent permalink ' + cyan(latest.substring(0, 44)) + ' to ' + magenta(name(log, ws.pubkey)) + ' ' + cyan(ws.pubkey))
         ws.send(boxed)
       })
     } else {
@@ -133,7 +133,7 @@ function processReq (req, ws, keys) {
           var latest = feeds[key][0]
           var message = {permalink: latest}
           box(JSON.stringify(message), ws.pubkey, keys).then(boxed => {
-            console.log('sent permalink ' + latest.substring(0, 44) + ' to ' +   ws.pubkey)
+            console.log('sent permalink ' + cyan(latest.substring(0, 44)) + ' to ' + magenta(name(log, ws.pubkey)) + ' ' + cyan(ws.pubkey))
             ws.send(boxed)
           })
         }
@@ -142,7 +142,7 @@ function processReq (req, ws, keys) {
         if (msg.raw.substring(0, req.feed.length) === req.feed) {
           var message = {permalink: msg.raw}
           box(JSON.stringify(message), ws.pubkey, keys).then(boxed => {
-            console.log('sent permalink ' + msg.raw.substring(0, 44) + ' to ' + ws.pubkey)
+            console.log('sent permalink ' + cyan(msg.raw.substring(0, 44)) + ' to ' + magenta(name(log, ws.pubkey)) + ' ' + cyan(ws.pubkey))
             ws.send(boxed)
           })
         }
@@ -185,9 +185,9 @@ function processReq (req, ws, keys) {
 export async function servePub (e) {
   const { socket, response } = Deno.upgradeWebSocket(e.request);
   socket.binaryType = 'arraybuffer'
-  socket.onopen = () => {
+  //socket.onopen = () => {
     //socket.send("Hello World!")
-  }
+  //}
   socket.onmessage = (e) => {
     var msg = e.data
     if (msg[0] === '{') {

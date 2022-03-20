@@ -337,7 +337,7 @@ function connect (server, keys) {
         }, 1000)
         scroller.insertBefore(welcome, scroller.childNodes[1])
         welcome.appendChild(
-          h('span', {innerHTML: marked(req.welcome)})
+          h('div', {classList: 'content', innerHTML: marked(req.welcome)})
         )
       }
       if (req.msg) {

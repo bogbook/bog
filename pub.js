@@ -196,7 +196,7 @@ export async function servePub (e) {
       if (!config.allowed.includes(req.connected)) {
         socket.pubkey = req.connected
         console.log(cyan(req.connected) + ' is ' + red('not invited') + ' to this pub. ' +  green(' Invite prompt sent.'))
-        var resp = {url: config.hostname, denied: 'You need an invite to sync with ' + config.hostname + '. Please request an invite below:', returnkey: key.substring(0, 44)}
+        var resp = {hostname: config.hostname, denied: 'You need an invite to sync with ' + config.hostname + '. Please request an invite below:', returnkey: key.substring(0, 44)}
         box(JSON.stringify(resp), req.connected, key).then(boxed => {
           socket.send(boxed)
         })

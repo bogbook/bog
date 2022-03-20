@@ -27,9 +27,10 @@ var feedlist = []
 
 if (ensureDir(path + 'bogs/')) {
   for await (const dirEntry of Deno.readDir(path + 'bogs/')) {
-    console.log('Loading: ' + cyan(dirEntry.name))
     feedlist.push(dirEntry.name)
-    feeds[dirEntry.name] = JSON.parse(await Deno.readTextFile(path + 'bogs/' + dirEntry.name))
+    var parsed = JSON.parse(await Deno.readTextFile(path + 'bogs/' + dirEntry.name))
+    feeds[dirEntry.name] = parsed
+    console.log('Loading: ' + magenta(name(log, dirEntry.name)) + ' ' + cyan(dirEntry.name) + ' at ' + green(parsed.length +''))
   }
 }
 

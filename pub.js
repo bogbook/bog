@@ -14,34 +14,61 @@ const path = Deno.env.get("HOME") + '/.' + appdir + '/'
 const sockets = new Set()
 
 var log = []
-
-if (await exists(path + 'log')) {
-  log = JSON.parse(await Deno.readTextFile(path + 'log'))
-} /*else {
-  console.log('no log, empty array')
-}*/
-
 var feeds = []
-
 var feedlist = []
 
-if (ensureDir(path + 'bogs/')) {
-  for await (const dirEntry of Deno.readDir(path + 'bogs/')) {
-    feedlist.push(dirEntry.name)
-    var parsed = JSON.parse(await Deno.readTextFile(path + 'bogs/' + dirEntry.name))
-    feeds[dirEntry.name] = parsed
-    console.log('Loading: ' + magenta(name(log, dirEntry.name)) + ' ' + cyan(dirEntry.name) + ' at ' + green(parsed.length +''))
+async function getBogs () {
+  if (ensureDir(path + 'bogs/')) {
+    for await (const dirEntry of Deno.readDir(path + 'bogs/')) {
+      feedlist.push(dirEntry.name)
+      var parsed = JSON.parse(await Deno.readTextFile(path + 'bogs/' + dirEntry.name))
+      feeds[dirEntry.name] = parsed
+      console.log('Loading: ' + magenta(name(log, dirEntry.name)) + ' ' + cyan(dirEntry.name) + ' at ' + green(parsed.length +''))
+    }
   }
 }
 
-setTimeout(function () {
+if (feeds && (Deno.args[1] == 'regenerate')) {
+  getBogs()
+  var oldfeeds = feeds
+  var newlog = []
+  setTimeout(function () {
+    console.log('generating log from feeds, this may take a moment to complete...')
+    var all = [] 
+    Object.keys(feeds).forEach(function(key,index) {
+      all = all.concat(feeds[key])
+      if (Object.keys(feeds).length -1 === index) {
+        all.forEach((msg, index) => {
+          open(msg).then(opened => {
+            newdata = false
+            newlog.push(opened)
+            console.log('Opened: ' + cyan(msg.substring(0, 44)) + ' by ' + magenta(name(newlog, opened.author)) + ' ' + cyan(opened.author))
+            if (index === all.length -1) {
+              log = newlog
+              feeds = oldfeeds
+              newdata = true
+              console.log(log.length + ' posts from ' + (Object.keys(feeds).length) + ' authors')
+            }
+          })
+        })
+      }
+    })
+  }, 5000)
+} else if (await exists(path + 'log')) {
+  log = JSON.parse(await Deno.readTextFile(path + 'log'))
+  getBogs()
+}
+
+
+
+/*setTimeout(function () {
   // deletes logs that have been removed from bogs folder
   if (log.length) {
     console.log(red('Cleaning up log'))
     var newlog = log.filter(msg => feedlist.includes(msg.author))
     log = newlog
   }
-}, 10000)
+}, 10000)*/
 
 let newdata = false
 

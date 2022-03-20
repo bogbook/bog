@@ -318,12 +318,14 @@ function connect (server, keys) {
         scroller.insertBefore(denied, scroller.childNodes[1])
       }
       if (req.welcome/* && (window.location.hash.substring(1) === '')*/) {
+        console.log(req)
         var welcome = h('div', {classList: 'message'}, [
           h('span', {style: 'float: right;'}, [
             h('code', [req.pubkey.substring(0, 7)]),
-            ' Connected'
+            ' Pub connected'
           ]),
           h('a', {href: req.hostname}, [req.hostname]),
+          ' '
         ])
         setTimeout(function () {
           // give it some time to connect

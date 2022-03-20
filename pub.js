@@ -74,6 +74,7 @@ function inviteFlow(req, ws, keys) {
   if (!config.fort) {
     console.log(green('Added ') + cyan(req.pubkey) + 'to allowed list at ' + new Date().toLocaleString())
     var obj = {
+      hostname: config.hostname,
       pubkey: key.substring(0, 44),
       welcome: 'Congrats! You\'ve been invited to ' + config.hostname + '.'
     }
@@ -201,14 +202,14 @@ export async function servePub (e) {
         })
         // socket.close()
       } else if (config.allowed.includes(req.connected)) {
-        var resp = { pubkey: key.substring(0, 44), welcome: 'Hello World!' }
+        var resp = { pubkey: key.substring(0, 44), welcome: config.welcome, hostname: config.hostname }
         socket.pubkey = req.connected
         console.log(magenta(name(log, req.connected)) + ' ' + cyan(req.connected) + ' connected.')
         sockets.add(socket)
-        var connected = ' connected.'
+        var connected = ''
         sockets.forEach(sock => {
-          connected = '[' + name(log, sock.pubkey) + '](' + sock.pubkey + ') ' + connected
-          resp.welcome = connected
+          connected = ' [' + name(log, sock.pubkey) + '](' + sock.pubkey + ')' + connected
+          resp.welcome = config.welcome + ' Peers:' + connected + '.'
         })
 
         box(JSON.stringify(resp), req.connected, key).then(boxed => {

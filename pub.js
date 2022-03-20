@@ -121,7 +121,7 @@ function processReq (req, ws, keys) {
     })
   }
   else if (req.seq === -1) {
-    if (feeds[req.feed]) {
+    if (feeds[req.feed] && (req.feed.length == 44)) {
       var latest = feeds[req.feed][0]
       var message = {permalink: latest}
       box(JSON.stringify(message), ws.pubkey, keys).then(boxed => {

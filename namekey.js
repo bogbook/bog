@@ -1,4 +1,4 @@
-// deno run --unstable namekey.js to generate a vanity pubkey
+// deno run --unstable namekey.js [arg]  // to generate a vanity pubkey
 
 import nacl from './lib/nacl-fast-es.js'
 import { decode, encode} from 'https://deno.land/std@0.97.0/encoding/base64.ts'

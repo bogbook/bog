@@ -4,7 +4,7 @@ function createpost (obj, keys, compose) {
       if (feeds[keys.substring(0, 44)]) {
         if (opened.previous === feeds[keys.substring(0,44)][0].substring(0, 44)) {
           var gossip = {feed: opened.author, seq: opened.seq}
-          dispatch(gossip, keys)
+          blast(gossip, keys)
           feeds[keys.substring(0, 44)].unshift(msg)
           log.push(opened)
           savefeeds(feeds, log)

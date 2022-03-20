@@ -239,42 +239,46 @@ function connect (server, keys) {
         peers.set(id, ws)
       }
       if (req.permalink) {
-        src = req.permalink.substring(44,88)
-        var permalink = h('div', {id: src})
+        var messageExists = (document.getElementById(req.permalink.substring(0, 44)) !== null)
+        if (!messageExists) {
+          src = req.permalink.substring(44,88)
 
-        if (scroller.firstChild) {
-          scroller.insertBefore(permalink, scroller.childNodes[1])
-        } else {
-          scroller.appendChild(permalink)
-        }
-        
-        var nofeed = h('div', {classList: 'message'}, [
-            'You are not syncing ',
-            h('a', {href: '#' + src}, [req.permalink.substring(44,54) + '\'s feed. ']),
-          h('button', {
-            onclick: function () {
-              
-              var gossip = {feed: src, seq: 0}
-              blast(gossip, keys)
-              if (window.location.hash.substring(1) != src) {
-                window.location.hash = src
+          var permalink = h('div', {id: src})
+          
+          if (scroller.firstChild) {
+            scroller.insertBefore(permalink, scroller.childNodes[1])
+          } else {
+            scroller.appendChild(permalink)
+          }
+          
+          var nofeed = h('div', {classList: 'message'}, [
+              'You are not syncing ',
+              h('a', {href: '#' + src}, [req.permalink.substring(44,54) + '\'s feed. ']),
+            h('button', {
+              onclick: function () {
+                
+                var gossip = {feed: src, seq: 0}
+                blast(gossip, keys)
+                if (window.location.hash.substring(1) != src) {
+                  window.location.hash = src
+                }
+                var gotit = document.getElementById(src)
+                gotit.parentNode.removeChild(gotit)
+
               }
-              var gotit = document.getElementById(src)
-              gotit.parentNode.removeChild(gotit)
-
-            }
-          }, ['Sync Now'])
-        ])
-        permalink.appendChild(nofeed)
-        //if (!document.getElementById(req.permalink.substring(0, 44))) {
-          bog.open(req.permalink).then(opened => {
-            //if (!window.location.hash.substring(1) || (window.location.hash.substring(1) === opened.raw.substring(0, 44)) || (window.location.hash.substring(1) === opened.author)) {
-              render(opened, keys).then(rendered => {
-                permalink.appendChild(rendered)
-              }) 
-            //}
-          })
-        //}
+            }, ['Sync Now'])
+          ])
+          permalink.appendChild(nofeed)
+          //if (!document.getElementById(req.permalink.substring(0, 44))) {
+            bog.open(req.permalink).then(opened => {
+              //if (!window.location.hash.substring(1) || (window.location.hash.substring(1) === opened.raw.substring(0, 44)) || (window.location.hash.substring(1) === opened.author)) {
+                render(opened, keys).then(rendered => {
+                  permalink.appendChild(rendered)
+                }) 
+              //}
+            })
+          //}
+        }
       }
       if (req.forted) {
         var forted = h('div', {classList: 'message'}, [

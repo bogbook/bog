@@ -124,15 +124,15 @@ function replicate (ws, keys) {
   // if we are on a 44 char route that does not have a local feed/post check if we can get that
 
   var src = window.location.hash.substring(1)
-  if (src.length === 44 && !feeds[src]) {
+  if (src != '' && !feeds[src]) {
     var haveit = false
     for (var i=0; i < log.length; i++) {
-      if (log[i].raw.substring(0, 44) === src) {
+      if (log[i].raw.substring(0, src.length) === src) {
         haveit = true
       }
       if ((i === (log.length - 1)) && !haveit) {
         console.log('asking for ' + src + ' that we do not have')
-        blast(src, keys)
+        blast({feed: src, seq: -1}, keys)
       } 
     }
   }
@@ -251,7 +251,7 @@ function connect (server, keys) {
           } else {
             scroller.appendChild(permalink)
           }
-          
+
           var nofeed = h('div', {classList: 'message'}, [
               'You are not syncing ',
               h('a', {href: '#' + src}, [req.permalink.substring(44,54) + '\'s feed. ']),
@@ -378,6 +378,11 @@ function connect (server, keys) {
                 var div = h('div')
                 scroller.appendChild(div)
               }
+              if (scroller.childNodes.length > 25) {
+                // so the screen doesn't fill up with dom nodes and crash
+                scroller.removeChild(scroller.lastChild)
+              }
+          
               render(opened, keys).then(rendered => {
                 scroller.insertBefore(rendered, scroller.childNodes[1])
               })

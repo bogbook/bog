@@ -41,7 +41,8 @@ function getName (id, log) {
 }
 
 function getProfileImage (id, log) {
-  var img = h('img')
+  var img = vb(nacl.util.decodeBase64(id.substring(0, 44)), 256)
+  img.classList = 'profileImage'
   var link = h('a', [
     img
   ])

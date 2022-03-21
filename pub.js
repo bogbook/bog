@@ -17,6 +17,8 @@ var log = []
 var feeds = []
 var feedlist = []
 
+ensureDir(path + 'bogs/')
+
 async function getBogs () {
   if (ensureDir(path + 'bogs/')) {
     for await (const dirEntry of Deno.readDir(path + 'bogs/')) {

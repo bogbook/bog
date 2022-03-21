@@ -6,22 +6,20 @@ body, button, textarea, input {
 
 .navbar {
   background: #f5f5f5;
+  border-bottom: 1px solid #ddd;
 }
 
 .profile, .message {
-  background: #fff;
-  color: #333;
+  background: #f5f5f5;
+  color: #444;
+  border: 1px solid #ddd;
 }
 
 body {
-  background: #f5f5f5;
+  background: #fff;
 }
 
 a { color: #2196f3 }
-
-.navbar {
-  background: #fff;
-}
 
 blockquote {
   border-left: 2px solid #008b8b;

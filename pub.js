@@ -56,6 +56,7 @@ if (feeds && (Deno.args[1] == 'regenerate')) {
   }, 5000)
 } else if (await exists(path + 'log')) {
   log = JSON.parse(await Deno.readTextFile(path + 'log'))
+  log.sort((a,b) => a.timestamp - b.timestamp)
   getBogs()
 }
 
